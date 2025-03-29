@@ -1,0 +1,1512 @@
+=== Report Generale ===
+
+--- Report per il file: file:///C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I%20ANNO/PRIMO%20SEMESTRE/MODELLI%20E%20TECNICHE%20PER%20BIG%20DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_1.csv ---
+Numero totale di righe: 509519
+Colonna 'Year': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'Quarter': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'Month': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DayofMonth': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DayOfWeek': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'FlightDate': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'Reporting_Airline': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DOT_ID_Reporting_Airline': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'IATA_CODE_Reporting_Airline': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'Tail_Number': nulli=1375, non nulli=508144, % nulli=0.27
+Colonna 'Flight_Number_Reporting_Airline': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'OriginAirportID': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'OriginAirportSeqID': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'OriginCityMarketID': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'Origin': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'OriginCityName': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'OriginState': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'OriginStateFips': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'OriginStateName': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'OriginWac': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DestAirportID': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DestAirportSeqID': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DestCityMarketID': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'Dest': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DestCityName': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DestState': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DestStateFips': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DestStateName': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DestWac': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'CRSDepTime': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DepTime': nulli=7164, non nulli=502355, % nulli=1.41
+Colonna 'DepDelay': nulli=7164, non nulli=502355, % nulli=1.41
+Colonna 'DepDelayMinutes': nulli=7164, non nulli=502355, % nulli=1.41
+Colonna 'DepDel15': nulli=7164, non nulli=502355, % nulli=1.41
+Colonna 'DepartureDelayGroups': nulli=7164, non nulli=502355, % nulli=1.41
+Colonna 'DepTimeBlk': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'TaxiOut': nulli=7411, non nulli=502108, % nulli=1.45
+Colonna 'WheelsOff': nulli=7411, non nulli=502108, % nulli=1.45
+Colonna 'WheelsOn': nulli=7836, non nulli=501683, % nulli=1.54
+Colonna 'TaxiIn': nulli=7836, non nulli=501683, % nulli=1.54
+Colonna 'CRSArrTime': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'ArrTime': nulli=7836, non nulli=501683, % nulli=1.54
+Colonna 'ArrDelay': nulli=8692, non nulli=500827, % nulli=1.71
+Colonna 'ArrDelayMinutes': nulli=8692, non nulli=500827, % nulli=1.71
+Colonna 'ArrDel15': nulli=8692, non nulli=500827, % nulli=1.71
+Colonna 'ArrivalDelayGroups': nulli=8692, non nulli=500827, % nulli=1.71
+Colonna 'ArrTimeBlk': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'Cancelled': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'CancellationCode': nulli=501958, non nulli=7561, % nulli=98.52
+Colonna 'Diverted': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'CRSElapsedTime': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'ActualElapsedTime': nulli=8692, non nulli=500827, % nulli=1.71
+Colonna 'AirTime': nulli=8692, non nulli=500827, % nulli=1.71
+Colonna 'Flights': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'Distance': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DistanceGroup': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'CarrierDelay': nulli=421309, non nulli=88210, % nulli=82.69
+Colonna 'WeatherDelay': nulli=421309, non nulli=88210, % nulli=82.69
+Colonna 'NASDelay': nulli=421309, non nulli=88210, % nulli=82.69
+Colonna 'SecurityDelay': nulli=421309, non nulli=88210, % nulli=82.69
+Colonna 'LateAircraftDelay': nulli=421309, non nulli=88210, % nulli=82.69
+Colonna 'FirstDepTime': nulli=506385, non nulli=3134, % nulli=99.38
+Colonna 'TotalAddGTime': nulli=506385, non nulli=3134, % nulli=99.38
+Colonna 'LongestAddGTime': nulli=506385, non nulli=3134, % nulli=99.38
+Colonna 'DivAirportLandings': nulli=0, non nulli=509519, % nulli=0.00
+Colonna 'DivReachedDest': nulli=508388, non nulli=1131, % nulli=99.78
+Colonna 'DivActualElapsedTime': nulli=508663, non nulli=856, % nulli=99.83
+Colonna 'DivArrDelay': nulli=508663, non nulli=856, % nulli=99.83
+Colonna 'DivDistance': nulli=508389, non nulli=1130, % nulli=99.78
+Colonna 'Div1Airport': nulli=508238, non nulli=1281, % nulli=99.75
+Colonna 'Div1AirportID': nulli=508239, non nulli=1280, % nulli=99.75
+Colonna 'Div1AirportSeqID': nulli=508239, non nulli=1280, % nulli=99.75
+Colonna 'Div1WheelsOn': nulli=508238, non nulli=1281, % nulli=99.75
+Colonna 'Div1TotalGTime': nulli=508238, non nulli=1281, % nulli=99.75
+Colonna 'Div1LongestGTime': nulli=508238, non nulli=1281, % nulli=99.75
+Colonna 'Div1WheelsOff': nulli=508652, non nulli=867, % nulli=99.83
+Colonna 'Div1TailNum': nulli=508652, non nulli=867, % nulli=99.83
+Colonna 'Div2Airport': nulli=509506, non nulli=13, % nulli=100.00
+Colonna 'Div2AirportID': nulli=509506, non nulli=13, % nulli=100.00
+Colonna 'Div2AirportSeqID': nulli=509506, non nulli=13, % nulli=100.00
+Colonna 'Div2WheelsOn': nulli=509506, non nulli=13, % nulli=100.00
+Colonna 'Div2TotalGTime': nulli=509506, non nulli=13, % nulli=100.00
+Colonna 'Div2LongestGTime': nulli=509506, non nulli=13, % nulli=100.00
+Colonna 'Div2WheelsOff': nulli=509517, non nulli=2, % nulli=100.00
+Colonna 'Div2TailNum': nulli=509517, non nulli=2, % nulli=100.00
+Colonna 'Div3Airport': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportID': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportSeqID': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOn': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div3TotalGTime': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div3LongestGTime': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOff': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div3TailNum': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div4Airport': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportID': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportSeqID': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOn': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div4TotalGTime': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div4LongestGTime': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOff': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div4TailNum': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div5Airport': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportID': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportSeqID': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOn': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div5TotalGTime': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div5LongestGTime': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOff': nulli=509519, non nulli=0, % nulli=100.00
+Colonna 'Div5TailNum': nulli=509519, non nulli=0, % nulli=100.00
+Colonna '_c109': nulli=509519, non nulli=0, % nulli=100.00
+
+Colonne non comuni tra i file:
+  - file: StringType()
+
+--- Report per il file: file:///C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I%20ANNO/PRIMO%20SEMESTRE/MODELLI%20E%20TECNICHE%20PER%20BIG%20DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_2.csv ---
+Numero totale di righe: 469746
+Colonna 'Year': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'Quarter': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'Month': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DayofMonth': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DayOfWeek': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'FlightDate': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'Reporting_Airline': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DOT_ID_Reporting_Airline': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'IATA_CODE_Reporting_Airline': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'Tail_Number': nulli=2397, non nulli=467349, % nulli=0.51
+Colonna 'Flight_Number_Reporting_Airline': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'OriginAirportID': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'OriginAirportSeqID': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'OriginCityMarketID': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'Origin': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'OriginCityName': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'OriginState': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'OriginStateFips': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'OriginStateName': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'OriginWac': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DestAirportID': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DestAirportSeqID': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DestCityMarketID': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'Dest': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DestCityName': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DestState': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DestStateFips': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DestStateName': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DestWac': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'CRSDepTime': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DepTime': nulli=10972, non nulli=458774, % nulli=2.34
+Colonna 'DepDelay': nulli=10972, non nulli=458774, % nulli=2.34
+Colonna 'DepDelayMinutes': nulli=10972, non nulli=458774, % nulli=2.34
+Colonna 'DepDel15': nulli=10972, non nulli=458774, % nulli=2.34
+Colonna 'DepartureDelayGroups': nulli=10972, non nulli=458774, % nulli=2.34
+Colonna 'DepTimeBlk': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'TaxiOut': nulli=11224, non nulli=458522, % nulli=2.39
+Colonna 'WheelsOff': nulli=11224, non nulli=458522, % nulli=2.39
+Colonna 'WheelsOn': nulli=11548, non nulli=458198, % nulli=2.46
+Colonna 'TaxiIn': nulli=11548, non nulli=458198, % nulli=2.46
+Colonna 'CRSArrTime': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'ArrTime': nulli=11548, non nulli=458198, % nulli=2.46
+Colonna 'ArrDelay': nulli=12186, non nulli=457560, % nulli=2.59
+Colonna 'ArrDelayMinutes': nulli=12186, non nulli=457560, % nulli=2.59
+Colonna 'ArrDel15': nulli=12186, non nulli=457560, % nulli=2.59
+Colonna 'ArrivalDelayGroups': nulli=12186, non nulli=457560, % nulli=2.59
+Colonna 'ArrTimeBlk': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'Cancelled': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'CancellationCode': nulli=458417, non nulli=11329, % nulli=97.59
+Colonna 'Diverted': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'CRSElapsedTime': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'ActualElapsedTime': nulli=12186, non nulli=457560, % nulli=2.59
+Colonna 'AirTime': nulli=12186, non nulli=457560, % nulli=2.59
+Colonna 'Flights': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'Distance': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DistanceGroup': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'CarrierDelay': nulli=386181, non nulli=83565, % nulli=82.21
+Colonna 'WeatherDelay': nulli=386181, non nulli=83565, % nulli=82.21
+Colonna 'NASDelay': nulli=386181, non nulli=83565, % nulli=82.21
+Colonna 'SecurityDelay': nulli=386181, non nulli=83565, % nulli=82.21
+Colonna 'LateAircraftDelay': nulli=386181, non nulli=83565, % nulli=82.21
+Colonna 'FirstDepTime': nulli=466968, non nulli=2778, % nulli=99.41
+Colonna 'TotalAddGTime': nulli=466968, non nulli=2778, % nulli=99.41
+Colonna 'LongestAddGTime': nulli=466968, non nulli=2778, % nulli=99.41
+Colonna 'DivAirportLandings': nulli=0, non nulli=469746, % nulli=0.00
+Colonna 'DivReachedDest': nulli=468889, non nulli=857, % nulli=99.82
+Colonna 'DivActualElapsedTime': nulli=469108, non nulli=638, % nulli=99.86
+Colonna 'DivArrDelay': nulli=469108, non nulli=638, % nulli=99.86
+Colonna 'DivDistance': nulli=468890, non nulli=856, % nulli=99.82
+Colonna 'Div1Airport': nulli=468784, non nulli=962, % nulli=99.80
+Colonna 'Div1AirportID': nulli=468784, non nulli=962, % nulli=99.80
+Colonna 'Div1AirportSeqID': nulli=468784, non nulli=962, % nulli=99.80
+Colonna 'Div1WheelsOn': nulli=468784, non nulli=962, % nulli=99.80
+Colonna 'Div1TotalGTime': nulli=468784, non nulli=962, % nulli=99.80
+Colonna 'Div1LongestGTime': nulli=468784, non nulli=962, % nulli=99.80
+Colonna 'Div1WheelsOff': nulli=469090, non nulli=656, % nulli=99.86
+Colonna 'Div1TailNum': nulli=469090, non nulli=656, % nulli=99.86
+Colonna 'Div2Airport': nulli=469726, non nulli=20, % nulli=100.00
+Colonna 'Div2AirportID': nulli=469726, non nulli=20, % nulli=100.00
+Colonna 'Div2AirportSeqID': nulli=469726, non nulli=20, % nulli=100.00
+Colonna 'Div2WheelsOn': nulli=469726, non nulli=20, % nulli=100.00
+Colonna 'Div2TotalGTime': nulli=469726, non nulli=20, % nulli=100.00
+Colonna 'Div2LongestGTime': nulli=469726, non nulli=20, % nulli=100.00
+Colonna 'Div2WheelsOff': nulli=469744, non nulli=2, % nulli=100.00
+Colonna 'Div2TailNum': nulli=469744, non nulli=2, % nulli=100.00
+Colonna 'Div3Airport': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportID': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportSeqID': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOn': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div3TotalGTime': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div3LongestGTime': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOff': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div3TailNum': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div4Airport': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportID': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportSeqID': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOn': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div4TotalGTime': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div4LongestGTime': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOff': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div4TailNum': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div5Airport': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportID': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportSeqID': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOn': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div5TotalGTime': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div5LongestGTime': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOff': nulli=469746, non nulli=0, % nulli=100.00
+Colonna 'Div5TailNum': nulli=469746, non nulli=0, % nulli=100.00
+Colonna '_c109': nulli=469746, non nulli=0, % nulli=100.00
+
+Colonne non comuni tra i file:
+  - file: StringType()
+
+--- Report per il file: file:///C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I%20ANNO/PRIMO%20SEMESTRE/MODELLI%20E%20TECNICHE%20PER%20BIG%20DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_3.csv ---
+Numero totale di righe: 552312
+Colonna 'Year': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'Quarter': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'Month': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DayofMonth': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DayOfWeek': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'FlightDate': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'Reporting_Airline': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DOT_ID_Reporting_Airline': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'IATA_CODE_Reporting_Airline': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'Tail_Number': nulli=1887, non nulli=550425, % nulli=0.34
+Colonna 'Flight_Number_Reporting_Airline': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'OriginAirportID': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'OriginAirportSeqID': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'OriginCityMarketID': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'Origin': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'OriginCityName': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'OriginState': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'OriginStateFips': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'OriginStateName': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'OriginWac': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DestAirportID': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DestAirportSeqID': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DestCityMarketID': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'Dest': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DestCityName': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DestState': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DestStateFips': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DestStateName': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DestWac': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'CRSDepTime': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DepTime': nulli=8606, non nulli=543706, % nulli=1.56
+Colonna 'DepDelay': nulli=8606, non nulli=543706, % nulli=1.56
+Colonna 'DepDelayMinutes': nulli=8606, non nulli=543706, % nulli=1.56
+Colonna 'DepDel15': nulli=8606, non nulli=543706, % nulli=1.56
+Colonna 'DepartureDelayGroups': nulli=8606, non nulli=543706, % nulli=1.56
+Colonna 'DepTimeBlk': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'TaxiOut': nulli=8815, non nulli=543497, % nulli=1.60
+Colonna 'WheelsOff': nulli=8815, non nulli=543497, % nulli=1.60
+Colonna 'WheelsOn': nulli=9150, non nulli=543162, % nulli=1.66
+Colonna 'TaxiIn': nulli=9150, non nulli=543162, % nulli=1.66
+Colonna 'CRSArrTime': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'ArrTime': nulli=9150, non nulli=543162, % nulli=1.66
+Colonna 'ArrDelay': nulli=9895, non nulli=542417, % nulli=1.79
+Colonna 'ArrDelayMinutes': nulli=9895, non nulli=542417, % nulli=1.79
+Colonna 'ArrDel15': nulli=9895, non nulli=542417, % nulli=1.79
+Colonna 'ArrivalDelayGroups': nulli=9895, non nulli=542417, % nulli=1.79
+Colonna 'ArrTimeBlk': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'Cancelled': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'CancellationCode': nulli=543379, non nulli=8933, % nulli=98.38
+Colonna 'Diverted': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'CRSElapsedTime': nulli=2, non nulli=552310, % nulli=0.00
+Colonna 'ActualElapsedTime': nulli=9895, non nulli=542417, % nulli=1.79
+Colonna 'AirTime': nulli=9895, non nulli=542417, % nulli=1.79
+Colonna 'Flights': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'Distance': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DistanceGroup': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'CarrierDelay': nulli=450569, non nulli=101743, % nulli=81.58
+Colonna 'WeatherDelay': nulli=450569, non nulli=101743, % nulli=81.58
+Colonna 'NASDelay': nulli=450569, non nulli=101743, % nulli=81.58
+Colonna 'SecurityDelay': nulli=450569, non nulli=101743, % nulli=81.58
+Colonna 'LateAircraftDelay': nulli=450569, non nulli=101743, % nulli=81.58
+Colonna 'FirstDepTime': nulli=549314, non nulli=2998, % nulli=99.46
+Colonna 'TotalAddGTime': nulli=549314, non nulli=2998, % nulli=99.46
+Colonna 'LongestAddGTime': nulli=549314, non nulli=2998, % nulli=99.46
+Colonna 'DivAirportLandings': nulli=0, non nulli=552312, % nulli=0.00
+Colonna 'DivReachedDest': nulli=551350, non nulli=962, % nulli=99.83
+Colonna 'DivActualElapsedTime': nulli=551567, non nulli=745, % nulli=99.87
+Colonna 'DivArrDelay': nulli=551567, non nulli=745, % nulli=99.87
+Colonna 'DivDistance': nulli=551350, non nulli=962, % nulli=99.83
+Colonna 'Div1Airport': nulli=551232, non nulli=1080, % nulli=99.80
+Colonna 'Div1AirportID': nulli=551232, non nulli=1080, % nulli=99.80
+Colonna 'Div1AirportSeqID': nulli=551232, non nulli=1080, % nulli=99.80
+Colonna 'Div1WheelsOn': nulli=551232, non nulli=1080, % nulli=99.80
+Colonna 'Div1TotalGTime': nulli=551232, non nulli=1080, % nulli=99.80
+Colonna 'Div1LongestGTime': nulli=551232, non nulli=1080, % nulli=99.80
+Colonna 'Div1WheelsOff': nulli=551558, non nulli=754, % nulli=99.86
+Colonna 'Div1TailNum': nulli=551558, non nulli=754, % nulli=99.86
+Colonna 'Div2Airport': nulli=552301, non nulli=11, % nulli=100.00
+Colonna 'Div2AirportID': nulli=552301, non nulli=11, % nulli=100.00
+Colonna 'Div2AirportSeqID': nulli=552301, non nulli=11, % nulli=100.00
+Colonna 'Div2WheelsOn': nulli=552301, non nulli=11, % nulli=100.00
+Colonna 'Div2TotalGTime': nulli=552301, non nulli=11, % nulli=100.00
+Colonna 'Div2LongestGTime': nulli=552301, non nulli=11, % nulli=100.00
+Colonna 'Div2WheelsOff': nulli=552310, non nulli=2, % nulli=100.00
+Colonna 'Div2TailNum': nulli=552310, non nulli=2, % nulli=100.00
+Colonna 'Div3Airport': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportID': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportSeqID': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOn': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div3TotalGTime': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div3LongestGTime': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOff': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div3TailNum': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div4Airport': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportID': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportSeqID': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOn': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div4TotalGTime': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div4LongestGTime': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOff': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div4TailNum': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div5Airport': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportID': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportSeqID': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOn': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div5TotalGTime': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div5LongestGTime': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOff': nulli=552312, non nulli=0, % nulli=100.00
+Colonna 'Div5TailNum': nulli=552312, non nulli=0, % nulli=100.00
+Colonna '_c109': nulli=552312, non nulli=0, % nulli=100.00
+
+Colonne non comuni tra i file:
+  - file: StringType()
+
+--- Report per il file: file:///C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I%20ANNO/PRIMO%20SEMESTRE/MODELLI%20E%20TECNICHE%20PER%20BIG%20DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_4.csv ---
+Numero totale di righe: 536393
+Colonna 'Year': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'Quarter': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'Month': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DayofMonth': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DayOfWeek': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'FlightDate': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'Reporting_Airline': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DOT_ID_Reporting_Airline': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'IATA_CODE_Reporting_Airline': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'Tail_Number': nulli=1578, non nulli=534815, % nulli=0.29
+Colonna 'Flight_Number_Reporting_Airline': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'OriginAirportID': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'OriginAirportSeqID': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'OriginCityMarketID': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'Origin': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'OriginCityName': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'OriginState': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'OriginStateFips': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'OriginStateName': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'OriginWac': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DestAirportID': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DestAirportSeqID': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DestCityMarketID': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'Dest': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DestCityName': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DestState': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DestStateFips': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DestStateName': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DestWac': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'CRSDepTime': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DepTime': nulli=9090, non nulli=527303, % nulli=1.69
+Colonna 'DepDelay': nulli=9090, non nulli=527303, % nulli=1.69
+Colonna 'DepDelayMinutes': nulli=9090, non nulli=527303, % nulli=1.69
+Colonna 'DepDel15': nulli=9090, non nulli=527303, % nulli=1.69
+Colonna 'DepartureDelayGroups': nulli=9090, non nulli=527303, % nulli=1.69
+Colonna 'DepTimeBlk': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'TaxiOut': nulli=9365, non nulli=527028, % nulli=1.75
+Colonna 'WheelsOff': nulli=9365, non nulli=527028, % nulli=1.75
+Colonna 'WheelsOn': nulli=9614, non nulli=526779, % nulli=1.79
+Colonna 'TaxiIn': nulli=9614, non nulli=526779, % nulli=1.79
+Colonna 'CRSArrTime': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'ArrTime': nulli=9614, non nulli=526779, % nulli=1.79
+Colonna 'ArrDelay': nulli=10468, non nulli=525925, % nulli=1.95
+Colonna 'ArrDelayMinutes': nulli=10468, non nulli=525925, % nulli=1.95
+Colonna 'ArrDel15': nulli=10468, non nulli=525925, % nulli=1.95
+Colonna 'ArrivalDelayGroups': nulli=10468, non nulli=525925, % nulli=1.95
+Colonna 'ArrTimeBlk': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'Cancelled': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'CancellationCode': nulli=526934, non nulli=9459, % nulli=98.24
+Colonna 'Diverted': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'CRSElapsedTime': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'ActualElapsedTime': nulli=10468, non nulli=525925, % nulli=1.95
+Colonna 'AirTime': nulli=10468, non nulli=525925, % nulli=1.95
+Colonna 'Flights': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'Distance': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DistanceGroup': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'CarrierDelay': nulli=425087, non nulli=111306, % nulli=79.25
+Colonna 'WeatherDelay': nulli=425087, non nulli=111306, % nulli=79.25
+Colonna 'NASDelay': nulli=425087, non nulli=111306, % nulli=79.25
+Colonna 'SecurityDelay': nulli=425087, non nulli=111306, % nulli=79.25
+Colonna 'LateAircraftDelay': nulli=425087, non nulli=111306, % nulli=79.25
+Colonna 'FirstDepTime': nulli=533186, non nulli=3207, % nulli=99.40
+Colonna 'TotalAddGTime': nulli=533186, non nulli=3207, % nulli=99.40
+Colonna 'LongestAddGTime': nulli=533186, non nulli=3207, % nulli=99.40
+Colonna 'DivAirportLandings': nulli=0, non nulli=536393, % nulli=0.00
+Colonna 'DivReachedDest': nulli=535384, non nulli=1009, % nulli=99.81
+Colonna 'DivActualElapsedTime': nulli=535539, non nulli=854, % nulli=99.84
+Colonna 'DivArrDelay': nulli=535539, non nulli=854, % nulli=99.84
+Colonna 'DivDistance': nulli=535386, non nulli=1007, % nulli=99.81
+Colonna 'Div1Airport': nulli=535290, non nulli=1103, % nulli=99.79
+Colonna 'Div1AirportID': nulli=535290, non nulli=1103, % nulli=99.79
+Colonna 'Div1AirportSeqID': nulli=535290, non nulli=1103, % nulli=99.79
+Colonna 'Div1WheelsOn': nulli=535290, non nulli=1103, % nulli=99.79
+Colonna 'Div1TotalGTime': nulli=535290, non nulli=1103, % nulli=99.79
+Colonna 'Div1LongestGTime': nulli=535290, non nulli=1103, % nulli=99.79
+Colonna 'Div1WheelsOff': nulli=535526, non nulli=867, % nulli=99.84
+Colonna 'Div1TailNum': nulli=535526, non nulli=867, % nulli=99.84
+Colonna 'Div2Airport': nulli=536374, non nulli=19, % nulli=100.00
+Colonna 'Div2AirportID': nulli=536374, non nulli=19, % nulli=100.00
+Colonna 'Div2AirportSeqID': nulli=536374, non nulli=19, % nulli=100.00
+Colonna 'Div2WheelsOn': nulli=536374, non nulli=19, % nulli=100.00
+Colonna 'Div2TotalGTime': nulli=536374, non nulli=19, % nulli=100.00
+Colonna 'Div2LongestGTime': nulli=536374, non nulli=19, % nulli=100.00
+Colonna 'Div2WheelsOff': nulli=536387, non nulli=6, % nulli=100.00
+Colonna 'Div2TailNum': nulli=536387, non nulli=6, % nulli=100.00
+Colonna 'Div3Airport': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportID': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportSeqID': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOn': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div3TotalGTime': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div3LongestGTime': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOff': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div3TailNum': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div4Airport': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportID': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportSeqID': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOn': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div4TotalGTime': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div4LongestGTime': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOff': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div4TailNum': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div5Airport': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportID': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportSeqID': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOn': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div5TotalGTime': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div5LongestGTime': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOff': nulli=536393, non nulli=0, % nulli=100.00
+Colonna 'Div5TailNum': nulli=536393, non nulli=0, % nulli=100.00
+Colonna '_c109': nulli=536393, non nulli=0, % nulli=100.00
+
+Colonne non comuni tra i file:
+  - file: StringType()
+
+--- Report per il file: file:///C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I%20ANNO/PRIMO%20SEMESTRE/MODELLI%20E%20TECNICHE%20PER%20BIG%20DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_5.csv ---
+Numero totale di righe: 548642
+Colonna 'Year': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'Quarter': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'Month': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DayofMonth': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DayOfWeek': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'FlightDate': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'Reporting_Airline': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DOT_ID_Reporting_Airline': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'IATA_CODE_Reporting_Airline': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'Tail_Number': nulli=860, non nulli=547782, % nulli=0.16
+Colonna 'Flight_Number_Reporting_Airline': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'OriginAirportID': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'OriginAirportSeqID': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'OriginCityMarketID': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'Origin': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'OriginCityName': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'OriginState': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'OriginStateFips': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'OriginStateName': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'OriginWac': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DestAirportID': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DestAirportSeqID': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DestCityMarketID': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'Dest': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DestCityName': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DestState': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DestStateFips': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DestStateName': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DestWac': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'CRSDepTime': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DepTime': nulli=5905, non nulli=542737, % nulli=1.08
+Colonna 'DepDelay': nulli=5905, non nulli=542737, % nulli=1.08
+Colonna 'DepDelayMinutes': nulli=5905, non nulli=542737, % nulli=1.08
+Colonna 'DepDel15': nulli=5905, non nulli=542737, % nulli=1.08
+Colonna 'DepartureDelayGroups': nulli=5905, non nulli=542737, % nulli=1.08
+Colonna 'DepTimeBlk': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'TaxiOut': nulli=6158, non nulli=542484, % nulli=1.12
+Colonna 'WheelsOff': nulli=6158, non nulli=542484, % nulli=1.12
+Colonna 'WheelsOn': nulli=6371, non nulli=542271, % nulli=1.16
+Colonna 'TaxiIn': nulli=6371, non nulli=542271, % nulli=1.16
+Colonna 'CRSArrTime': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'ArrTime': nulli=6371, non nulli=542271, % nulli=1.16
+Colonna 'ArrDelay': nulli=7658, non nulli=540984, % nulli=1.40
+Colonna 'ArrDelayMinutes': nulli=7658, non nulli=540984, % nulli=1.40
+Colonna 'ArrDel15': nulli=7658, non nulli=540984, % nulli=1.40
+Colonna 'ArrivalDelayGroups': nulli=7658, non nulli=540984, % nulli=1.40
+Colonna 'ArrTimeBlk': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'Cancelled': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'CancellationCode': nulli=542404, non nulli=6238, % nulli=98.86
+Colonna 'Diverted': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'CRSElapsedTime': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'ActualElapsedTime': nulli=7658, non nulli=540984, % nulli=1.40
+Colonna 'AirTime': nulli=7658, non nulli=540984, % nulli=1.40
+Colonna 'Flights': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'Distance': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DistanceGroup': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'CarrierDelay': nulli=443364, non nulli=105278, % nulli=80.81
+Colonna 'WeatherDelay': nulli=443364, non nulli=105278, % nulli=80.81
+Colonna 'NASDelay': nulli=443364, non nulli=105278, % nulli=80.81
+Colonna 'SecurityDelay': nulli=443364, non nulli=105278, % nulli=80.81
+Colonna 'LateAircraftDelay': nulli=443364, non nulli=105278, % nulli=80.81
+Colonna 'FirstDepTime': nulli=545328, non nulli=3314, % nulli=99.40
+Colonna 'TotalAddGTime': nulli=545328, non nulli=3314, % nulli=99.40
+Colonna 'LongestAddGTime': nulli=545328, non nulli=3314, % nulli=99.40
+Colonna 'DivAirportLandings': nulli=0, non nulli=548642, % nulli=0.00
+Colonna 'DivReachedDest': nulli=547222, non nulli=1420, % nulli=99.74
+Colonna 'DivActualElapsedTime': nulli=547355, non nulli=1287, % nulli=99.77
+Colonna 'DivArrDelay': nulli=547355, non nulli=1287, % nulli=99.77
+Colonna 'DivDistance': nulli=547222, non nulli=1420, % nulli=99.74
+Colonna 'Div1Airport': nulli=547142, non nulli=1500, % nulli=99.73
+Colonna 'Div1AirportID': nulli=547142, non nulli=1500, % nulli=99.73
+Colonna 'Div1AirportSeqID': nulli=547142, non nulli=1500, % nulli=99.73
+Colonna 'Div1WheelsOn': nulli=547142, non nulli=1500, % nulli=99.73
+Colonna 'Div1TotalGTime': nulli=547142, non nulli=1500, % nulli=99.73
+Colonna 'Div1LongestGTime': nulli=547142, non nulli=1500, % nulli=99.73
+Colonna 'Div1WheelsOff': nulli=547343, non nulli=1299, % nulli=99.76
+Colonna 'Div1TailNum': nulli=547343, non nulli=1299, % nulli=99.76
+Colonna 'Div2Airport': nulli=548627, non nulli=15, % nulli=100.00
+Colonna 'Div2AirportID': nulli=548627, non nulli=15, % nulli=100.00
+Colonna 'Div2AirportSeqID': nulli=548627, non nulli=15, % nulli=100.00
+Colonna 'Div2WheelsOn': nulli=548627, non nulli=15, % nulli=100.00
+Colonna 'Div2TotalGTime': nulli=548627, non nulli=15, % nulli=100.00
+Colonna 'Div2LongestGTime': nulli=548627, non nulli=15, % nulli=100.00
+Colonna 'Div2WheelsOff': nulli=548639, non nulli=3, % nulli=100.00
+Colonna 'Div2TailNum': nulli=548639, non nulli=3, % nulli=100.00
+Colonna 'Div3Airport': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportID': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportSeqID': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOn': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div3TotalGTime': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div3LongestGTime': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOff': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div3TailNum': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div4Airport': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportID': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportSeqID': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOn': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div4TotalGTime': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div4LongestGTime': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOff': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div4TailNum': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div5Airport': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportID': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportSeqID': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOn': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div5TotalGTime': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div5LongestGTime': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOff': nulli=548642, non nulli=0, % nulli=100.00
+Colonna 'Div5TailNum': nulli=548642, non nulli=0, % nulli=100.00
+Colonna '_c109': nulli=548642, non nulli=0, % nulli=100.00
+
+Colonne non comuni tra i file:
+  - file: StringType()
+
+--- Report per il file: file:///C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I%20ANNO/PRIMO%20SEMESTRE/MODELLI%20E%20TECNICHE%20PER%20BIG%20DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_6.csv ---
+Numero totale di righe: 552141
+Colonna 'Year': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'Quarter': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'Month': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DayofMonth': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DayOfWeek': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'FlightDate': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'Reporting_Airline': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DOT_ID_Reporting_Airline': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'IATA_CODE_Reporting_Airline': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'Tail_Number': nulli=1753, non nulli=550388, % nulli=0.32
+Colonna 'Flight_Number_Reporting_Airline': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'OriginAirportID': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'OriginAirportSeqID': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'OriginCityMarketID': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'Origin': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'OriginCityName': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'OriginState': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'OriginStateFips': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'OriginStateName': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'OriginWac': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DestAirportID': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DestAirportSeqID': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DestCityMarketID': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'Dest': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DestCityName': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DestState': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DestStateFips': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DestStateName': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DestWac': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'CRSDepTime': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DepTime': nulli=9310, non nulli=542831, % nulli=1.69
+Colonna 'DepDelay': nulli=9310, non nulli=542831, % nulli=1.69
+Colonna 'DepDelayMinutes': nulli=9310, non nulli=542831, % nulli=1.69
+Colonna 'DepDel15': nulli=9310, non nulli=542831, % nulli=1.69
+Colonna 'DepartureDelayGroups': nulli=9310, non nulli=542831, % nulli=1.69
+Colonna 'DepTimeBlk': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'TaxiOut': nulli=9768, non nulli=542373, % nulli=1.77
+Colonna 'WheelsOff': nulli=9768, non nulli=542373, % nulli=1.77
+Colonna 'WheelsOn': nulli=10018, non nulli=542123, % nulli=1.81
+Colonna 'TaxiIn': nulli=10018, non nulli=542123, % nulli=1.81
+Colonna 'CRSArrTime': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'ArrTime': nulli=10018, non nulli=542123, % nulli=1.81
+Colonna 'ArrDelay': nulli=11732, non nulli=540409, % nulli=2.12
+Colonna 'ArrDelayMinutes': nulli=11732, non nulli=540409, % nulli=2.12
+Colonna 'ArrDel15': nulli=11732, non nulli=540409, % nulli=2.12
+Colonna 'ArrivalDelayGroups': nulli=11732, non nulli=540409, % nulli=2.12
+Colonna 'ArrTimeBlk': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'Cancelled': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'CancellationCode': nulli=542289, non nulli=9852, % nulli=98.22
+Colonna 'Diverted': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'CRSElapsedTime': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'ActualElapsedTime': nulli=11732, non nulli=540409, % nulli=2.12
+Colonna 'AirTime': nulli=11732, non nulli=540409, % nulli=2.12
+Colonna 'Flights': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'Distance': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DistanceGroup': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'CarrierDelay': nulli=408957, non nulli=143184, % nulli=74.07
+Colonna 'WeatherDelay': nulli=408957, non nulli=143184, % nulli=74.07
+Colonna 'NASDelay': nulli=408957, non nulli=143184, % nulli=74.07
+Colonna 'SecurityDelay': nulli=408957, non nulli=143184, % nulli=74.07
+Colonna 'LateAircraftDelay': nulli=408957, non nulli=143184, % nulli=74.07
+Colonna 'FirstDepTime': nulli=547818, non nulli=4323, % nulli=99.22
+Colonna 'TotalAddGTime': nulli=547818, non nulli=4323, % nulli=99.22
+Colonna 'LongestAddGTime': nulli=547818, non nulli=4323, % nulli=99.22
+Colonna 'DivAirportLandings': nulli=0, non nulli=552141, % nulli=0.00
+Colonna 'DivReachedDest': nulli=550261, non nulli=1880, % nulli=99.66
+Colonna 'DivActualElapsedTime': nulli=550427, non nulli=1714, % nulli=99.69
+Colonna 'DivArrDelay': nulli=550427, non nulli=1714, % nulli=99.69
+Colonna 'DivDistance': nulli=550261, non nulli=1880, % nulli=99.66
+Colonna 'Div1Airport': nulli=550177, non nulli=1964, % nulli=99.64
+Colonna 'Div1AirportID': nulli=550177, non nulli=1964, % nulli=99.64
+Colonna 'Div1AirportSeqID': nulli=550177, non nulli=1964, % nulli=99.64
+Colonna 'Div1WheelsOn': nulli=550177, non nulli=1964, % nulli=99.64
+Colonna 'Div1TotalGTime': nulli=550177, non nulli=1964, % nulli=99.64
+Colonna 'Div1LongestGTime': nulli=550177, non nulli=1964, % nulli=99.64
+Colonna 'Div1WheelsOff': nulli=550425, non nulli=1716, % nulli=99.69
+Colonna 'Div1TailNum': nulli=550425, non nulli=1716, % nulli=99.69
+Colonna 'Div2Airport': nulli=552131, non nulli=10, % nulli=100.00
+Colonna 'Div2AirportID': nulli=552131, non nulli=10, % nulli=100.00
+Colonna 'Div2AirportSeqID': nulli=552131, non nulli=10, % nulli=100.00
+Colonna 'Div2WheelsOn': nulli=552131, non nulli=10, % nulli=100.00
+Colonna 'Div2TotalGTime': nulli=552131, non nulli=10, % nulli=100.00
+Colonna 'Div2LongestGTime': nulli=552131, non nulli=10, % nulli=100.00
+Colonna 'Div2WheelsOff': nulli=552133, non nulli=8, % nulli=100.00
+Colonna 'Div2TailNum': nulli=552133, non nulli=8, % nulli=100.00
+Colonna 'Div3Airport': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportID': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportSeqID': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOn': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div3TotalGTime': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div3LongestGTime': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOff': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div3TailNum': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div4Airport': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportID': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportSeqID': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOn': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div4TotalGTime': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div4LongestGTime': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOff': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div4TailNum': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div5Airport': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportID': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportSeqID': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOn': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div5TotalGTime': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div5LongestGTime': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOff': nulli=552141, non nulli=0, % nulli=100.00
+Colonna 'Div5TailNum': nulli=552141, non nulli=0, % nulli=100.00
+Colonna '_c109': nulli=552141, non nulli=0, % nulli=100.00
+
+Colonne non comuni tra i file:
+  - file: StringType()
+
+--- Report per il file: file:///C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I%20ANNO/PRIMO%20SEMESTRE/MODELLI%20E%20TECNICHE%20PER%20BIG%20DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_7.csv ---
+Numero totale di righe: 571623
+Colonna 'Year': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'Quarter': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'Month': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DayofMonth': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DayOfWeek': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'FlightDate': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'Reporting_Airline': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DOT_ID_Reporting_Airline': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'IATA_CODE_Reporting_Airline': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'Tail_Number': nulli=2094, non nulli=569529, % nulli=0.37
+Colonna 'Flight_Number_Reporting_Airline': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'OriginAirportID': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'OriginAirportSeqID': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'OriginCityMarketID': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'Origin': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'OriginCityName': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'OriginState': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'OriginStateFips': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'OriginStateName': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'OriginWac': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DestAirportID': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DestAirportSeqID': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DestCityMarketID': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'Dest': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DestCityName': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DestState': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DestStateFips': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DestStateName': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DestWac': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'CRSDepTime': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DepTime': nulli=9097, non nulli=562526, % nulli=1.59
+Colonna 'DepDelay': nulli=9097, non nulli=562526, % nulli=1.59
+Colonna 'DepDelayMinutes': nulli=9097, non nulli=562526, % nulli=1.59
+Colonna 'DepDel15': nulli=9097, non nulli=562526, % nulli=1.59
+Colonna 'DepartureDelayGroups': nulli=9097, non nulli=562526, % nulli=1.59
+Colonna 'DepTimeBlk': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'TaxiOut': nulli=9509, non nulli=562114, % nulli=1.66
+Colonna 'WheelsOff': nulli=9509, non nulli=562114, % nulli=1.66
+Colonna 'WheelsOn': nulli=9843, non nulli=561780, % nulli=1.72
+Colonna 'TaxiIn': nulli=9843, non nulli=561780, % nulli=1.72
+Colonna 'CRSArrTime': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'ArrTime': nulli=9843, non nulli=561780, % nulli=1.72
+Colonna 'ArrDelay': nulli=11366, non nulli=560257, % nulli=1.99
+Colonna 'ArrDelayMinutes': nulli=11366, non nulli=560257, % nulli=1.99
+Colonna 'ArrDel15': nulli=11366, non nulli=560257, % nulli=1.99
+Colonna 'ArrivalDelayGroups': nulli=11366, non nulli=560257, % nulli=1.99
+Colonna 'ArrTimeBlk': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'Cancelled': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'CancellationCode': nulli=562024, non nulli=9599, % nulli=98.32
+Colonna 'Diverted': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'CRSElapsedTime': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'ActualElapsedTime': nulli=11366, non nulli=560257, % nulli=1.99
+Colonna 'AirTime': nulli=11366, non nulli=560257, % nulli=1.99
+Colonna 'Flights': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'Distance': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DistanceGroup': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'CarrierDelay': nulli=429064, non nulli=142559, % nulli=75.06
+Colonna 'WeatherDelay': nulli=429064, non nulli=142559, % nulli=75.06
+Colonna 'NASDelay': nulli=429064, non nulli=142559, % nulli=75.06
+Colonna 'SecurityDelay': nulli=429064, non nulli=142559, % nulli=75.06
+Colonna 'LateAircraftDelay': nulli=429064, non nulli=142559, % nulli=75.06
+Colonna 'FirstDepTime': nulli=567539, non nulli=4084, % nulli=99.29
+Colonna 'TotalAddGTime': nulli=567539, non nulli=4084, % nulli=99.29
+Colonna 'LongestAddGTime': nulli=567539, non nulli=4084, % nulli=99.29
+Colonna 'DivAirportLandings': nulli=0, non nulli=571623, % nulli=0.00
+Colonna 'DivReachedDest': nulli=569856, non nulli=1767, % nulli=99.69
+Colonna 'DivActualElapsedTime': nulli=570100, non nulli=1523, % nulli=99.73
+Colonna 'DivArrDelay': nulli=570100, non nulli=1523, % nulli=99.73
+Colonna 'DivDistance': nulli=569856, non nulli=1767, % nulli=99.69
+Colonna 'Div1Airport': nulli=569766, non nulli=1857, % nulli=99.68
+Colonna 'Div1AirportID': nulli=569766, non nulli=1857, % nulli=99.68
+Colonna 'Div1AirportSeqID': nulli=569766, non nulli=1857, % nulli=99.68
+Colonna 'Div1WheelsOn': nulli=569766, non nulli=1857, % nulli=99.68
+Colonna 'Div1TotalGTime': nulli=569766, non nulli=1857, % nulli=99.68
+Colonna 'Div1LongestGTime': nulli=569766, non nulli=1857, % nulli=99.68
+Colonna 'Div1WheelsOff': nulli=570095, non nulli=1528, % nulli=99.73
+Colonna 'Div1TailNum': nulli=570095, non nulli=1528, % nulli=99.73
+Colonna 'Div2Airport': nulli=571615, non nulli=8, % nulli=100.00
+Colonna 'Div2AirportID': nulli=571615, non nulli=8, % nulli=100.00
+Colonna 'Div2AirportSeqID': nulli=571615, non nulli=8, % nulli=100.00
+Colonna 'Div2WheelsOn': nulli=571615, non nulli=8, % nulli=100.00
+Colonna 'Div2TotalGTime': nulli=571615, non nulli=8, % nulli=100.00
+Colonna 'Div2LongestGTime': nulli=571615, non nulli=8, % nulli=100.00
+Colonna 'Div2WheelsOff': nulli=571620, non nulli=3, % nulli=100.00
+Colonna 'Div2TailNum': nulli=571620, non nulli=3, % nulli=100.00
+Colonna 'Div3Airport': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportID': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportSeqID': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOn': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div3TotalGTime': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div3LongestGTime': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOff': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div3TailNum': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div4Airport': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportID': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportSeqID': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOn': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div4TotalGTime': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div4LongestGTime': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOff': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div4TailNum': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div5Airport': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportID': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportSeqID': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOn': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div5TotalGTime': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div5LongestGTime': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOff': nulli=571623, non nulli=0, % nulli=100.00
+Colonna 'Div5TailNum': nulli=571623, non nulli=0, % nulli=100.00
+Colonna '_c109': nulli=571623, non nulli=0, % nulli=100.00
+
+Colonne non comuni tra i file:
+  - file: StringType()
+
+--- Report per il file: file:///C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I%20ANNO/PRIMO%20SEMESTRE/MODELLI%20E%20TECNICHE%20PER%20BIG%20DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_8.csv ---
+Numero totale di righe: 562921
+Colonna 'Year': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'Quarter': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'Month': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DayofMonth': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DayOfWeek': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'FlightDate': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'Reporting_Airline': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DOT_ID_Reporting_Airline': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'IATA_CODE_Reporting_Airline': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'Tail_Number': nulli=880, non nulli=562041, % nulli=0.16
+Colonna 'Flight_Number_Reporting_Airline': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'OriginAirportID': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'OriginAirportSeqID': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'OriginCityMarketID': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'Origin': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'OriginCityName': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'OriginState': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'OriginStateFips': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'OriginStateName': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'OriginWac': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DestAirportID': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DestAirportSeqID': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DestCityMarketID': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'Dest': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DestCityName': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DestState': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DestStateFips': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DestStateName': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DestWac': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'CRSDepTime': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DepTime': nulli=5225, non nulli=557696, % nulli=0.93
+Colonna 'DepDelay': nulli=5225, non nulli=557696, % nulli=0.93
+Colonna 'DepDelayMinutes': nulli=5225, non nulli=557696, % nulli=0.93
+Colonna 'DepDel15': nulli=5225, non nulli=557696, % nulli=0.93
+Colonna 'DepartureDelayGroups': nulli=5225, non nulli=557696, % nulli=0.93
+Colonna 'DepTimeBlk': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'TaxiOut': nulli=5467, non nulli=557454, % nulli=0.97
+Colonna 'WheelsOff': nulli=5467, non nulli=557454, % nulli=0.97
+Colonna 'WheelsOn': nulli=5642, non nulli=557279, % nulli=1.00
+Colonna 'TaxiIn': nulli=5642, non nulli=557279, % nulli=1.00
+Colonna 'CRSArrTime': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'ArrTime': nulli=5642, non nulli=557279, % nulli=1.00
+Colonna 'ArrDelay': nulli=6846, non nulli=556075, % nulli=1.22
+Colonna 'ArrDelayMinutes': nulli=6846, non nulli=556075, % nulli=1.22
+Colonna 'ArrDel15': nulli=6846, non nulli=556075, % nulli=1.22
+Colonna 'ArrivalDelayGroups': nulli=6846, non nulli=556075, % nulli=1.22
+Colonna 'ArrTimeBlk': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'Cancelled': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'CancellationCode': nulli=557384, non nulli=5537, % nulli=99.02
+Colonna 'Diverted': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'CRSElapsedTime': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'ActualElapsedTime': nulli=6846, non nulli=556075, % nulli=1.22
+Colonna 'AirTime': nulli=6846, non nulli=556075, % nulli=1.22
+Colonna 'Flights': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'Distance': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DistanceGroup': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'CarrierDelay': nulli=450271, non nulli=112650, % nulli=79.99
+Colonna 'WeatherDelay': nulli=450271, non nulli=112650, % nulli=79.99
+Colonna 'NASDelay': nulli=450271, non nulli=112650, % nulli=79.99
+Colonna 'SecurityDelay': nulli=450271, non nulli=112650, % nulli=79.99
+Colonna 'LateAircraftDelay': nulli=450271, non nulli=112650, % nulli=79.99
+Colonna 'FirstDepTime': nulli=559631, non nulli=3290, % nulli=99.42
+Colonna 'TotalAddGTime': nulli=559631, non nulli=3290, % nulli=99.42
+Colonna 'LongestAddGTime': nulli=559631, non nulli=3290, % nulli=99.42
+Colonna 'DivAirportLandings': nulli=0, non nulli=562921, % nulli=0.00
+Colonna 'DivReachedDest': nulli=561612, non nulli=1309, % nulli=99.77
+Colonna 'DivActualElapsedTime': nulli=561717, non nulli=1204, % nulli=99.79
+Colonna 'DivArrDelay': nulli=561717, non nulli=1204, % nulli=99.79
+Colonna 'DivDistance': nulli=561612, non nulli=1309, % nulli=99.77
+Colonna 'Div1Airport': nulli=561542, non nulli=1379, % nulli=99.76
+Colonna 'Div1AirportID': nulli=561542, non nulli=1379, % nulli=99.76
+Colonna 'Div1AirportSeqID': nulli=561542, non nulli=1379, % nulli=99.76
+Colonna 'Div1WheelsOn': nulli=561542, non nulli=1379, % nulli=99.76
+Colonna 'Div1TotalGTime': nulli=561542, non nulli=1379, % nulli=99.76
+Colonna 'Div1LongestGTime': nulli=561542, non nulli=1379, % nulli=99.76
+Colonna 'Div1WheelsOff': nulli=561711, non nulli=1210, % nulli=99.79
+Colonna 'Div1TailNum': nulli=561711, non nulli=1210, % nulli=99.79
+Colonna 'Div2Airport': nulli=562913, non nulli=8, % nulli=100.00
+Colonna 'Div2AirportID': nulli=562913, non nulli=8, % nulli=100.00
+Colonna 'Div2AirportSeqID': nulli=562913, non nulli=8, % nulli=100.00
+Colonna 'Div2WheelsOn': nulli=562913, non nulli=8, % nulli=100.00
+Colonna 'Div2TotalGTime': nulli=562913, non nulli=8, % nulli=100.00
+Colonna 'Div2LongestGTime': nulli=562913, non nulli=8, % nulli=100.00
+Colonna 'Div2WheelsOff': nulli=562919, non nulli=2, % nulli=100.00
+Colonna 'Div2TailNum': nulli=562919, non nulli=2, % nulli=100.00
+Colonna 'Div3Airport': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportID': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportSeqID': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOn': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div3TotalGTime': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div3LongestGTime': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOff': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div3TailNum': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div4Airport': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportID': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportSeqID': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOn': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div4TotalGTime': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div4LongestGTime': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOff': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div4TailNum': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div5Airport': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportID': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportSeqID': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOn': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div5TotalGTime': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div5LongestGTime': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOff': nulli=562921, non nulli=0, % nulli=100.00
+Colonna 'Div5TailNum': nulli=562921, non nulli=0, % nulli=100.00
+Colonna '_c109': nulli=562921, non nulli=0, % nulli=100.00
+
+Colonne non comuni tra i file:
+  - file: StringType()
+
+--- Report per il file: file:///C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I%20ANNO/PRIMO%20SEMESTRE/MODELLI%20E%20TECNICHE%20PER%20BIG%20DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_9.csv ---
+Numero totale di righe: 510806
+Colonna 'Year': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'Quarter': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'Month': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DayofMonth': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DayOfWeek': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'FlightDate': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'Reporting_Airline': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DOT_ID_Reporting_Airline': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'IATA_CODE_Reporting_Airline': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'Tail_Number': nulli=632, non nulli=510174, % nulli=0.12
+Colonna 'Flight_Number_Reporting_Airline': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'OriginAirportID': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'OriginAirportSeqID': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'OriginCityMarketID': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'Origin': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'OriginCityName': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'OriginState': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'OriginStateFips': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'OriginStateName': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'OriginWac': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DestAirportID': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DestAirportSeqID': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DestCityMarketID': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'Dest': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DestCityName': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DestState': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DestStateFips': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DestStateName': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DestWac': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'CRSDepTime': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DepTime': nulli=4111, non nulli=506695, % nulli=0.80
+Colonna 'DepDelay': nulli=4111, non nulli=506695, % nulli=0.80
+Colonna 'DepDelayMinutes': nulli=4111, non nulli=506695, % nulli=0.80
+Colonna 'DepDel15': nulli=4111, non nulli=506695, % nulli=0.80
+Colonna 'DepartureDelayGroups': nulli=4111, non nulli=506695, % nulli=0.80
+Colonna 'DepTimeBlk': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'TaxiOut': nulli=4363, non nulli=506443, % nulli=0.85
+Colonna 'WheelsOff': nulli=4363, non nulli=506443, % nulli=0.85
+Colonna 'WheelsOn': nulli=4515, non nulli=506291, % nulli=0.88
+Colonna 'TaxiIn': nulli=4515, non nulli=506291, % nulli=0.88
+Colonna 'CRSArrTime': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'ArrTime': nulli=4515, non nulli=506291, % nulli=0.88
+Colonna 'ArrDelay': nulli=5466, non nulli=505340, % nulli=1.07
+Colonna 'ArrDelayMinutes': nulli=5466, non nulli=505340, % nulli=1.07
+Colonna 'ArrDel15': nulli=5466, non nulli=505340, % nulli=1.07
+Colonna 'ArrivalDelayGroups': nulli=5466, non nulli=505340, % nulli=1.07
+Colonna 'ArrTimeBlk': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'Cancelled': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'CancellationCode': nulli=506394, non nulli=4412, % nulli=99.14
+Colonna 'Diverted': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'CRSElapsedTime': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'ActualElapsedTime': nulli=5466, non nulli=505340, % nulli=1.07
+Colonna 'AirTime': nulli=5466, non nulli=505340, % nulli=1.07
+Colonna 'Flights': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'Distance': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DistanceGroup': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'CarrierDelay': nulli=433672, non nulli=77134, % nulli=84.90
+Colonna 'WeatherDelay': nulli=433672, non nulli=77134, % nulli=84.90
+Colonna 'NASDelay': nulli=433672, non nulli=77134, % nulli=84.90
+Colonna 'SecurityDelay': nulli=433672, non nulli=77134, % nulli=84.90
+Colonna 'LateAircraftDelay': nulli=433672, non nulli=77134, % nulli=84.90
+Colonna 'FirstDepTime': nulli=507931, non nulli=2875, % nulli=99.44
+Colonna 'TotalAddGTime': nulli=507931, non nulli=2875, % nulli=99.44
+Colonna 'LongestAddGTime': nulli=507931, non nulli=2875, % nulli=99.44
+Colonna 'DivAirportLandings': nulli=0, non nulli=510806, % nulli=0.00
+Colonna 'DivReachedDest': nulli=509752, non nulli=1054, % nulli=99.79
+Colonna 'DivActualElapsedTime': nulli=509855, non nulli=951, % nulli=99.81
+Colonna 'DivArrDelay': nulli=509855, non nulli=951, % nulli=99.81
+Colonna 'DivDistance': nulli=509752, non nulli=1054, % nulli=99.79
+Colonna 'Div1Airport': nulli=509703, non nulli=1103, % nulli=99.78
+Colonna 'Div1AirportID': nulli=509703, non nulli=1103, % nulli=99.78
+Colonna 'Div1AirportSeqID': nulli=509703, non nulli=1103, % nulli=99.78
+Colonna 'Div1WheelsOn': nulli=509703, non nulli=1103, % nulli=99.78
+Colonna 'Div1TotalGTime': nulli=509703, non nulli=1103, % nulli=99.78
+Colonna 'Div1LongestGTime': nulli=509703, non nulli=1103, % nulli=99.78
+Colonna 'Div1WheelsOff': nulli=509850, non nulli=956, % nulli=99.81
+Colonna 'Div1TailNum': nulli=509850, non nulli=956, % nulli=99.81
+Colonna 'Div2Airport': nulli=510796, non nulli=10, % nulli=100.00
+Colonna 'Div2AirportID': nulli=510796, non nulli=10, % nulli=100.00
+Colonna 'Div2AirportSeqID': nulli=510796, non nulli=10, % nulli=100.00
+Colonna 'Div2WheelsOn': nulli=510796, non nulli=10, % nulli=100.00
+Colonna 'Div2TotalGTime': nulli=510796, non nulli=10, % nulli=100.00
+Colonna 'Div2LongestGTime': nulli=510796, non nulli=10, % nulli=100.00
+Colonna 'Div2WheelsOff': nulli=510801, non nulli=5, % nulli=100.00
+Colonna 'Div2TailNum': nulli=510801, non nulli=5, % nulli=100.00
+Colonna 'Div3Airport': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportID': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportSeqID': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOn': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div3TotalGTime': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div3LongestGTime': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOff': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div3TailNum': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div4Airport': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportID': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportSeqID': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOn': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div4TotalGTime': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div4LongestGTime': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOff': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div4TailNum': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div5Airport': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportID': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportSeqID': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOn': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div5TotalGTime': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div5LongestGTime': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOff': nulli=510806, non nulli=0, % nulli=100.00
+Colonna 'Div5TailNum': nulli=510806, non nulli=0, % nulli=100.00
+Colonna '_c109': nulli=510806, non nulli=0, % nulli=100.00
+
+Colonne non comuni tra i file:
+  - file: StringType()
+
+--- Report per il file: file:///C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I%20ANNO/PRIMO%20SEMESTRE/MODELLI%20E%20TECNICHE%20PER%20BIG%20DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_10.csv ---
+Numero totale di righe: 535344
+Colonna 'Year': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'Quarter': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'Month': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DayofMonth': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DayOfWeek': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'FlightDate': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'Reporting_Airline': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DOT_ID_Reporting_Airline': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'IATA_CODE_Reporting_Airline': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'Tail_Number': nulli=556, non nulli=534788, % nulli=0.10
+Colonna 'Flight_Number_Reporting_Airline': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'OriginAirportID': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'OriginAirportSeqID': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'OriginCityMarketID': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'Origin': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'OriginCityName': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'OriginState': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'OriginStateFips': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'OriginStateName': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'OriginWac': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DestAirportID': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DestAirportSeqID': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DestCityMarketID': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'Dest': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DestCityName': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DestState': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DestStateFips': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DestStateName': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DestWac': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'CRSDepTime': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DepTime': nulli=3099, non nulli=532245, % nulli=0.58
+Colonna 'DepDelay': nulli=3099, non nulli=532245, % nulli=0.58
+Colonna 'DepDelayMinutes': nulli=3099, non nulli=532245, % nulli=0.58
+Colonna 'DepDel15': nulli=3099, non nulli=532245, % nulli=0.58
+Colonna 'DepartureDelayGroups': nulli=3099, non nulli=532245, % nulli=0.58
+Colonna 'DepTimeBlk': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'TaxiOut': nulli=3213, non nulli=532131, % nulli=0.60
+Colonna 'WheelsOff': nulli=3213, non nulli=532131, % nulli=0.60
+Colonna 'WheelsOn': nulli=3366, non nulli=531978, % nulli=0.63
+Colonna 'TaxiIn': nulli=3366, non nulli=531978, % nulli=0.63
+Colonna 'CRSArrTime': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'ArrTime': nulli=3366, non nulli=531978, % nulli=0.63
+Colonna 'ArrDelay': nulli=4023, non nulli=531321, % nulli=0.75
+Colonna 'ArrDelayMinutes': nulli=4023, non nulli=531321, % nulli=0.75
+Colonna 'ArrDel15': nulli=4023, non nulli=531321, % nulli=0.75
+Colonna 'ArrivalDelayGroups': nulli=4023, non nulli=531321, % nulli=0.75
+Colonna 'ArrTimeBlk': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'Cancelled': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'CancellationCode': nulli=532081, non nulli=3263, % nulli=99.39
+Colonna 'Diverted': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'CRSElapsedTime': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'ActualElapsedTime': nulli=4023, non nulli=531321, % nulli=0.75
+Colonna 'AirTime': nulli=4023, non nulli=531321, % nulli=0.75
+Colonna 'Flights': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'Distance': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DistanceGroup': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'CarrierDelay': nulli=454006, non nulli=81338, % nulli=84.81
+Colonna 'WeatherDelay': nulli=454006, non nulli=81338, % nulli=84.81
+Colonna 'NASDelay': nulli=454006, non nulli=81338, % nulli=84.81
+Colonna 'SecurityDelay': nulli=454006, non nulli=81338, % nulli=84.81
+Colonna 'LateAircraftDelay': nulli=454006, non nulli=81338, % nulli=84.81
+Colonna 'FirstDepTime': nulli=532820, non nulli=2524, % nulli=99.53
+Colonna 'TotalAddGTime': nulli=532820, non nulli=2524, % nulli=99.53
+Colonna 'LongestAddGTime': nulli=532820, non nulli=2524, % nulli=99.53
+Colonna 'DivAirportLandings': nulli=0, non nulli=535344, % nulli=0.00
+Colonna 'DivReachedDest': nulli=534584, non nulli=760, % nulli=99.86
+Colonna 'DivActualElapsedTime': nulli=534687, non nulli=657, % nulli=99.88
+Colonna 'DivArrDelay': nulli=534687, non nulli=657, % nulli=99.88
+Colonna 'DivDistance': nulli=534584, non nulli=760, % nulli=99.86
+Colonna 'Div1Airport': nulli=534534, non nulli=810, % nulli=99.85
+Colonna 'Div1AirportID': nulli=534534, non nulli=810, % nulli=99.85
+Colonna 'Div1AirportSeqID': nulli=534534, non nulli=810, % nulli=99.85
+Colonna 'Div1WheelsOn': nulli=534534, non nulli=810, % nulli=99.85
+Colonna 'Div1TotalGTime': nulli=534534, non nulli=810, % nulli=99.85
+Colonna 'Div1LongestGTime': nulli=534534, non nulli=810, % nulli=99.85
+Colonna 'Div1WheelsOff': nulli=534682, non nulli=662, % nulli=99.88
+Colonna 'Div1TailNum': nulli=534682, non nulli=662, % nulli=99.88
+Colonna 'Div2Airport': nulli=535336, non nulli=8, % nulli=100.00
+Colonna 'Div2AirportID': nulli=535336, non nulli=8, % nulli=100.00
+Colonna 'Div2AirportSeqID': nulli=535336, non nulli=8, % nulli=100.00
+Colonna 'Div2WheelsOn': nulli=535336, non nulli=8, % nulli=100.00
+Colonna 'Div2TotalGTime': nulli=535336, non nulli=8, % nulli=100.00
+Colonna 'Div2LongestGTime': nulli=535336, non nulli=8, % nulli=100.00
+Colonna 'Div2WheelsOff': nulli=535341, non nulli=3, % nulli=100.00
+Colonna 'Div2TailNum': nulli=535341, non nulli=3, % nulli=100.00
+Colonna 'Div3Airport': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportID': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportSeqID': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOn': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div3TotalGTime': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div3LongestGTime': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOff': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div3TailNum': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div4Airport': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportID': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportSeqID': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOn': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div4TotalGTime': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div4LongestGTime': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOff': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div4TailNum': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div5Airport': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportID': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportSeqID': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOn': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div5TotalGTime': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div5LongestGTime': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOff': nulli=535344, non nulli=0, % nulli=100.00
+Colonna 'Div5TailNum': nulli=535344, non nulli=0, % nulli=100.00
+Colonna '_c109': nulli=535344, non nulli=0, % nulli=100.00
+
+Colonne non comuni tra i file:
+  - file: StringType()
+
+--- Report per il file: file:///C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I%20ANNO/PRIMO%20SEMESTRE/MODELLI%20E%20TECNICHE%20PER%20BIG%20DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_11.csv ---
+Numero totale di righe: 503296
+Colonna 'Year': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'Quarter': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'Month': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DayofMonth': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DayOfWeek': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'FlightDate': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'Reporting_Airline': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DOT_ID_Reporting_Airline': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'IATA_CODE_Reporting_Airline': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'Tail_Number': nulli=789, non nulli=502507, % nulli=0.16
+Colonna 'Flight_Number_Reporting_Airline': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'OriginAirportID': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'OriginAirportSeqID': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'OriginCityMarketID': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'Origin': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'OriginCityName': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'OriginState': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'OriginStateFips': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'OriginStateName': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'OriginWac': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DestAirportID': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DestAirportSeqID': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DestCityMarketID': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'Dest': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DestCityName': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DestState': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DestStateFips': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DestStateName': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DestWac': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'CRSDepTime': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DepTime': nulli=4876, non nulli=498420, % nulli=0.97
+Colonna 'DepDelay': nulli=4876, non nulli=498420, % nulli=0.97
+Colonna 'DepDelayMinutes': nulli=4876, non nulli=498420, % nulli=0.97
+Colonna 'DepDel15': nulli=4876, non nulli=498420, % nulli=0.97
+Colonna 'DepartureDelayGroups': nulli=4876, non nulli=498420, % nulli=0.97
+Colonna 'DepTimeBlk': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'TaxiOut': nulli=5017, non nulli=498279, % nulli=1.00
+Colonna 'WheelsOff': nulli=5017, non nulli=498279, % nulli=1.00
+Colonna 'WheelsOn': nulli=5331, non nulli=497965, % nulli=1.06
+Colonna 'TaxiIn': nulli=5331, non nulli=497965, % nulli=1.06
+Colonna 'CRSArrTime': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'ArrTime': nulli=5331, non nulli=497965, % nulli=1.06
+Colonna 'ArrDelay': nulli=5937, non nulli=497359, % nulli=1.18
+Colonna 'ArrDelayMinutes': nulli=5937, non nulli=497359, % nulli=1.18
+Colonna 'ArrDel15': nulli=5937, non nulli=497359, % nulli=1.18
+Colonna 'ArrivalDelayGroups': nulli=5937, non nulli=497359, % nulli=1.18
+Colonna 'ArrTimeBlk': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'Cancelled': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'CancellationCode': nulli=498214, non nulli=5082, % nulli=98.99
+Colonna 'Diverted': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'CRSElapsedTime': nulli=3, non nulli=503293, % nulli=0.00
+Colonna 'ActualElapsedTime': nulli=5937, non nulli=497359, % nulli=1.18
+Colonna 'AirTime': nulli=5937, non nulli=497359, % nulli=1.18
+Colonna 'Flights': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'Distance': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DistanceGroup': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'CarrierDelay': nulli=425944, non nulli=77352, % nulli=84.63
+Colonna 'WeatherDelay': nulli=425944, non nulli=77352, % nulli=84.63
+Colonna 'NASDelay': nulli=425944, non nulli=77352, % nulli=84.63
+Colonna 'SecurityDelay': nulli=425944, non nulli=77352, % nulli=84.63
+Colonna 'LateAircraftDelay': nulli=425944, non nulli=77352, % nulli=84.63
+Colonna 'FirstDepTime': nulli=500750, non nulli=2546, % nulli=99.49
+Colonna 'TotalAddGTime': nulli=500750, non nulli=2546, % nulli=99.49
+Colonna 'LongestAddGTime': nulli=500750, non nulli=2546, % nulli=99.49
+Colonna 'DivAirportLandings': nulli=0, non nulli=503296, % nulli=0.00
+Colonna 'DivReachedDest': nulli=502441, non nulli=855, % nulli=99.83
+Colonna 'DivActualElapsedTime': nulli=502690, non nulli=606, % nulli=99.88
+Colonna 'DivArrDelay': nulli=502690, non nulli=606, % nulli=99.88
+Colonna 'DivDistance': nulli=502441, non nulli=855, % nulli=99.83
+Colonna 'Div1Airport': nulli=502376, non nulli=920, % nulli=99.82
+Colonna 'Div1AirportID': nulli=502376, non nulli=920, % nulli=99.82
+Colonna 'Div1AirportSeqID': nulli=502376, non nulli=920, % nulli=99.82
+Colonna 'Div1WheelsOn': nulli=502376, non nulli=920, % nulli=99.82
+Colonna 'Div1TotalGTime': nulli=502376, non nulli=920, % nulli=99.82
+Colonna 'Div1LongestGTime': nulli=502376, non nulli=920, % nulli=99.82
+Colonna 'Div1WheelsOff': nulli=502679, non nulli=617, % nulli=99.88
+Colonna 'Div1TailNum': nulli=502679, non nulli=617, % nulli=99.88
+Colonna 'Div2Airport': nulli=503284, non nulli=12, % nulli=100.00
+Colonna 'Div2AirportID': nulli=503284, non nulli=12, % nulli=100.00
+Colonna 'Div2AirportSeqID': nulli=503284, non nulli=12, % nulli=100.00
+Colonna 'Div2WheelsOn': nulli=503284, non nulli=12, % nulli=100.00
+Colonna 'Div2TotalGTime': nulli=503284, non nulli=12, % nulli=100.00
+Colonna 'Div2LongestGTime': nulli=503284, non nulli=12, % nulli=100.00
+Colonna 'Div2WheelsOff': nulli=503295, non nulli=1, % nulli=100.00
+Colonna 'Div2TailNum': nulli=503295, non nulli=1, % nulli=100.00
+Colonna 'Div3Airport': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportID': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div3AirportSeqID': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOn': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div3TotalGTime': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div3LongestGTime': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div3WheelsOff': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div3TailNum': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div4Airport': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportID': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportSeqID': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOn': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div4TotalGTime': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div4LongestGTime': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOff': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div4TailNum': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div5Airport': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportID': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportSeqID': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOn': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div5TotalGTime': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div5LongestGTime': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOff': nulli=503296, non nulli=0, % nulli=100.00
+Colonna 'Div5TailNum': nulli=503296, non nulli=0, % nulli=100.00
+Colonna '_c109': nulli=503296, non nulli=0, % nulli=100.00
+
+Colonne non comuni tra i file:
+  - file: StringType()
+
+--- Report per il file: file:///C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I%20ANNO/PRIMO%20SEMESTRE/MODELLI%20E%20TECNICHE%20PER%20BIG%20DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_12.csv ---
+Numero totale di righe: 516739
+Colonna 'Year': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'Quarter': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'Month': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DayofMonth': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DayOfWeek': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'FlightDate': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'Reporting_Airline': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DOT_ID_Reporting_Airline': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'IATA_CODE_Reporting_Airline': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'Tail_Number': nulli=2363, non nulli=514376, % nulli=0.46
+Colonna 'Flight_Number_Reporting_Airline': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'OriginAirportID': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'OriginAirportSeqID': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'OriginCityMarketID': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'Origin': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'OriginCityName': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'OriginState': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'OriginStateFips': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'OriginStateName': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'OriginWac': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DestAirportID': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DestAirportSeqID': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DestCityMarketID': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'Dest': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DestCityName': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DestState': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DestStateFips': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DestStateName': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DestWac': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'CRSDepTime': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DepTime': nulli=14226, non nulli=502513, % nulli=2.75
+Colonna 'DepDelay': nulli=14226, non nulli=502513, % nulli=2.75
+Colonna 'DepDelayMinutes': nulli=14226, non nulli=502513, % nulli=2.75
+Colonna 'DepDel15': nulli=14226, non nulli=502513, % nulli=2.75
+Colonna 'DepartureDelayGroups': nulli=14226, non nulli=502513, % nulli=2.75
+Colonna 'DepTimeBlk': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'TaxiOut': nulli=14593, non nulli=502146, % nulli=2.82
+Colonna 'WheelsOff': nulli=14593, non nulli=502146, % nulli=2.82
+Colonna 'WheelsOn': nulli=15041, non nulli=501698, % nulli=2.91
+Colonna 'TaxiIn': nulli=15041, non nulli=501698, % nulli=2.91
+Colonna 'CRSArrTime': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'ArrTime': nulli=15041, non nulli=501698, % nulli=2.91
+Colonna 'ArrDelay': nulli=15903, non nulli=500836, % nulli=3.08
+Colonna 'ArrDelayMinutes': nulli=15903, non nulli=500836, % nulli=3.08
+Colonna 'ArrDel15': nulli=15903, non nulli=500836, % nulli=3.08
+Colonna 'ArrivalDelayGroups': nulli=15903, non nulli=500836, % nulli=3.08
+Colonna 'ArrTimeBlk': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'Cancelled': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'CancellationCode': nulli=501992, non nulli=14747, % nulli=97.15
+Colonna 'Diverted': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'CRSElapsedTime': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'ActualElapsedTime': nulli=15903, non nulli=500836, % nulli=3.08
+Colonna 'AirTime': nulli=15903, non nulli=500836, % nulli=3.08
+Colonna 'Flights': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'Distance': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DistanceGroup': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'CarrierDelay': nulli=371781, non nulli=144958, % nulli=71.95
+Colonna 'WeatherDelay': nulli=371781, non nulli=144958, % nulli=71.95
+Colonna 'NASDelay': nulli=371781, non nulli=144958, % nulli=71.95
+Colonna 'SecurityDelay': nulli=371781, non nulli=144958, % nulli=71.95
+Colonna 'LateAircraftDelay': nulli=371781, non nulli=144958, % nulli=71.95
+Colonna 'FirstDepTime': nulli=513172, non nulli=3567, % nulli=99.31
+Colonna 'TotalAddGTime': nulli=513172, non nulli=3567, % nulli=99.31
+Colonna 'LongestAddGTime': nulli=513172, non nulli=3567, % nulli=99.31
+Colonna 'DivAirportLandings': nulli=0, non nulli=516739, % nulli=0.00
+Colonna 'DivReachedDest': nulli=515583, non nulli=1156, % nulli=99.78
+Colonna 'DivActualElapsedTime': nulli=515877, non nulli=862, % nulli=99.83
+Colonna 'DivArrDelay': nulli=515877, non nulli=862, % nulli=99.83
+Colonna 'DivDistance': nulli=515583, non nulli=1156, % nulli=99.78
+Colonna 'Div1Airport': nulli=515429, non nulli=1310, % nulli=99.75
+Colonna 'Div1AirportID': nulli=515429, non nulli=1310, % nulli=99.75
+Colonna 'Div1AirportSeqID': nulli=515429, non nulli=1310, % nulli=99.75
+Colonna 'Div1WheelsOn': nulli=515429, non nulli=1310, % nulli=99.75
+Colonna 'Div1TotalGTime': nulli=515429, non nulli=1310, % nulli=99.75
+Colonna 'Div1LongestGTime': nulli=515429, non nulli=1310, % nulli=99.75
+Colonna 'Div1WheelsOff': nulli=515863, non nulli=876, % nulli=99.83
+Colonna 'Div1TailNum': nulli=515863, non nulli=876, % nulli=99.83
+Colonna 'Div2Airport': nulli=516720, non nulli=19, % nulli=100.00
+Colonna 'Div2AirportID': nulli=516720, non nulli=19, % nulli=100.00
+Colonna 'Div2AirportSeqID': nulli=516720, non nulli=19, % nulli=100.00
+Colonna 'Div2WheelsOn': nulli=516720, non nulli=19, % nulli=100.00
+Colonna 'Div2TotalGTime': nulli=516720, non nulli=19, % nulli=100.00
+Colonna 'Div2LongestGTime': nulli=516720, non nulli=19, % nulli=100.00
+Colonna 'Div2WheelsOff': nulli=516733, non nulli=6, % nulli=100.00
+Colonna 'Div2TailNum': nulli=516733, non nulli=6, % nulli=100.00
+Colonna 'Div3Airport': nulli=516738, non nulli=1, % nulli=100.00
+Colonna 'Div3AirportID': nulli=516738, non nulli=1, % nulli=100.00
+Colonna 'Div3AirportSeqID': nulli=516738, non nulli=1, % nulli=100.00
+Colonna 'Div3WheelsOn': nulli=516738, non nulli=1, % nulli=100.00
+Colonna 'Div3TotalGTime': nulli=516738, non nulli=1, % nulli=100.00
+Colonna 'Div3LongestGTime': nulli=516738, non nulli=1, % nulli=100.00
+Colonna 'Div3WheelsOff': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div3TailNum': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div4Airport': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportID': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div4AirportSeqID': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOn': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div4TotalGTime': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div4LongestGTime': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div4WheelsOff': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div4TailNum': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div5Airport': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportID': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div5AirportSeqID': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOn': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div5TotalGTime': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div5LongestGTime': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div5WheelsOff': nulli=516739, non nulli=0, % nulli=100.00
+Colonna 'Div5TailNum': nulli=516739, non nulli=0, % nulli=100.00
+Colonna '_c109': nulli=516739, non nulli=0, % nulli=100.00
+
+Colonne non comuni tra i file:
+  - file: StringType()
+
+--- Riepilogo Finale ---
+Numero totale di righe per tutti i file: 6369482
+Numero totale di colonne in tutti i file (comune a tutti): 110
+
+=== Informazioni dettagliate per il file: C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_1.csv ===
+
+Numero totale di righe: 509519
+
+Colonna 'Year': tipo=IntegerType(), formato data=N/A
+Colonna 'Quarter': tipo=IntegerType(), formato data=N/A
+Colonna 'Month': tipo=IntegerType(), formato data=N/A
+Colonna 'DayofMonth': tipo=IntegerType(), formato data=N/A
+Colonna 'DayOfWeek': tipo=IntegerType(), formato data=N/A
+Colonna 'FlightDate': tipo=DateType(), formato data=YYYY-MM-DD
+Colonna 'Reporting_Airline': tipo=StringType(), formato data=N/A
+Colonna 'DOT_ID_Reporting_Airline': tipo=IntegerType(), formato data=N/A
+Colonna 'IATA_CODE_Reporting_Airline': tipo=StringType(), formato data=N/A
+Colonna 'Tail_Number': tipo=StringType(), formato data=N/A
+Colonna 'Flight_Number_Reporting_Airline': tipo=IntegerType(), formato data=N/A
+Colonna 'OriginAirportID': tipo=IntegerType(), formato data=N/A
+Colonna 'OriginAirportSeqID': tipo=IntegerType(), formato data=N/A
+Colonna 'OriginCityMarketID': tipo=IntegerType(), formato data=N/A
+Colonna 'Origin': tipo=StringType(), formato data=N/A
+Colonna 'OriginCityName': tipo=StringType(), formato data=N/A
+Colonna 'OriginState': tipo=StringType(), formato data=N/A
+Colonna 'OriginStateFips': tipo=IntegerType(), formato data=N/A
+Colonna 'OriginStateName': tipo=StringType(), formato data=N/A
+Colonna 'OriginWac': tipo=IntegerType(), formato data=N/A
+Colonna 'DestAirportID': tipo=IntegerType(), formato data=N/A
+Colonna 'DestAirportSeqID': tipo=IntegerType(), formato data=N/A
+Colonna 'DestCityMarketID': tipo=IntegerType(), formato data=N/A
+Colonna 'Dest': tipo=StringType(), formato data=N/A
+Colonna 'DestCityName': tipo=StringType(), formato data=N/A
+Colonna 'DestState': tipo=StringType(), formato data=N/A
+Colonna 'DestStateFips': tipo=IntegerType(), formato data=N/A
+Colonna 'DestStateName': tipo=StringType(), formato data=N/A
+Colonna 'DestWac': tipo=IntegerType(), formato data=N/A
+Colonna 'CRSDepTime': tipo=IntegerType(), formato data=N/A
+Colonna 'DepTime': tipo=IntegerType(), formato data=N/A
+Colonna 'DepDelay': tipo=DoubleType(), formato data=N/A
+Colonna 'DepDelayMinutes': tipo=DoubleType(), formato data=N/A
+Colonna 'DepDel15': tipo=DoubleType(), formato data=N/A
+Colonna 'DepartureDelayGroups': tipo=IntegerType(), formato data=N/A
+Colonna 'DepTimeBlk': tipo=StringType(), formato data=N/A
+Colonna 'TaxiOut': tipo=DoubleType(), formato data=N/A
+Colonna 'WheelsOff': tipo=IntegerType(), formato data=N/A
+Colonna 'WheelsOn': tipo=IntegerType(), formato data=N/A
+Colonna 'TaxiIn': tipo=DoubleType(), formato data=N/A
+Colonna 'CRSArrTime': tipo=IntegerType(), formato data=N/A
+Colonna 'ArrTime': tipo=IntegerType(), formato data=N/A
+Colonna 'ArrDelay': tipo=DoubleType(), formato data=N/A
+Colonna 'ArrDelayMinutes': tipo=DoubleType(), formato data=N/A
+Colonna 'ArrDel15': tipo=DoubleType(), formato data=N/A
+Colonna 'ArrivalDelayGroups': tipo=IntegerType(), formato data=N/A
+Colonna 'ArrTimeBlk': tipo=StringType(), formato data=N/A
+Colonna 'Cancelled': tipo=DoubleType(), formato data=N/A
+Colonna 'CancellationCode': tipo=StringType(), formato data=N/A
+Colonna 'Diverted': tipo=DoubleType(), formato data=N/A
+Colonna 'CRSElapsedTime': tipo=DoubleType(), formato data=N/A
+Colonna 'ActualElapsedTime': tipo=DoubleType(), formato data=N/A
+Colonna 'AirTime': tipo=DoubleType(), formato data=N/A
+Colonna 'Flights': tipo=DoubleType(), formato data=N/A
+Colonna 'Distance': tipo=DoubleType(), formato data=N/A
+Colonna 'DistanceGroup': tipo=IntegerType(), formato data=N/A
+Colonna 'CarrierDelay': tipo=DoubleType(), formato data=N/A
+Colonna 'WeatherDelay': tipo=DoubleType(), formato data=N/A
+Colonna 'NASDelay': tipo=DoubleType(), formato data=N/A
+Colonna 'SecurityDelay': tipo=DoubleType(), formato data=N/A
+Colonna 'LateAircraftDelay': tipo=DoubleType(), formato data=N/A
+Colonna 'FirstDepTime': tipo=IntegerType(), formato data=N/A
+Colonna 'TotalAddGTime': tipo=DoubleType(), formato data=N/A
+Colonna 'LongestAddGTime': tipo=DoubleType(), formato data=N/A
+Colonna 'DivAirportLandings': tipo=IntegerType(), formato data=N/A
+Colonna 'DivReachedDest': tipo=DoubleType(), formato data=N/A
+Colonna 'DivActualElapsedTime': tipo=DoubleType(), formato data=N/A
+Colonna 'DivArrDelay': tipo=DoubleType(), formato data=N/A
+Colonna 'DivDistance': tipo=DoubleType(), formato data=N/A
+Colonna 'Div1Airport': tipo=StringType(), formato data=N/A
+Colonna 'Div1AirportID': tipo=IntegerType(), formato data=N/A
+Colonna 'Div1AirportSeqID': tipo=IntegerType(), formato data=N/A
+Colonna 'Div1WheelsOn': tipo=IntegerType(), formato data=N/A
+Colonna 'Div1TotalGTime': tipo=DoubleType(), formato data=N/A
+Colonna 'Div1LongestGTime': tipo=DoubleType(), formato data=N/A
+Colonna 'Div1WheelsOff': tipo=IntegerType(), formato data=N/A
+Colonna 'Div1TailNum': tipo=StringType(), formato data=N/A
+Colonna 'Div2Airport': tipo=StringType(), formato data=N/A
+Colonna 'Div2AirportID': tipo=IntegerType(), formato data=N/A
+Colonna 'Div2AirportSeqID': tipo=IntegerType(), formato data=N/A
+Colonna 'Div2WheelsOn': tipo=IntegerType(), formato data=N/A
+Colonna 'Div2TotalGTime': tipo=DoubleType(), formato data=N/A
+Colonna 'Div2LongestGTime': tipo=DoubleType(), formato data=N/A
+Colonna 'Div2WheelsOff': tipo=IntegerType(), formato data=N/A
+Colonna 'Div2TailNum': tipo=StringType(), formato data=N/A
+Colonna 'Div3Airport': tipo=StringType(), formato data=N/A
+Colonna 'Div3AirportID': tipo=StringType(), formato data=N/A
+Colonna 'Div3AirportSeqID': tipo=StringType(), formato data=N/A
+Colonna 'Div3WheelsOn': tipo=StringType(), formato data=N/A
+Colonna 'Div3TotalGTime': tipo=StringType(), formato data=N/A
+Colonna 'Div3LongestGTime': tipo=StringType(), formato data=N/A
+Colonna 'Div3WheelsOff': tipo=StringType(), formato data=N/A
+Colonna 'Div3TailNum': tipo=StringType(), formato data=N/A
+Colonna 'Div4Airport': tipo=StringType(), formato data=N/A
+Colonna 'Div4AirportID': tipo=StringType(), formato data=N/A
+Colonna 'Div4AirportSeqID': tipo=StringType(), formato data=N/A
+Colonna 'Div4WheelsOn': tipo=StringType(), formato data=N/A
+Colonna 'Div4TotalGTime': tipo=StringType(), formato data=N/A
+Colonna 'Div4LongestGTime': tipo=StringType(), formato data=N/A
+Colonna 'Div4WheelsOff': tipo=StringType(), formato data=N/A
+Colonna 'Div4TailNum': tipo=StringType(), formato data=N/A
+Colonna 'Div5Airport': tipo=StringType(), formato data=N/A
+Colonna 'Div5AirportID': tipo=StringType(), formato data=N/A
+Colonna 'Div5AirportSeqID': tipo=StringType(), formato data=N/A
+Colonna 'Div5WheelsOn': tipo=StringType(), formato data=N/A
+Colonna 'Div5TotalGTime': tipo=StringType(), formato data=N/A
+Colonna 'Div5LongestGTime': tipo=StringType(), formato data=N/A
+Colonna 'Div5WheelsOff': tipo=StringType(), formato data=N/A
+Colonna 'Div5TailNum': tipo=StringType(), formato data=N/A
+Colonna '_c109': tipo=StringType(), formato data=N/A
