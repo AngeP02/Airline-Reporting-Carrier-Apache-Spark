@@ -3,10 +3,55 @@ from pyspark.sql.functions import col
 import os
 import shutil
 
+import os
+# os.environ["HADOOP_HOME"] = "C:\\hadoop"
+# os.environ["hadoop.home.dir"] = "C:\\hadoop"
+#
+# #os.environ["HADOOP_OPTS"] = "-Djava.library.path="
+# import os
+# os.environ["PYSPARK_PYTHON"] = r"C:\Users\ANGELICA\Desktop\ANGELICA\UNICAL\MAGISTRALE\I ANNO\PRIMO SEMESTRE\MODELLI E TECNICHE PER BIG DATA\PROGETTO\CODICE\.venv\Scripts\python.exe"
+# os.environ["PYSPARK_DRIVER_PYTHON"] = r"C:\Users\ANGELICA\Desktop\ANGELICA\UNICAL\MAGISTRALE\I ANNO\PRIMO SEMESTRE\MODELLI E TECNICHE PER BIG DATA\PROGETTO\CODICE\.venv\Scripts\python.exe"
+# os.environ["PYSPARK_PYTHON"] = os.path.join("C:\\Users\\ANGELICA\\Desktop\\ANGELICA\\UNICAL\\MAGISTRALE\\I ANNO\\PRIMO SEMESTRE\\MODELLI E TECNICHE PER BIG DATA\\PROGETTO\\CODICE\\.venv", "Scripts", "python.exe")
+# os.environ["PYSPARK_DRIVER_PYTHON"] = os.environ["PYSPARK_PYTHON"]
+#
+# # Creazione della sessione Spark
+# # TODO cancellare 8g dal codice seguente
+# #spark = SparkSession.builder.appName("AnalisiDatiVoli").config("spark.driver.memory", "24g").getOrCreate()
+# spark = SparkSession.builder \
+#     .appName("AnalisiDatiVoli") \
+#     .config("spark.driver.memory", "24g") \
+#     .config("spark.sql.debug.maxToStringFields", "1000") \
+#     .config("spark.hadoop.fs.defaultFS", "file:///") \
+#     .config("spark.hadoop.fs.file.impl", "org.apache.hadoop.fs.LocalFileSystem") \
+#     .config("spark.hadoop.io.nativeio.NativeIO$Windows.access0", "false") \
+#     .config("spark.hadoop.home.dir", "C:\\hadoop") \
+#     .master("local[*]") \
+#     .getOrCreate()
+os.environ["HADOOP_HOME"] = "C:\\hadoop"
+os.environ["PYSPARK_PYTHON"] = r"C:\Users\ANGELICA\Desktop\ANGELICA\UNICAL\MAGISTRALE\I ANNO\PRIMO SEMESTRE\MODELLI E TECNICHE PER BIG DATA\PROGETTO\CODICE\.venv\Scripts\python.exe"
+os.environ["PYSPARK_DRIVER_PYTHON"] = os.environ["PYSPARK_PYTHON"]
+os.environ["SPARK_HOME"] = "C:\\spark"
+os.environ["PATH"] += os.pathsep + r"C:\Users\ANGELICA\Desktop\ANGELICA\UNICAL\MAGISTRALE\I ANNO\PRIMO SEMESTRE\MODELLI E TECNICHE PER BIG DATA\PROGETTO\CODICE\.venv\Scripts"
 
 # Creazione della sessione Spark
-spark = SparkSession.builder.appName("AnalisiDatiVoli").config("spark.driver.memory", "8g").getOrCreate()
+spark = SparkSession.builder \
+    .appName("AnalisiDatiVoli") \
+    .config("spark.driver.memory", "24g") \
+    .config("spark.sql.debug.maxToStringFields", "1000") \
+    .config("spark.hadoop.fs.defaultFS", "file:///") \
+    .config("spark.hadoop.fs.file.impl", "org.apache.hadoop.fs.LocalFileSystem") \
+    .config("spark.hadoop.io.nativeio.NativeIO$Windows.access0", "false") \
+    .config("spark.hadoop.home.dir", "C:\\hadoop") \
+    .master("local[*]") \
+    .getOrCreate()
+import os
+print(os.environ["PYSPARK_PYTHON"])
+print(spark.version)
+
 spark.conf.set("spark.sql.debug.maxToStringFields", "1000")  # Or any higher number depending on your needs
+spark.conf.set("spark.hadoop.fs.file.impl", "org.apache.hadoop.fs.LocalFileSystem")
+spark.conf.set("spark.hadoop.native.lib", "false")
+
 
 #Caricamento dei dati
 nomi_file = [
@@ -60,12 +105,18 @@ df_finale = df_finale.drop(*colonne_con_nulli)
 #Eliminazione dei duplicati
 df_finale = df_finale.dropDuplicates()
 
+project_dir = os.getcwd()  # Ottiene la directory del progetto
+data_dir = os.path.join(project_dir, "Dati")  # Percorso della cartella dati
 
-# Salvataggio del DataFrame finale in un nuovo file CSV
-output_path = "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Dati/On_Time_Performance_2013_cleaned.csv"
-if os.path.exists(output_path):
-    shutil.rmtree(output_path)
-df_finale.coalesce(1).write.option("header", "true").csv(output_path)
+output_dir = os.path.join(data_dir, "On_Time_Performance_2013_cleaned")
+
+# Rimuove la cartella di output se esiste già
+if os.path.exists(output_dir):
+    shutil.rmtree(output_dir)
+
+df_finale.coalesce(1).write.option("header", "true").csv(output_dir)
+
+print(f"Il file è stato salvato in: {output_dir}")
 
 df_finale.describe().show()
 df_finale.show(5)

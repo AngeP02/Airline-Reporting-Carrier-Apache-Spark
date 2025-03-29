@@ -9,7 +9,8 @@ spark = SparkSession.builder.master("local").appName("FlightAnalysis").getOrCrea
 
 # Funzione per caricare i dati
 def carica_dati(path):
-    return spark.read.csv(path, header=True, inferSchema=True)
+    return spark.read.csv(path, header=True, inferSchema=True).cache()
+    #return spark.read.options(delimiter=',').csv(path, header=True, inferSchema=True).cache()
 
 
 #query per analisi dati

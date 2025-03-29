@@ -3,6 +3,7 @@ from datetime import datetime
 import sys
 import os
 import plotly.express as px
+from pyspark import StorageLevel
 from pyspark.sql import Row
 from pyspark.sql.functions import col
 from pyspark.sql import functions as F
@@ -23,7 +24,7 @@ from Backend.query import carica_dati, elenco_aeroporti_NY, statistiche_aeroport
 
 # Carica il dataset
 df = carica_dati("C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_1.csv")
-
+df = df.persist(StorageLevel.MEMORY_ONLY)
 
 # Interfaccia Streamlit
 def main():
@@ -51,14 +52,14 @@ def main():
             col6.metric("Distanza Media", f"{kpi['distanza_media']:.2f} miglia")
 
 
-        with st.container(border=True):
-            fig = mappa_aeroporti(df)
+        #with st.container(border=True):
+            #fig = mappa_aeroporti(df)
 
             # Aggiungi le rotte principali sulla mappa
-            fig = aggiungi_rotte(df, fig)
+            #fig = aggiungi_rotte(df, fig)
 
             # Mostra la mappa in Streamlit
-            st.plotly_chart(fig)
+           # st.plotly_chart(fig)
 
         with st.container(border=True):
             # Crea due colonne
