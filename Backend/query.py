@@ -5,12 +5,18 @@ import plotly.graph_objects as go
 from pyspark.sql import functions as F
 import plotly.express as px
 
-spark = SparkSession.builder.master("local").appName("FlightAnalysis").getOrCreate()
+#spark = SparkSession.builder.master("local").appName("FlightAnalysis").getOrCreate()
 
-# Funzione per caricare i dati
-def carica_dati(path):
-    return spark.read.csv(path, header=True, inferSchema=True).cache()
-    #return spark.read.options(delimiter=',').csv(path, header=True, inferSchema=True).cache()
+# # Funzione per caricare i dati
+# def carica_dati(path):
+#     return spark.read.csv(path, header=True, inferSchema=True).cache()
+#     #return spark.read.options(delimiter=',').csv(path, header=True, inferSchema=True).cache()
+
+def carica_dati_tutti(directory_path):
+    spark = SparkSession.builder.appName("Analisi Voli").getOrCreate()
+    # Carica tutti i file CSV nella cartella
+    df = spark.read.option("header", True).csv(directory_path + "/*.csv")
+    return df
 
 
 #query per analisi dati
@@ -86,6 +92,134 @@ def calcola_puntualita(df):
     return status_percentage
 
 from pyspark.sql import functions as F
+
+import folium
+from streamlit.components.v1 import html
+
+
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut
+import time
+
+# Funzione per ottenere le coordinate con caching
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
+import time
+
+
+def get_airport_coords(iata, cache={}):
+    if iata in cache:
+        return cache[iata]
+
+    geolocator = Nominatim(user_agent="airport_mapper", timeout=100)  # Aumentato il timeout a 100 secondi
+
+    try:
+        location = geolocator.geocode(f"{iata} airport")
+        if location:
+            coords = {"lat": location.latitude, "lon": location.longitude}
+            cache[iata] = coords
+            return coords
+        else:
+            cache[iata] = None
+            return None
+    except (GeocoderTimedOut, GeocoderUnavailable) as e:
+        print(f"Errore nel recupero delle coordinate per {iata}: {e}")
+        time.sleep(2)  # Attende 2 secondi prima di riprovare
+        try:
+            location = geolocator.geocode(f"{iata} airport")
+            if location:
+                coords = {"lat": location.latitude, "lon": location.longitude}
+                cache[iata] = coords
+                return coords
+        except Exception as e2:
+            print(f"Seconda eccezione per {iata}: {e2}")
+        cache[iata] = None
+        return None
+
+
+def display_routes_map(df):
+    import plotly.graph_objects as go
+    import pandas as pd
+    import streamlit as st
+    from pyspark.sql import functions as F
+
+    # Raggruppa per coppia di aeroporti e conta il numero di voli per rotta
+    routes_df = df.groupBy("Origin", "Dest").agg(F.count("*").alias("flights"))
+    routes_pd = routes_df.toPandas()
+
+    # Ottieni le coordinate per ogni aeroporto presente nel dataset (sia in origine che in destinazione)
+    # Creiamo un insieme di codici unici
+    aeroporti = set(routes_pd["Origin"]).union(set(routes_pd["Dest"]))
+    airport_coords = {}
+    st.write("Recupero coordinate degli aeroporti, attendere...")  # Messaggio per l'utente
+    for airport in aeroporti:
+        coords = get_airport_coords(airport)
+        if coords:
+            airport_coords[airport] = coords
+
+    # Filtra le rotte per cui esistono coordinate per entrambi gli aeroporti
+    routes_pd = routes_pd[
+        routes_pd["Origin"].isin(airport_coords.keys()) &
+        routes_pd["Dest"].isin(airport_coords.keys())
+    ]
+
+    # Crea la figura per la mappa
+    fig = go.Figure()
+
+    # Aggiungi una traccia per ogni rotta: disegna una linea tra origine e destinazione
+    for index, row in routes_pd.iterrows():
+        origin = row["Origin"]
+        dest = row["Dest"]
+        flights = row["flights"]
+
+        origin_coord = airport_coords[origin]
+        dest_coord = airport_coords[dest]
+#TODO modificare grandezza delle linee grafico
+        fig.add_trace(go.Scattergeo(
+            locationmode='USA-states',
+            lon=[origin_coord["lon"], dest_coord["lon"]],
+            lat=[origin_coord["lat"], dest_coord["lat"]],
+            mode='lines',
+            line=dict(width=max(flights/10, 1), color='blue'),
+            opacity=0.5,
+            hoverinfo='text',
+            text=f"{origin} → {dest}<br>Voli: {flights}"
+        ))
+
+    # Aggiungi i marker per ogni aeroporto con coordinate disponibili
+    for airport, coords in airport_coords.items():
+        fig.add_trace(go.Scattergeo(
+            locationmode='USA-states',
+            lon=[coords["lon"]],
+            lat=[coords["lat"]],
+            mode='markers',
+            marker=dict(size=8, color='red'),
+            name=airport,
+            hoverinfo='text',
+            text=airport
+        ))
+
+    # Configura il layout della mappa
+    fig.update_layout(
+        title_text='Mappa delle Rotte Aeree',
+        showlegend=False,
+        geo=dict(
+            scope='world',
+            projection_type='equirectangular',
+            showland=True,
+            landcolor="rgb(217, 217, 217)",
+            subunitwidth=1,
+            countrywidth=1,
+            subunitcolor="rgb(255, 255, 255)",
+            countrycolor="rgb(255, 255, 255)"
+        )
+    )
+
+    # Visualizza la mappa in Streamlit
+    st.plotly_chart(fig)
+
+
+
 
 def elenco_aeroporti(df):
     # Estrai le informazioni sugli aeroporti (ad esempio, codici IATA e latitudine/longitudine)

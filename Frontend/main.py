@@ -3,8 +3,8 @@ from datetime import datetime
 import sys
 import os
 import plotly.express as px
-from pyspark import StorageLevel
-from pyspark.sql import Row
+from pyspark import StorageLevel, SparkConf, SparkContext
+from pyspark.sql import Row, SparkSession
 from pyspark.sql.functions import col
 from pyspark.sql import functions as F
 import plotly.graph_objects as go
@@ -18,13 +18,42 @@ os.environ["PYSPARK_PYTHON"] = "python"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
-from Backend.query import carica_dati, elenco_aeroporti_NY, statistiche_aeroporto, mappa_aeroporti, \
+from Backend.query import elenco_aeroporti_NY, statistiche_aeroporto, mappa_aeroporti, \
     disegna_collegamenti, calcola_kpi, elenco_tutti_aeroporti, aggregazione_voli_per_mese, aggregazione_voli_per_giorno, \
-    calcola_puntualita, aggiungi_rotte
+    calcola_puntualita, aggiungi_rotte, carica_dati_tutti, display_routes_map
 
-# Carica il dataset
-df = carica_dati("C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Dati/On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2013_1.csv")
-df = df.persist(StorageLevel.MEMORY_ONLY)
+file_paths = [
+    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_1_clean.csv",
+    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_2_clean.csv",
+    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_3_clean.csv",
+    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_4_clean.csv",
+    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_5_clean.csv",
+    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_6_clean.csv",
+    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_7_clean.csv",
+    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_8_clean.csv",
+    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_9_clean.csv",
+    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_10_clean.csv",
+    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_11_clean.csv",
+    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_12_clean.csv",
+
+]
+
+
+spark = SparkSession.builder \
+    .appName("MyApp") \
+    .config("spark.executor.memory", "24g") \
+    .config("spark.driver.memory", "24g") \
+    .getOrCreate()
+
+
+# Carica i file e uniscili
+df = None
+for file in file_paths:
+    temp_df = spark.read.csv(file, header=True, inferSchema=True)
+    df = temp_df if df is None else df.union(temp_df)
+
+# Persisti il DataFrame
+df.persist(StorageLevel.MEMORY_AND_DISK)
 
 # Interfaccia Streamlit
 def main():
@@ -202,43 +231,11 @@ def main():
                     # Mostra il grafico
                     st.plotly_chart(fig)
 
-
-            else:
-                # Se nessun aeroporto è selezionato, calcoliamo le statistiche medie per tutti gli aeroporti
-                st.subheader("Statistiche Medie di Tutti gli Aeroporti")
-
-                # Calcolare le statistiche di tutti gli aeroporti
-                stats_list = [statistiche_aeroporto(aeroporto, df) for aeroporto in aeroporti_list]
-
-                # Creazione del DataFrame PySpark per il confronto
-                rows = []
-                for stat in stats_list:
-                    rows.append(Row(Aeroporto=stat["Aeroporto"],
-                                    Totale_Voli=stat["Totale Voli"],
-                                    Ritardo_Medio_Partenza=stat["Ritardo Medio Partenza"],
-                                    Ritardo_Medio_Arrivo=stat["Ritardo Medio Arrivo"],
-                                    Voli_Cancellati=stat["Voli Cancellati"],
-                                    Voli_Dirottati=stat["Voli Dirottati"]))
-
-                stats_spark_df = df.sparkSession.createDataFrame(rows)
-
-                # Calcolare le statistiche medie per tutti gli aeroporti
-                media_stats = stats_spark_df.agg(
-                    {'Totale_Voli': 'avg', 'Ritardo_Medio_Partenza': 'avg', 'Ritardo_Medio_Arrivo': 'avg',
-                     'Voli_Cancellati': 'avg', 'Voli_Dirottati': 'avg'}).collect()[0]
-
-                st.write(media_stats)
-
-                # Visualizzazione grafica con Plotly
-                fig = px.bar(
-                    x=['Totale_Voli', 'Ritardo_Medio_Partenza', 'Ritardo_Medio_Arrivo', 'Voli_Cancellati',
-                       'Voli_Dirottati'],
-                    y=[media_stats['avg(Totale_Voli)'], media_stats['avg(Ritardo_Medio_Partenza)'],
-                       media_stats['avg(Ritardo_Medio_Arrivo)'], media_stats['avg(Voli_Cancellati)'],
-                       media_stats['avg(Voli_Dirottati)']],
-                    title="Statistiche Medie di Tutti gli Aeroporti"
-                )
-                st.plotly_chart(fig)
+        with st.container(border=True):
+            st.title("Tratte aeree")
+            st.write("Visualizzazione della mappa delle tratte aeree estratte dal dataset.")
+            # Richiama la funzione per visualizzare la mappa, usando i dati dal DataFrame Spark
+            display_routes_map(df)
 
 
     with scelta[1]:
