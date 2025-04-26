@@ -1,26 +1,24 @@
 import streamlit as st
-from datetime import datetime
+from streamlit_option_menu import option_menu
+
 import sys
 import os
 import plotly.express as px
-from pyspark import StorageLevel, SparkConf, SparkContext
+from pyspark import StorageLevel
 from pyspark.sql import Row, SparkSession
-from pyspark.sql.functions import col
-from pyspark.sql import functions as F
 import plotly.graph_objects as go
-
 import pandas as pd
-from streamlit_plotly_events import plotly_events
-
+import altair as alt
+import pyspark.sql.functions as F
+from pyspark.sql.types import FloatType
 os.environ["PYSPARK_PYTHON"] = "python"
-
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from Backend.query import statistiche_aeroporto, \
+    calcola_kpi, elenco_tutti_aeroporti, aggregazione_voli_per_mese, \
+    calcola_puntualita, display_routes_map, analisi_completa_ritardi, indicatori_di_performance, mappa_rotte, \
+    get_lat_lon
 
-from Backend.query import elenco_aeroporti_NY, statistiche_aeroporto, mappa_aeroporti, \
-    disegna_collegamenti, calcola_kpi, elenco_tutti_aeroporti, aggregazione_voli_per_mese, aggregazione_voli_per_giorno, \
-    calcola_puntualita, aggiungi_rotte, carica_dati_tutti, display_routes_map
 
 file_paths = [
     "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_1_clean.csv",
@@ -37,131 +35,118 @@ file_paths = [
     "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_12_clean.csv",
 
 ]
+aeroporti_info = pd.read_csv("C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/distutils/usa-airports.csv")
+
+def get_spark_session(app_name="ProgettoVoli"):
+    return (
+        SparkSession.builder
+        .appName(app_name)
+        .master("local[*]")
+        .config("spark.driver.memory", "16g")
+        .config("spark.sql.shuffle.partitions", "8")
+        .getOrCreate()
+    )
+
+spark = get_spark_session()
 
 
-spark = SparkSession.builder \
-    .appName("MyApp") \
-    .config("spark.executor.memory", "24g") \
-    .config("spark.driver.memory", "24g") \
-    .getOrCreate()
-
-
-# Carica i file e uniscili
 df = None
 for file in file_paths:
     temp_df = spark.read.csv(file, header=True, inferSchema=True)
     df = temp_df if df is None else df.union(temp_df)
-
-# Persisti il DataFrame
 df.persist(StorageLevel.MEMORY_AND_DISK)
 
-# Interfaccia Streamlit
+
 def main():
-    # Layout principale
     st.set_page_config(page_title="Analisi Voli", layout="wide")
 
-    #st.title("Dashboard Analisi Voli")
+    # Definizione del menu orizzontale full-width
+    menu_items = [
+        "Home",
+        "Ritardi e puntualità",
+        "Cancellazioni e deviazioni",
+        "Tratte aeree",
+        "Condizioni operative",
+        "Informazioni tecniche"
+    ]
+    menu_icons = ["house", "clock-history", "x-circle", "airplane", "cloud-sun", "gear"]
+    scelta = option_menu(
+        menu_title=None,
+        options=menu_items,
+        icons=menu_icons,
+        default_index=0,
+        orientation="horizontal",
+        styles={
+            "container": {"padding": "0px", "background-color": "#f0f2f6"},
+            "nav-link": {
+                "font-size": "16px",
+                "text-align": "center",
+                "margin": "0px",
+                "padding": "10px 0px",
+                "flex": "1"
+            },
+            "nav-link-selected": {
+                "background-color": "#0275d8",
+                "color": "white",
+                "font-weight": "bold"
+            }
+        }
+    )
 
-    menu = ["Home", "Ritardi e puntualità", "Cancellazioni e deviazioni", "Tratte aeree", "Condizioni operative", "Informazioni tecniche"]
-    scelta = st.tabs( menu)
-
-    with scelta[0]:
+    if scelta == "Home":
         st.title("Dashboard Analisi Voli")
         st.write("Statistiche generali dei dati")
 
         with st.container(border=True):
             kpi = calcola_kpi(df)
             st.subheader("Indicatori chiave")
-            col1, col2, col3, col4, col5, col6 = st.columns(6)
+            col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
             col1.metric("Totale Voli", kpi["totale_voli"])
             col2.metric("Voli Cancellati", kpi["voli_cancellati"])
             col3.metric("Voli Deviati", kpi["voli_deviati"])
             col4.metric("Ritardo Medio Partenza", f"{kpi['ritardo_medio_partenza']:.2f} min")
             col5.metric("Ritardo Medio Arrivo", f"{kpi['ritardo_medio_arrivo']:.2f} min")
             col6.metric("Distanza Media", f"{kpi['distanza_media']:.2f} miglia")
+            col7.metric("Percentuale voli cancellati", f"{kpi['percentuale_cancellati']:.2f} %")
 
-
-        #with st.container(border=True):
-            #fig = mappa_aeroporti(df)
-
-            # Aggiungi le rotte principali sulla mappa
-            #fig = aggiungi_rotte(df, fig)
-
-            # Mostra la mappa in Streamlit
-           # st.plotly_chart(fig)
 
         with st.container(border=True):
-            # Crea due colonne
             col1, col2 = st.columns(2)  # 2 colonne affiancate
-            # Aggiungi bordi alle colonne utilizzando il CSS
-
             with col1:
                 st.subheader("Andamento dei Voli per Mese")
-                # Esegui l'aggregazione dei voli per mese
                 agg_df = aggregazione_voli_per_mese(df)
-                # Converte il DataFrame PySpark in Pandas
                 agg_df_pandas = agg_df.toPandas()
-                # Crea il grafico a barre con Plotly
                 fig = go.Figure()
-                # Aggiungi una traccia per il grafico a barre
                 fig.add_trace(go.Bar(
-                    x=agg_df_pandas['Month'],  # Mesi sull'asse X
-                    y=agg_df_pandas['NumeroVoli'],  # Numero di voli sull'asse Y
-                    name='Numero di voli per mese',  # Nome della traccia
-                    marker=dict(color='blue')  # Colore delle barre
+                    x=agg_df_pandas['Month'],
+                    y=agg_df_pandas['NumeroVoli'],
+                    name='Numero di voli per mese',
+                    marker=dict(color='lightblue')
                 ))
-                # Aggiungi titolo e etichette agli assi
                 fig.update_layout(
                     title='Numero di voli per mese',
                     xaxis_title='Mese',
                     yaxis_title='Numero di voli',
-                    template='plotly_dark',  # Tema oscuro per il grafico
-                    showlegend=False  # Nascondi la legenda
+                    template='plotly_dark',
+                    showlegend=False
                 )
-                # Visualizza il grafico interattivo
                 st.plotly_chart(fig)
 
             with col2:
                 st.subheader("Puntualità vs. Ritardi dei Voli")
-                # Calcola la puntualità
                 puntualita_df = calcola_puntualita(df)
-
-                # Converti il DataFrame PySpark in Pandas per la visualizzazione
                 puntualita_pd = puntualita_df.toPandas()
-
-                # Crea il grafico a torta (donut) con Plotly
                 fig = go.Figure(data=[go.Pie(
                     labels=puntualita_pd["Status"],
                     values=puntualita_pd["Percentage"],
-                    hole=0.3,  # Crea un grafico a donut
+                    hole=0.3,
                     marker=dict(colors=["#00cc96", "#f44336", "#ff9800"])  # Colori personalizzati
                 )])
-
-                # Aggiungi titolo al grafico
                 fig.update_layout(
                     title="Puntualità vs. Ritardi dei Voli",
                     showlegend=True
                 )
-
-                # Visualizza il grafico a torta (donut) in Streamlit
                 st.plotly_chart(fig)
-
-        #with st.container(border=True):
-         #   st.subheader("Mappa Collegamenti Aeroporti")
-          #  fig, airports_locations = mappa_aeroporti(df)
-
-           # aeroporto_selezionato = st.selectbox("Seleziona un aeroporto", [loc[0] for loc in airports_locations])
-
-            # Mostra i collegamenti se un aeroporto è selezionato
-            #if aeroporto_selezionato:
-             #   linee_collegamenti = disegna_collegamenti(aeroporto_selezionato, df, airports_locations)
-
-              #  if linee_collegamenti:
-               #     for line in linee_collegamenti:
-                #        fig.add_trace(line)
-                 #   st.plotly_chart(fig)
-               # else:
-                #    st.write(f"Nessun collegamento trovato per l'aeroporto {aeroporto_selezionato}.")
 
         with st.container(border=True):
             st.subheader("Seleziona Aeroporto/i")
@@ -232,34 +217,39 @@ def main():
                     st.plotly_chart(fig)
 
         with st.container(border=True):
+
+            fig = mappa_rotte(df, aeroporti_info)
+            st.plotly_chart(fig)
+
+        with st.container(border=True):
             st.title("Tratte aeree")
             st.write("Visualizzazione della mappa delle tratte aeree estratte dal dataset.")
             # Richiama la funzione per visualizzare la mappa, usando i dati dal DataFrame Spark
-            display_routes_map(df)
+            #display_routes_map(df)
 
 
-    with scelta[1]:
+    elif scelta == "Ritardi e puntualità":
         st.title("Ritardi")
         st.write("Analisi dei ritardi e della puntualità dei voli.")
         # Aggiungi codice per questa sezione
 
 
-    with scelta[1]:
+    elif scelta == "Cancellazioni e deviazioni":
         st.title("Cancellazioni e deviazioni")
         st.write("Statistiche sulla cancellazione e deviazione.")
         # Aggiungi codice per questa sezione
 
-    with scelta[2]:
+    elif scelta == "Tratte aeree":
         st.title("Tratte aeree")
         st.write("Informazioni sulle tratte aeree.")
         # Aggiungi codice per questa sezione
 
-    with scelta[3]:
+    elif scelta == "Condizioni operative":
         st.title("Condizioni operative")
         st.write("Dati su meteo e congestioni.")
         # Aggiungi codice per questa sezione
 
-    with scelta[4]:
+    elif scelta == "Informazioni tecniche":
         st.title("Informazioni tecniche")
         st.write("Inserire informazioni tecniche sui dati, come tipo di dataset, numero di righe, numero di colonne, etc.."
                  ""

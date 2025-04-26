@@ -23,13 +23,121 @@ def carica_dati_tutti(directory_path):
 
 from pyspark.sql.functions import col, avg, count
 
+def mappa_rotte(df, aeroporti_dict):
+    fig = go.Figure()
+
+    for _, row in df.iterrows():
+        # Estrai le coordinate degli aeroporti di origine e destinazione
+        lat_origin, lon_origin = aeroporti_dict.get(row['Origin'], (None, None))
+        lat_dest, lon_dest = aeroporti_dict.get(row['Dest'], (None, None))
+
+        # Verifica se le coordinate sono valide
+        if lat_origin and lon_origin and lat_dest and lon_dest:
+            fig.add_trace(go.Scattergeo(
+                locationmode='ISO-3',
+                locations=[row['Origin'], row['Dest']],
+                line=dict(
+                    width=2,
+                    color='rgba(0, 0, 255, 0.5)'  # Colore blu con trasparenza
+                ),
+                opacity=0.7
+            ))
+
+    fig.update_layout(
+        geo=dict(
+            scope='world',
+            projection_type='mercator',
+            showland=True,
+            landcolor='rgb(255, 255, 255)',
+            countrycolor='rgb(204, 204, 204)'
+        ),
+        title="Mappa delle Rotte Aeree"
+    )
+
+    return fig
+
+def get_lat_lon(iata_code, aeroporti_dict):
+    return aeroporti_dict.get(iata_code, (None, None))
+
+def mappa_rotteNO(df, aeroporti_info):
+    """
+    Funzione per generare una mappa interattiva delle rotte aeree.
+
+    :param df: DataFrame contenente i voli, con le colonne 'Origin' e 'Dest'.
+    :param aeroporti_info: DataFrame contenente le informazioni sugli aeroporti (inclusi latitudine e longitudine).
+    :return: grafico Plotly con la mappa interattiva delle rotte.
+    """
+    # Creiamo un dizionario per ottenere latitudine e longitudine per ogni aeroporto
+    aeroporti_dict = aeroporti_info.set_index('iata')[['latitude', 'longitude']].to_dict('index')
+
+    # Creiamo una lista per memorizzare le rotte
+    rotte = []
+
+    # Calcoliamo la frequenza dei voli tra ogni coppia di aeroporti (origine e destinazione)
+    rotte_frequenza = df.groupBy('Origin', 'Dest').count().toPandas()
+
+    for index, row in rotte_frequenza.iterrows():
+        origine = row['Origin']
+        destinazione = row['Dest']
+        frequenza = row['count']
+
+        # Otteniamo latitudine e longitudine per origine e destinazione
+        lat_origine, lon_origine = aeroporti_dict.get(origine, (None, None))
+        lat_destinazione, lon_destinazione = aeroporti_dict.get(destinazione, (None, None))
+
+        if lat_origine is not None and lat_destinazione is not None:
+            rotte.append({
+                'origine': origine,
+                'destinazione': destinazione,
+                'frequenza': frequenza,
+                'lat_origine': lat_origine,
+                'lon_origine': lon_origine,
+                'lat_destinazione': lat_destinazione,
+                'lon_destinazione': lon_destinazione
+            })
+
+    # Creiamo la mappa con Plotly
+    fig = go.Figure()
+
+    for rotta in rotte:
+        fig.add_trace(go.Scattergeo(
+            locationmode='USA-states',
+            lon=[rotta['lon_origine'], rotta['lon_destinazione']],
+            lat=[rotta['lat_origine'], rotta['lat_destinazione']],
+            mode='lines',
+            line=dict(width=rotta['frequenza'] / 10, color='blue', opacity=0.5),
+            hoverinfo='text',
+            text=f"Rotta: {rotta['origine']} -> {rotta['destinazione']}<br>Frequenza: {rotta['frequenza']}"
+        ))
+
+    # Aggiungiamo le informazioni della mappa
+    fig.update_layout(
+        title="Mappa Interattiva delle Rotte Aeree",
+        geo=dict(
+            scope='world',
+            showland=True,
+            landcolor='white',
+            showlakes=True,
+            lakecolor='rgb(255, 255, 255)',
+            projection_type='mercator'
+        ),
+        showlegend=False
+    )
+
+    return fig
+
+
 def statistiche_aeroporto(aeroporto,df=None):
     query = df.filter((col("Origin") == aeroporto) | (col("Dest") == aeroporto))
 
     totale_voli = query.count()
     # Media dei ritardi in partenza e in arrivo
-    ritardo_medio_partenza = query.agg(avg(col("DepDelayMinutes"))).collect()[0][0]
-    ritardo_medio_arrivo = query.agg(avg(col("ArrDelayMinutes"))).collect()[0][0]
+    res = query.agg(
+        avg("DepDelayMinutes").alias("ritardo_partenza"),
+        avg("ArrDelayMinutes").alias("ritardo_arrivo")
+    ).collect()[0]
+    ritardo_medio_partenza = res["ritardo_partenza"]
+    ritardo_medio_arrivo = res["ritardo_arrivo"]
     # Numero di voli cancellati
     voli_cancellati = query.filter(col("Cancelled") == 1).count()
     # Numero di voli dirottati
@@ -44,6 +152,41 @@ def statistiche_aeroporto(aeroporto,df=None):
         "Voli Dirottati": voli_dirottati
     }
     return statistiche
+
+def statistiche_aeroportoNO(df, codice_aeroporto):
+    query = df.filter(
+        (col("Origin") == codice_aeroporto) | (col("Dest") == codice_aeroporto)
+    )
+
+    # Raggruppo tutte le metriche in una singola azione
+    result = query.agg(
+        avg("DepDelayMinutes").alias("ritardo_partenza"),
+        avg("ArrDelayMinutes").alias("ritardo_arrivo"),
+        count("*").alias("totale_voli")
+    ).collect()[0]
+
+    return (
+        round(result["ritardo_partenza"], 2) if result["ritardo_partenza"] else 0,
+        round(result["ritardo_arrivo"], 2) if result["ritardo_arrivo"] else 0,
+        result["totale_voli"]
+    )
+
+
+def calcola_kpiNO(df, codice_aeroporto):
+    query = df.filter((col("Origin") == codice_aeroporto) | (col("Dest") == codice_aeroporto))
+
+    stats = query.agg(
+        count("*").alias("num_voli"),
+        avg("DepDelayMinutes").alias("ritardo_medio_partenza"),
+        avg("ArrDelayMinutes").alias("ritardo_medio_arrivo")
+    ).collect()[0]
+
+    return {
+        "numero_voli": stats["num_voli"],
+        "ritardo_medio_partenza": round(stats["ritardo_medio_partenza"], 2) if stats["ritardo_medio_partenza"] else 0,
+        "ritardo_medio_arrivo": round(stats["ritardo_medio_arrivo"], 2) if stats["ritardo_medio_arrivo"] else 0
+    }
+
 
 def elenco_aeroporti_NY(df=None):
     aeroporti = df.select("Origin").distinct().orderBy("Origin")
@@ -308,7 +451,15 @@ from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
 
 
-def coordinate_aeroporto(aeroporto):
+def coordinate_aeroporto(codice_aeroporto, coords_dict):
+    return coords_dict.get(codice_aeroporto, (None, None))
+
+def estrai_coordinate_aeroporti(df):
+    coords_df = df.select("Origin", "OriginLat", "OriginLon").distinct()
+    return {row["Origin"]: (row["OriginLat"], row["OriginLon"]) for row in coords_df.collect()}
+
+
+def coordinate_aeroportoNO(aeroporto):
     geolocator = Nominatim(user_agent="airport_locator")
 
     try:
@@ -374,17 +525,18 @@ def disegna_collegamenti(aeroporto_selezionato, df, airports_locations):
 
     return linee
 
+
 def calcola_kpi(df):
     # Totale voli
     totale_voli = df.count()
 
-    # Voli cancellati: si assume che il campo "Cancelled" contenga 1 per i voli cancellati
+    # Voli cancellati
     voli_cancellati = df.filter(col("Cancelled") == 1).count()
 
-    # Voli deviati: si assume che il campo "Diverted" contenga 1 per i voli deviati
+    # Voli deviati
     voli_deviati = df.filter(col("Diverted") == 1).count()
 
-    # Ritardo medio partenza (considera solo i voli dove DepDelay è valorizzato)
+    # Ritardo medio partenza
     ritardo_medio_partenza = df.filter(col("DepDelay").isNotNull()) \
         .agg(avg("DepDelay").alias("avgDepDelay")).collect()[0]["avgDepDelay"]
 
@@ -392,9 +544,12 @@ def calcola_kpi(df):
     ritardo_medio_arrivo = df.filter(col("ArrDelay").isNotNull()) \
         .agg(avg("ArrDelay").alias("avgArrDelay")).collect()[0]["avgArrDelay"]
 
-    # Distanza media percorsa
+    # Distanza media
     distanza_media = df.filter(col("Distance").isNotNull()) \
         .agg(avg("Distance").alias("avgDistance")).collect()[0]["avgDistance"]
+
+    # Percentuale voli cancellati
+    percentuale_cancellati = (voli_cancellati / totale_voli) * 100
 
     return {
         "totale_voli": totale_voli,
@@ -402,342 +557,301 @@ def calcola_kpi(df):
         "voli_deviati": voli_deviati,
         "ritardo_medio_partenza": ritardo_medio_partenza,
         "ritardo_medio_arrivo": ritardo_medio_arrivo,
-        "distanza_media": distanza_media
+        "distanza_media": distanza_media,
+        "percentuale_cancellati": percentuale_cancellati,
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def tratte_con_maggiori_ritardi(dataInizio =None, dataFine=None, df=None):
-    query = df.filter(col("ArrDelayMinutes").isNotNull())
-    if dataInizio and dataFine:
-        query = query.filter((col("FlightDate") >= dataInizio) & (col("FlightDate") <= dataFine))
-    tratte = query.groupBy("Origin", "Dest").agg(
-        sum("DepDelayMinutes").alias("MinutiRitardoPartenza"),
-        sum("ArrDelayMinutes").alias("MinutiRitardoArrivo")
-    ).withColumn(
-        "TotaleMinutiRitardo", col("MinutiRitardoPartenza") + col("MinutiRitardoArrivo")
-    ).select("Origin", "Dest", "TotaleMinutiRitardo").orderBy(desc("TotaleMinutiRitardo")).limit(10)
-    return tratte
-
-def voli_10_piu_puntuali(dataInizio=None, dataFine=None, df =None):
-    query = df.filter((col("ArrDelayMinutes") == 0) & (col("DepDelayMinutes") == 0))
-    if dataInizio and dataFine:
-        query = query.filter((col("FlightDate") >= dataInizio) & (col("FlightDate") <= dataFine))
-    puntuali = query.groupBy("Flights").count().orderBy(col("count").desc()).limit(10)
-    return puntuali
-
-def aereo_piu_frequentemente_utilizzato(dataInizio=None, dataFine=None, df=None):
-    query = df.filter(col("Tail_Number").isNotNull())
-    if dataInizio and dataFine:
-        query = query.filter((col("FlightDate") >= dataFine) & (col("FlightDate") <= dataFine))
-    aereo = query.groupBy("Tail_Number").count().orderBy(col("count").desc()).limit(1)
-    return aereo
-
-def tratte_piu_frequenti(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Origin").isNotNull() & col("Dest").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    tratte = query.groupBy("Origin", "Dest").count().orderBy(desc("count")).limit(10)
-    return tratte
-
-def ritardi_per_giorno_settimana(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("DayOfWeek").isNotNull() & col("ArrDelayMinutes").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    ritardi = query.groupBy("DayOfWeek").agg(
-        sum("ArrDelayMinutes").alias("TotaleRitardoArrivo")
-    ).orderBy("DayOfWeek")
-    return ritardi
-
-
-def cancellazioni_per_giorno_settimana(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Cancelled") == 1)
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    cancellazioni = query.groupBy("DayOfWeek").count().orderBy("DayOfWeek")
-    return cancellazioni
-
-
-def ritardo_medio_per_compagnia(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Reporting_Airline").isNotNull() & col("ArrDelayMinutes").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    compagnia = query.groupBy("Reporting_Airline").agg(
-        avg("ArrDelayMinutes").alias("RitardoMedioArrivo")
-    ).orderBy(desc("RitardoMedioArrivo"))
-    return compagnia
-
-def compagnia_meno_cancellazioni(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Cancelled") == 1)
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    compagnia = query.groupBy("Reporting_Airline").count().orderBy("count").limit(1)
-    return compagnia
-
-def ritardo_medio_partenza_per_aeroporto(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Origin").isNotNull() & col("DepDelayMinutes").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    aeroporti = query.groupBy("Origin").agg(
-        avg("DepDelayMinutes").alias("RitardoMedioPartenza")
-    ).orderBy(desc("RitardoMedioPartenza"))
-    return aeroporti
-
-def voli_con_ritardi_superiori_a_30min(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("ArrDelayMinutes") > 30)
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    voli = query.select("FlightNumber", "Origin", "Dest", "ArrDelayMinutes").orderBy(desc("ArrDelayMinutes"))
-    return voli
-
-
-def aerei_piu_frequenti_da_aeroporto(aeroporto, data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Origin") == aeroporto)
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    aerei = query.groupBy("Tail_Number").count().orderBy(desc("count"))
-    return aerei
-
-
-def aerei_piu_frequenti_verso_aeroporto(aeroporto, data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Dest") == aeroporto)
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    aerei = query.groupBy("Tail_Number").count().orderBy(desc("count"))
-    return aerei
-
-
-def aeroporti_con_maggiori_ritardi_totali(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Origin").isNotNull() & col("ArrDelayMinutes").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    aeroporti = query.groupBy("Origin").agg(
-        sum("ArrDelayMinutes").alias("TotaleRitardoArrivo")
-    ).orderBy(desc("TotaleRitardoArrivo")).limit(10)
-    return aeroporti
-
-
-def tratte_piu_brevi(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Distance").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    tratte = query.groupBy("Origin", "Dest").agg(
-        sum("Distance").alias("TotaleDistanza")
-    ).orderBy("TotaleDistanza").limit(10)
-    return tratte
-
-def tratte_piu_lunghe(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Distance").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    tratte = query.groupBy("Origin", "Dest").agg(
-        sum("Distance").alias("TotaleDistanza")
-    ).orderBy(desc("TotaleDistanza")).limit(10)
-    return tratte
-
-def aeroporti_con_tempi_arrivo_piu_lunghi(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Origin").isNotNull() & col("ArrDelayMinutes").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    aeroporti = query.groupBy("Origin").agg(
-        avg("ArrDelayMinutes").alias("RitardoMedioArrivo")
-    ).orderBy(desc("RitardoMedioArrivo"))
-    return aeroporti
-
-def compagnie_piu_puntuali(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Reporting_Airline").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    compagnia = query.groupBy("Reporting_Airline").agg(
-        avg("ArrDelayMinutes").alias("RitardoMedioArrivo")
-    ).orderBy(desc("RitardoMedioArrivo"))
-    return compagnia
-
-def aerei_con_i_tempi_di_volo_piu_lunghi(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Tail_Number").isNotNull() & col("AirTime").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    aerei = query.groupBy("Tail_Number").agg(
-        sum("AirTime").alias("TotaleTempoVolo")
-    ).orderBy(desc("TotaleTempoVolo")).limit(10)
-    return aerei
-
-def giorni_con_piu_cancellazioni(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Cancelled") == 1)
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    giorni = query.groupBy("FlightDate").count().orderBy(desc("count")).limit(10)
-    return giorni
-
-def voli_breve_durata(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("AirTime").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    durata_media = query.agg(avg("AirTime").alias("DurataMedia")).collect()[0]["DurataMedia"]
-    voli = query.filter(col("AirTime") < durata_media).select("FlightNumber", "AirTime").orderBy("AirTime")
-    return voli
-
-def ritardo_medio_per_stato(arrivo=None, data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("DestStateName").isNotNull() & col("ArrDelayMinutes").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    stati = query.groupBy("DestStateName").agg(
-        avg("ArrDelayMinutes").alias("RitardoMedioArrivo")
-    ).orderBy("RitardoMedioArrivo")
-    return stati
-
-def aeroporti_con_aerei_disponibili(data_inizio=None, data_fine=None, df=None):
-    if data_inizio and data_fine:
-        query = df.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine)).select("Tail_Number", "Origin").distinct()
-    query = df.select("Tail_Number", "Origin").distinct().filter(col("Tail_Number").isNotNull())
-    return query
-
-
-def durata_media_per_compagnia(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Reporting_Airline").isNotNull() & col("AirTime").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    compagnia = query.groupBy("Reporting_Airline").agg(
-        avg("AirTime").alias("DurataMediaVolo")
-    ).orderBy("DurataMediaVolo")
-    return compagnia
-
-
-def tempo_medio_per_aeroporto(data_inizio=None, data_fine=None, df=None):
-    query = df.filter(col("Origin").isNotNull() & col("AirTime").isNotNull())
-    if data_inizio and data_fine:
-        query = query.filter((col("FlightDate") >= data_inizio) & (col("FlightDate") <= data_fine))
-    aeroporti = query.groupBy("Origin").agg(
-        avg("AirTime").alias("DurataMediaVolo")
-    ).orderBy("DurataMediaVolo")
-    return aeroporti
-
-def voli_per_mese(df=None):
-    query = df.groupBy("Month").count().orderBy("Month")
-    return query
-
-def aeroporti_con_maggiori_ritardi_arrivo(df=None):
-    query = df.filter(col("ArrDelayMinutes").isNotNull())
-    aeroporti = query.groupBy("Origin").agg(
-        avg("ArrDelayMinutes").alias("RitardoMedioArrivo")
-    ).orderBy(desc("RitardoMedioArrivo"))
-    return aeroporti
-
-def voli_per_compagnia_aerea(df=None):
-    query = df.groupBy("Reporting_Airline").count().orderBy(desc("count"))
-    return query
-
-def voli_cancellati_per_compagnia_aerea(df=None):
-    query = df.filter(col("Cancelled") == 1)
-    compagnie = query.groupBy("Reporting_Airline").count().orderBy(desc("count"))
-    return compagnie
-
-def voli_medi_per_mese(df=None):
-    query = df.groupBy("Month").agg(count("FlightNumber").alias("NumeroVoli")).orderBy("Month")
-    return query
-
-def voli_con_ritardo_arrivo_grande(df=None):
-    query = df.filter(col("ArrDel15") == 1)
-    voli = query.groupBy("FlightNumber", "ArrDelayMinutes").count().orderBy(desc("ArrDelayMinutes"))
-    return voli
-
-def voli_con_maggiori_cancellazioni_per_compagnia(df=None):
-    query = df.filter(col("Cancelled") == 1)
-    cancellazioni = query.groupBy("Reporting_Airline").count().orderBy(desc("count"))
-    return cancellazioni
-
-def distanza_media_per_aeroporto(df=None):
-    query = df.filter(col("Distance").isNotNull())
-    distanze = query.groupBy("Origin", "Dest").agg(
-        avg("Distance").alias("DistanzaMedia")
-    ).orderBy("DistanzaMedia")
-    return distanze
-
-
-def aeroporti_con_maggiore_distanza_media(df=None):
-    query = df.filter(col("Distance").isNotNull())
-    aeroporti = query.groupBy("Origin").agg(
-        avg("Distance").alias("DistanzaMediaVolo")
-    ).orderBy(desc("DistanzaMediaVolo"))
-    return aeroporti
-
-def ritardi_per_ora(df=None):
-    query = df.filter(col("DepDelayMinutes").isNotNull())
-    query = query.withColumn("OraVolo", hour(col("DepTime")))
-    ritardi = query.groupBy("OraVolo").agg(
-        avg("DepDelayMinutes").alias("RitardoMedio")
-    ).orderBy("OraVolo")
-    return ritardi
-
-def voli_per_stato_destinazione(df=None):
-    query = df.groupBy("DestState").count().orderBy("DestState")
-    return query
-
-def voli_per_aeroporto_partenza(df=None):
-    query = df.groupBy("Origin").count().orderBy(desc("count"))
-    return query
-
-
-def ritardo_medio_arrivo_destinazione(df=None):
-    query = df.filter(col("ArrDelayMinutes").isNotNull())
-    aeroporti = query.groupBy("Dest").agg(
-        avg("ArrDelayMinutes").alias("RitardoMedioArrivo")
-    ).orderBy(desc("RitardoMedioArrivo"))
-    return aeroporti
-
-def compagnie_aeree_con_maggiori_ritardi(df=None):
-    query = df.filter(col("DepDelayMinutes").isNotNull())
-    compagnie = query.groupBy("Reporting_Airline").agg(
-        avg("DepDelayMinutes").alias("RitardoMedioPartenza")
-    ).orderBy(desc("RitardoMedioPartenza"))
-    return compagnie
-def aeroporti_con_maggiori_ritardi_partenza(df=None):
-    query = df.filter(col("DepDelayMinutes").isNotNull())
-    aeroporti = query.groupBy("Origin").agg(
-        avg("DepDelayMinutes").alias("RitardoMedioPartenza")
-    ).orderBy(desc("RitardoMedioPartenza"))
-    return aeroporti
-
-def compagnie_con_ritardi_grandi(df=None):
-    query = df.filter(col("DepDelayMinutes") > 30)
-    compagnie = query.groupBy("Reporting_Airline").count().orderBy(desc("count"))
-    return compagnie
-
-
-def durata_totale_voli_per_compagnia(df=None):
-    query = df.filter(col("AirTime").isNotNull())
-    durata = query.groupBy("Reporting_Airline").agg(
-        sum("AirTime").alias("DurataTotaleVoli")
-    ).orderBy(desc("DurataTotaleVoli"))
-    return durata
-
-def voli_in_ritardo_per_causa(df=None):
-    query = df.filter(col("DepDelayMinutes").isNotNull())
-    cause = query.groupBy("CarrierDelay", "WeatherDelay", "NASDelay", "SecurityDelay", "LateAircraftDelay").count().orderBy(desc("count"))
-    return cause
-
-def join_coordinate_aeroporti(df_aeroporti, df=None):
-    query = df.join(df_aeroporti, df["OriginAirportID"] == df_aeroporti["AirportID"], "left").select(
-        "Origin", "Latitude", "Longitude"
+from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+
+def indicatori_di_performance(df):
+    risultati = {}
+
+
+
+    # 2. Top 5 aeroporti più congestionati (ritardo medio in partenza)
+    congestionati = (df.groupBy("Origin", "OriginCityName")
+                       .agg(F.avg("DepDelayMinutes").alias("RitardoMedioPartenza"))
+                       .orderBy(F.desc("RitardoMedioPartenza"))
+                       .limit(5))
+    risultati["Top5_Aeroporti_Congestionati"] = congestionati
+
+    # 3. Top 5 rotte più frequenti
+    rotte_frequenti = (df.groupBy("Origin", "Dest")
+                         .count()
+                         .orderBy(F.desc("count"))
+                         .limit(5))
+    risultati["Top5_Rotte_Frequenti"] = rotte_frequenti
+
+    # 5. Compagnie aeree più puntuali (minor ritardo medio in arrivo)
+    compagnie_puntuali = (df.groupBy("Reporting_Airline", "IATA_CODE_Reporting_Airline")
+                            .agg(F.avg("ArrDelayMinutes").alias("RitardoMedioArrivo"))
+                            .orderBy("RitardoMedioArrivo")
+                            .filter(F.col("RitardoMedioArrivo").isNotNull())
+                            .limit(5))
+    risultati["Top5_Compagnie_Puntuali"] = compagnie_puntuali
+
+    # 6. Giorni della settimana con più ritardi
+    ritardi_giorno = (df.groupBy("DayOfWeek")
+                        .agg(F.avg("ArrDelayMinutes").alias("RitardoMedio"))
+                        .orderBy(F.desc("RitardoMedio")))
+    risultati["Ritardi_Per_GiornoDellaSettimana"] = ritardi_giorno
+
+    return risultati
+
+
+def analisi_completa_ritardi(df):
+    """
+    Funzione ottimizzata che calcola più metriche in una sola passata sui dati.
+    Riduce lo shuffling eseguendo più analisi insieme.
+    """
+    # Selezioniamo solo le colonne necessarie per tutte le analisi
+    cols_needed = ["Reporting_Airline", "Origin", "Dest", "DepDelay", "ArrDelay",
+                   "DepDel15", "ArrDel15", "Cancelled", "DayOfWeek", "Month"]
+
+    df_filtered = df.select(*cols_needed)
+    df_filtered.cache()  # Cache per riutilizzo
+
+    # Effettuiamo diverse aggregazioni in paralleo
+    airline_stats = df_filtered.groupBy("Reporting_Airline").agg(
+        F.count("*").alias("totale_voli"),
+        F.avg("DepDelay").alias("ritardo_medio_partenza"),
+        F.avg("ArrDelay").alias("ritardo_medio_arrivo"),
+        F.sum(F.when(F.col("DepDel15") == 1, 1).otherwise(0)).alias("voli_ritardo_partenza"),
+        F.sum(F.when(F.col("ArrDel15") == 1, 1).otherwise(0)).alias("voli_ritardo_arrivo")
     )
-    return query
 
-def compagnie_aeree_lungo_raggio(df=None):
-    query = df.filter(col("Distance") > 1000)
-    compagnie = query.groupBy("Reporting_Airline").count().orderBy(desc("count"))
-    return compagnie
+    origin_stats = df_filtered.groupBy("Origin").count().withColumnRenamed("count", "partenze")
+    dest_stats = df_filtered.groupBy("Dest").count().withColumnRenamed("count", "arrivi")
+
+    # Possiamo anche calcolare le statistiche giornaliere e mensili in una passata
+    time_stats = df_filtered.groupBy("DayOfWeek", "Month").agg(
+        F.count("*").alias("voli"),
+        F.avg("DepDelay").alias("ritardo_medio_partenza"),
+        F.avg("ArrDelay").alias("ritardo_medio_arrivo")
+    )
+
+    # Ritorniamo un dizionario con tutti i risultati
+    return {
+        "airline_stats": airline_stats,
+        "origin_stats": origin_stats.orderBy("partenze", ascending=False),
+        "dest_stats": dest_stats.orderBy("arrivi", ascending=False),
+        "time_stats": time_stats
+    }
+
+def calcola_ritardi_medi(df):
+    """
+    Calcola la percentuale media di ritardi per compagnia aerea in modo ottimizzato.
+    """
+    # Selezioniamo solo le colonne necessarie per ridurre il carico di lavoro
+    df_filtered = df.select("Reporting_Airline", "DepDel15", "ArrDel15", "DepDelay", "ArrDelay")
+
+    # Cache utile se questo DataFrame verrà riutilizzato in altre analisi
+    df_filtered.cache()
+
+    return df_filtered.groupBy("Reporting_Airline") \
+        .agg(
+        F.count("*").alias("totale_voli"),
+        F.sum(F.when(F.col("DepDel15") == 1, 1).otherwise(0)).alias("voli_ritardo_partenza"),
+        F.sum(F.when(F.col("ArrDel15") == 1, 1).otherwise(0)).alias("voli_ritardo_arrivo"),
+        F.round(F.avg(F.col("DepDelay")), 2).alias("ritardo_medio_partenza_minuti"),
+        F.round(F.avg(F.col("ArrDelay")), 2).alias("ritardo_medio_arrivo_minuti"),
+        F.round((F.sum(F.when(F.col("DepDel15") == 1, 1).otherwise(0)) / F.count("*")) * 100, 2)
+        .alias("percentuale_ritardi_partenza"),
+        F.round((F.sum(F.when(F.col("ArrDel15") == 1, 1).otherwise(0)) / F.count("*")) * 100, 2)
+        .alias("percentuale_ritardi_arrivo")
+    ) \
+        .orderBy("percentuale_ritardi_arrivo", ascending=False)
+
+
+def top_aeroporti_congestionati_partenze(df, n=5):
+    """
+    Identifica gli aeroporti più congestionati in base al numero di partenze, ottimizzato.
+    """
+    # Selezione anticipata delle sole colonne necessarie
+    return df.select("Origin", "OriginCityName", "OriginState") \
+        .groupBy("Origin", "OriginCityName", "OriginState") \
+        .count() \
+        .withColumnRenamed("count", "numero_partenze") \
+        .orderBy("numero_partenze", ascending=False) \
+        .limit(n)
+
+def top_aeroporti_congestionati_arrivi(df, n=5):
+    """
+    Identifica gli aeroporti più congestionati in base al numero di arrivi.
+    """
+    return df.select("Dest", "DestCityName", "DestState") \
+        .groupBy("Dest", "DestCityName", "DestState") \
+        .count() \
+        .withColumnRenamed("count", "numero_arrivi") \
+        .orderBy("numero_arrivi", ascending=False) \
+        .limit(n)
+
+
+def top_rotte_frequenti(df, n=5):
+    """
+    Identifica le rotte più frequenti.
+    """
+    return df.withColumn("Rotta", F.concat(F.col("Origin"), F.lit(" -> "), F.col("Dest"))) \
+        .withColumn("CittaRotta", F.concat(F.col("OriginCityName"), F.lit(" -> "), F.col("DestCityName"))) \
+        .groupBy("Rotta", "CittaRotta") \
+        .count() \
+        .withColumnRenamed("count", "numero_voli") \
+        .orderBy("numero_voli", ascending=False) \
+        .limit(n)
+
+
+def ritardi_per_giorno_settimana(df):
+    """
+    Analizza i ritardi medi per giorno della settimana.
+    """
+    return df.groupBy("DayOfWeek") \
+        .agg(
+        F.count("*").alias("numero_voli"),
+        F.round(F.avg(F.col("DepDelay")), 2).alias("ritardo_medio_partenza"),
+        F.round(F.avg(F.col("ArrDelay")), 2).alias("ritardo_medio_arrivo"),
+        F.round((F.sum(F.when(F.col("DepDel15") == 1, 1).otherwise(0)) / F.count("*")) * 100, 2)
+        .alias("percentuale_ritardi_partenza"),
+        F.round((F.sum(F.when(F.col("ArrDel15") == 1, 1).otherwise(0)) / F.count("*")) * 100, 2)
+        .alias("percentuale_ritardi_arrivo")
+    ) \
+        .orderBy("DayOfWeek")
+
+
+def ritardi_per_mese(df):
+    """
+    Analizza i ritardi medi per mese.
+    """
+    return df.groupBy("Month") \
+        .agg(
+        F.count("*").alias("numero_voli"),
+        F.round(F.avg(F.col("DepDelay")), 2).alias("ritardo_medio_partenza"),
+        F.round(F.avg(F.col("ArrDelay")), 2).alias("ritardo_medio_arrivo"),
+        F.round((F.sum(F.when(F.col("DepDel15") == 1, 1).otherwise(0)) / F.count("*")) * 100, 2)
+        .alias("percentuale_ritardi_partenza"),
+        F.round((F.sum(F.when(F.col("ArrDel15") == 1, 1).otherwise(0)) / F.count("*")) * 100, 2)
+        .alias("percentuale_ritardi_arrivo")
+    ) \
+        .orderBy("Month")
+
+
+def cause_ritardi(df):
+    """
+    Analizza le diverse cause dei ritardi.
+    """
+    return df.filter((F.col("CarrierDelay").isNotNull()) |
+                     (F.col("WeatherDelay").isNotNull()) |
+                     (F.col("NASDelay").isNotNull()) |
+                     (F.col("SecurityDelay").isNotNull()) |
+                     (F.col("LateAircraftDelay").isNotNull())) \
+        .agg(
+        F.sum("CarrierDelay").alias("totale_ritardo_compagnia"),
+        F.sum("WeatherDelay").alias("totale_ritardo_meteo"),
+        F.sum("NASDelay").alias("totale_ritardo_sistema"),
+        F.sum("SecurityDelay").alias("totale_ritardo_sicurezza"),
+        F.sum("LateAircraftDelay").alias("totale_ritardo_aeromobile")
+    )
+
+
+def percentuale_cause_ritardi(df):
+    """
+    Calcola la percentuale di ciascuna causa di ritardo sul totale, con ottimizzazioni.
+    """
+    # Selezione anticipata delle colonne necessarie e filtraggio
+    delay_cols = ["CarrierDelay", "WeatherDelay", "NASDelay", "SecurityDelay", "LateAircraftDelay"]
+
+    ritardi = df.select(*delay_cols) \
+        .filter(F.coalesce(*[F.col(c).isNotNull() for c in delay_cols]))
+
+    ritardi.cache()  # Caching utile dato che faremo più operazioni su questo DF
+
+    # Calcolo una sola volta i totali per ogni tipo di ritardo
+    totali = ritardi.agg(*[F.sum(col).alias(f"sum_{col}") for col in delay_cols])
+    totali.cache()
+
+    # Recupero il totale assoluto dei minuti di ritardo
+    totale_row = totali.select(sum([F.col(f"sum_{col}") for col in delay_cols]).alias("totale")).collect()
+    totale_minuti = totale_row[0]["totale"]
+
+    # Se non ci sono ritardi registrati, ritorniamo None
+    if totale_minuti is None or totale_minuti == 0:
+        return None
+
+    # Creiamo il DataFrame con le percentuali
+    result = totali.select(*[
+        F.round((F.col(f"sum_{col}") / totale_minuti) * 100, 2).alias(
+            f"percentuale_ritardo_{col.lower().replace('delay', '')}")
+        for col in delay_cols
+    ])
+
+    # Puliamo la cache quando abbiamo finito per liberare memoria
+    ritardi.unpersist()
+    totali.unpersist()
+
+    return result
+
+def performance_compagnie_aeree(df):
+    """
+    Analizza le performance delle compagnie aeree in termini di puntualità.
+    """
+    return df.groupBy("Reporting_Airline") \
+        .agg(
+        F.count("*").alias("totale_voli"),
+        F.sum(F.when(F.col("Cancelled") == 1, 1).otherwise(0)).alias("voli_cancellati"),
+        F.sum(F.when(F.col("Diverted") == 1, 1).otherwise(0)).alias("voli_deviati"),
+        F.round(F.avg(F.col("DepDelay")), 2).alias("ritardo_medio_partenza"),
+        F.round(F.avg(F.col("ArrDelay")), 2).alias("ritardo_medio_arrivo"),
+        F.round((F.sum(F.when(F.col("DepDel15") == 1, 1).otherwise(0)) / F.count("*")) * 100, 2)
+        .alias("percentuale_ritardi_partenza"),
+        F.round((F.sum(F.when(F.col("ArrDel15") == 1, 1).otherwise(0)) / F.count("*")) * 100, 2)
+        .alias("percentuale_ritardi_arrivo"),
+        F.round((F.sum(F.when(F.col("Cancelled") == 1, 1).otherwise(0)) / F.count("*")) * 100, 2)
+        .alias("percentuale_cancellazioni")
+    ) \
+        .orderBy("percentuale_ritardi_arrivo")
+
+
+def analisi_distanze_ritardi(df):
+    """
+    Analizza la relazione tra distanza del volo e ritardi.
+    """
+    return df.groupBy("DistanceGroup") \
+        .agg(
+        F.count("*").alias("numero_voli"),
+        F.round(F.avg("Distance"), 2).alias("distanza_media"),
+        F.round(F.avg(F.col("DepDelay")), 2).alias("ritardo_medio_partenza"),
+        F.round(F.avg(F.col("ArrDelay")), 2).alias("ritardo_medio_arrivo"),
+        F.round((F.sum(F.when(F.col("DepDel15") == 1, 1).otherwise(0)) / F.count("*")) * 100, 2)
+        .alias("percentuale_ritardi_partenza"),
+        F.round((F.sum(F.when(F.col("ArrDel15") == 1, 1).otherwise(0)) / F.count("*")) * 100, 2)
+        .alias("percentuale_ritardi_arrivo")
+    ) \
+        .orderBy("DistanceGroup")
+
+
+def orari_critici_ritardi(df):
+    """
+    Identifica le fasce orarie con più ritardi.
+    """
+    return df.groupBy("DepTimeBlk") \
+        .agg(
+        F.count("*").alias("numero_voli"),
+        F.round(F.avg(F.col("DepDelay")), 2).alias("ritardo_medio_partenza"),
+        F.round((F.sum(F.when(F.col("DepDel15") == 1, 1).otherwise(0)) / F.count("*")) * 100, 2)
+        .alias("percentuale_ritardi_partenza")
+    ) \
+        .orderBy("percentuale_ritardi_partenza", ascending=False)
+
+
+def statistiche_cancellazioni(df):
+    """
+    Analizza le cancellazioni dei voli.
+    """
+    return df.filter(F.col("Cancelled") == 1) \
+        .groupBy("CancellationCode") \
+        .count() \
+        .withColumn("percentuale",
+                    F.round(F.col("count") / F.sum("count").over(Window.partitionBy()) * 100, 2)) \
+        .orderBy("count", ascending=False)
+

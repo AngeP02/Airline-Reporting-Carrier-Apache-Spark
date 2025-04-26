@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
-# Configurazione ambiente (aggiorna i percorsi se necessario)
+# configurazione ambiente (aggiorna i percorsi se necessario)
 import os
 
 os.environ["HADOOP_HOME"] = "C:\\hadoop"

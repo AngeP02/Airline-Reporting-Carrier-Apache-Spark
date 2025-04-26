@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 import os
 
-# Configurazione ambiente
+# configurazione ambiente
 os.environ["HADOOP_HOME"] = "C:\\hadoop"
 os.environ["SPARK_HOME"] = "C:\\spark"
 
