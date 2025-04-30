@@ -8,18 +8,24 @@ from pyspark import StorageLevel
 from pyspark.sql import Row, SparkSession
 import plotly.graph_objects as go
 import pandas as pd
+import pydeck as pdk
+
 import altair as alt
 import pyspark.sql.functions as F
 from pyspark.sql.types import FloatType
+
+
+
 os.environ["PYSPARK_PYTHON"] = "python"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Backend.query import statistiche_aeroporto, \
     calcola_kpi, elenco_tutti_aeroporti, aggregazione_voli_per_mese, \
     calcola_puntualita, display_routes_map, analisi_completa_ritardi, indicatori_di_performance, mappa_rotte, \
-    get_lat_lon
-
-
+    get_lat_lon, elenco_tutte_compagnie, statistiche_compagnia_aerea, calcola_voli_per_giorno, crea_heatmap_calendario, \
+    percentuali_ritardi, gruppi_ritardo, confronto_ritardi, distribuzione_ritardi, heatmap_ritardi, \
+    ritardi_medi_per_mese, ritardi_medi_per_compagnia
+from Frontend.Aeroporto import mostra_aeroporto
 file_paths = [
     "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_1_clean.csv",
     "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_2_clean.csv",
@@ -64,7 +70,7 @@ def main():
     menu_items = [
         "Home",
         "Ritardi e puntualità",
-        "Cancellazioni e deviazioni",
+        "Aeroporto",
         "Tratte aeree",
         "Condizioni operative",
         "Informazioni tecniche"
@@ -109,6 +115,21 @@ def main():
             col6.metric("Distanza Media", f"{kpi['distanza_media']:.2f} miglia")
             col7.metric("Percentuale voli cancellati", f"{kpi['percentuale_cancellati']:.2f} %")
 
+        with st.container(border=True):
+            st.subheader("Calendario Heatmap - Voli per Giorno")
+
+            compagnie_df = df.select("IATA_CODE_Reporting_Airline").distinct()
+            compagnie_list = sorted([row["IATA_CODE_Reporting_Airline"] for row in compagnie_df.collect()])
+            compagnie_selezionate = st.multiselect("Filtra per compagnia aerea", compagnie_list)
+
+            voli_per_giorno_df = calcola_voli_per_giorno(df, compagnie_selezionate)
+            voli_pd = voli_per_giorno_df.toPandas()
+
+            if not voli_pd.empty:
+                fig = crea_heatmap_calendario(voli_pd)
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("Nessun dato disponibile per le compagnie selezionate.")
 
         with st.container(border=True):
             col1, col2 = st.columns(2)  # 2 colonne affiancate
@@ -149,21 +170,99 @@ def main():
                 st.plotly_chart(fig)
 
         with st.container(border=True):
-            st.subheader("Seleziona Aeroporto/i")
-            aeroporti_df = elenco_tutti_aeroporti(df)
-            aeroporti_list = [aeroporto['Origin'] for aeroporto in aeroporti_df.collect()]
-            aeroporti_list = sorted(aeroporti_list)
-            aeroporti_selezionati = st.multiselect("Seleziona uno o più aeroporti", aeroporti_list)
 
-            if aeroporti_selezionati :
-                if len(aeroporti_selezionati) < 2:
+            st.subheader("Seleziona Compagnia/e Aeree")
+            compagnie_df = df.select("IATA_CODE_Reporting_Airline").distinct()
+            compagnie_list = sorted(
+                [compagnia['IATA_CODE_Reporting_Airline'] for compagnia in compagnie_df.collect()])
+            compagnie_selezionate = st.multiselect("Seleziona una o più compagnie aeree", compagnie_list)
+
+            if compagnie_selezionate:
+                if len(compagnie_selezionate) < 2:
+                    modalita = "Media"  # Se una sola compagnia è selezionata, seleziona automaticamente "Media"
+                else:
+                    options = ["Media", "Confronto"]
+                    modalita = st.pills("Seleziona modalità", options)
+
+                # Calcolare le statistiche delle compagnie aeree selezionate
+                stats_list = [statistiche_compagnia_aerea(compagnia, df) for compagnia in compagnie_selezionate]
+
+                # Creazione del DataFrame PySpark per il confronto
+                rows = []
+                for stat in stats_list:
+                    rows.append(Row(Compagnia_Aerea=stat["Compagnia Aerea"],
+                                    Totale_Voli=stat["Totale Voli"],
+                                    Ritardo_Medio_Partenza=stat["Ritardo Medio Partenza"],
+                                    Ritardo_Medio_Arrivo=stat["Ritardo Medio Arrivo"],
+                                    Voli_Cancellati=stat["Voli Cancellati"],
+                                    Voli_Dirottati=stat["Voli Dirottati"]))
+
+                stats_spark_df = df.sparkSession.createDataFrame(rows)
+
+                if modalita == "Media":
+                    # Calcolo delle statistiche medie
+                    media_stats = stats_spark_df.agg(
+                        {'Totale_Voli': 'avg', 'Ritardo_Medio_Partenza': 'avg', 'Ritardo_Medio_Arrivo': 'avg',
+                         'Voli_Cancellati': 'avg', 'Voli_Dirottati': 'avg'}).collect()[0]
+
+                    st.subheader("Statistiche Medie Compagnie Aeree")
+
+                    # Visualizzazione grafica con Plotly
+                    fig = px.bar(
+                        x=['Totale_Voli', 'Ritardo_Medio_Partenza', 'Ritardo_Medio_Arrivo', 'Voli_Cancellati',
+                           'Voli_Dirottati'],
+                        y=[media_stats['avg(Totale_Voli)'], media_stats['avg(Ritardo_Medio_Partenza)'],
+                           media_stats['avg(Ritardo_Medio_Arrivo)'], media_stats['avg(Voli_Cancellati)'],
+                           media_stats['avg(Voli_Dirottati)']],
+                        title="Statistiche Medie Compagnie Aeree",
+                        text=[media_stats['avg(Totale_Voli)'], media_stats['avg(Ritardo_Medio_Partenza)'],
+                              media_stats['avg(Ritardo_Medio_Arrivo)'], media_stats['avg(Voli_Cancellati)'],
+                              media_stats['avg(Voli_Dirottati)']]
+                    )
+                    fig.update_traces(textposition='outside')
+                    fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+
+                    st.plotly_chart(fig)
+
+                else:
+                    st.subheader("Confronto Compagnie Aeree")
+                    # Conversione del DataFrame Spark in Pandas
+                    stats_pandas_df = stats_spark_df.toPandas()
+
+                    # Creazione di un DataFrame "lungo" per Plotly
+                    metrics = ["Totale_Voli", "Ritardo_Medio_Partenza", "Ritardo_Medio_Arrivo", "Voli_Cancellati",
+                               "Voli_Dirottati"]
+
+                    stats_long_df = pd.melt(stats_pandas_df, id_vars=["Compagnia_Aerea"], value_vars=metrics,
+                                            var_name="Metrica", value_name="Valore")
+
+                    # Creazione del grafico a barre raggruppate per ogni metrica
+                    fig = px.bar(stats_long_df, x="Metrica", y="Valore", color="Compagnia_Aerea",
+                                 barmode="group", title="Confronto Statistiche Compagnie Aeree",
+                                 text="Valore")
+                    fig.update_traces(textposition='outside')
+                    fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+
+                    # Mostra il grafico
+                    st.plotly_chart(fig)
+
+
+        with st.container(border=True):
+            st.subheader("Seleziona Aeroporto/i")
+            compagnie_df = elenco_tutti_aeroporti(df)
+            compagnie_list = [aeroporto['Origin'] for aeroporto in compagnie_df.collect()]
+            compagnie_list = sorted(compagnie_list)
+            compagnie_selezionate = st.multiselect("Seleziona uno o più aeroporti", compagnie_list)
+
+            if compagnie_selezionate :
+                if len(compagnie_selezionate) < 2:
                     modalita = "Media"  # Se un solo aeroporto è selezionato, seleziona automaticamente "Media"
                 else:
                     options = ["Media", "Confronto"]
                     modalita = st.pills("Seleziona modalità", options)
 
                 # Calcolare le statistiche degli aeroporti selezionati
-                stats_list = [statistiche_aeroporto(aeroporto, df) for aeroporto in aeroporti_selezionati]
+                stats_list = [statistiche_aeroporto(aeroporto, df) for aeroporto in compagnie_selezionate]
 
                 # Creazione del DataFrame PySpark per il confronto
                 rows = []
@@ -218,8 +317,86 @@ def main():
 
         with st.container(border=True):
 
-            fig = mappa_rotte(df, aeroporti_info)
-            st.plotly_chart(fig)
+            with st.container(border=True):
+                st.subheader("Mappa interattiva delle rotte")
+
+                # Calcolo dei dati delle rotte
+                route_data = mappa_rotte(df, aeroporti_info)  # Questa funzione te la creo qui sotto
+                route_pd = route_data.toPandas()
+                if not route_pd.empty:
+
+                    # Estrai l'elenco di tutti gli aeroporti
+                    all_airports = sorted(set(route_pd['Origin']).union(set(route_pd['Dest'])))
+
+                    # Filtro aeroporto
+                    selected_airport = st.selectbox(
+                        "Seleziona un aeroporto",
+                        options=["Tutti"] + all_airports,
+                        index=0
+                    )
+
+                    # Filtro minimo voli
+                    min_flights = st.slider(
+                        "Filtra per numero minimo di voli",
+                        min_value=1,
+                        max_value=int(route_pd['flight_count'].max()),
+                        value=10
+                    )
+
+                    if selected_airport != "Tutti":
+                        route_pd = route_pd[
+                            (route_pd['Origin'] == selected_airport) |
+                            (route_pd['Dest'] == selected_airport)
+                            ]
+
+                    route_pd = route_pd[route_pd['flight_count'] >= min_flights]
+
+                    if route_pd.empty:
+                        st.warning("Nessuna rotta soddisfa i criteri selezionati.")
+                    else:
+                        # Normalizzazione larghezza linee
+                        route_pd['width'] = route_pd['flight_count'] / route_pd['flight_count'].max() * 10
+
+                        # Creazione mappa pydeck
+                        routes_layer = pdk.Layer(
+                            "ArcLayer",
+                            data=route_pd,
+                            get_source_position=["origin_lon", "origin_lat"],
+                            get_target_position=["dest_lon", "dest_lat"],
+                            get_width="width",
+                            get_source_color=[0, 128, 255, 80],
+                            get_target_color=[0, 128, 255, 80],
+                            pickable=True,
+                            auto_highlight=True,
+                        )
+
+                        view_state = pdk.ViewState(
+                            latitude=route_pd['origin_lat'].mean(),
+                            longitude=route_pd['origin_lon'].mean(),
+                            zoom=3,
+                            pitch=0
+                        )
+
+                        r = pdk.Deck(
+                            layers=[routes_layer],
+                            initial_view_state=view_state,
+                            map_style="mapbox://styles/mapbox/light-v10",
+                            tooltip={
+                                "html": "<b>Rotta:</b> {Origin} → {Dest}<br/>"
+                                        "<b>Voli:</b> {flight_count}<br/>"
+                                        "<b>Compagnie:</b> {airlines}",
+                                "style": {
+                                    "backgroundColor": "steelblue",
+                                    "color": "white"
+                                }
+                            }
+                        )
+
+                        st.pydeck_chart(r)
+
+                else:
+                    st.warning("Non sono disponibili dati di rotta per la visualizzazione.")
+
 
         with st.container(border=True):
             st.title("Tratte aeree")
@@ -231,12 +408,54 @@ def main():
     elif scelta == "Ritardi e puntualità":
         st.title("Ritardi")
         st.write("Analisi dei ritardi e della puntualità dei voli.")
-        # Aggiungi codice per questa sezione
+        with st.container(border=True):
+            st.subheader("Ritardi Medi per Compagnia Aerea")
+            df_stats = ritardi_medi_per_compagnia(df).toPandas()
+            fig = px.bar(df_stats, x="IATA_CODE_Reporting_Airline",
+                         y=["Ritardo_Medio_Partenza", "Ritardo_Medio_Arrivo"],
+                         barmode="group", title="Ritardi Medi per Compagnia")
+            st.plotly_chart(fig, use_container_width=True)
+
+        with st.container(border=True):
+            st.subheader("Ritardi Medi per Mese")
+            df_mese = ritardi_medi_per_mese(df).toPandas()
+            fig = px.line(df_mese, x="Mese", y=["Ritardo_Medio_Partenza", "Ritardo_Medio_Arrivo"], markers=True,
+                          title="Ritardi Medi Mensili")
+            st.plotly_chart(fig, use_container_width=True)
 
 
-    elif scelta == "Cancellazioni e deviazioni":
+        with st.container(border=True):
+            st.subheader("Distribuzione dei Ritardi in Partenza")
+            df_hist = distribuzione_ritardi(df).toPandas()
+            fig = px.histogram(df_hist, x="DepDelayMinutes", nbins=50, title="Distribuzione Ritardi")
+            st.plotly_chart(fig, use_container_width=True)
+
+        with st.container(border=True):
+            st.subheader("Confronto Ritardi Partenza vs Arrivo")
+            df_comp = confronto_ritardi(df).toPandas()
+            fig = px.scatter(df_comp, x="DepDelayMinutes", y="ArrDelayMinutes",
+                             title="Confronto Ritardi Partenza vs Arrivo", trendline="ols")
+            st.plotly_chart(fig, use_container_width=True)
+
+        with st.container(border=True):
+            st.subheader("Analisi Gruppi Ritardo Partenza e Arrivo")
+            df_gruppi = gruppi_ritardo(df).toPandas()
+            fig = px.density_heatmap(df_gruppi, x="DepartureDelayGroups", y="ArrivalDelayGroups", z="count",
+                                     color_continuous_scale="Viridis", title="Distribuzione Gruppi di Ritardo")
+            st.plotly_chart(fig, use_container_width=True)
+
+        with st.container(border=True):
+            st.subheader("Percentuale Ritardi oltre 15 Minuti")
+            percentuali = percentuali_ritardi(df)
+            st.metric(label="Partenze con Ritardo > 15 min", value=f"{percentuali['DepDel15']}%")
+            st.metric(label="Arrivi con Ritardo > 15 min", value=f"{percentuali['ArrDel15']}%")
+
+
+
+    elif scelta == "Aeroporto":
         st.title("Cancellazioni e deviazioni")
         st.write("Statistiche sulla cancellazione e deviazione.")
+        mostra_aeroporto(df, aeroporti_info)
         # Aggiungi codice per questa sezione
 
     elif scelta == "Tratte aeree":

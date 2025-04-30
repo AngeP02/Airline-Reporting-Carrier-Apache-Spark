@@ -1,3 +1,5 @@
+import pandas as pd
+from plotly.subplots import make_subplots
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, count, mean, sum, asc, desc, when, avg, expr, coalesce, stddev, lit, hour
 from geopy.geocoders import Nominatim
@@ -23,109 +25,236 @@ def carica_dati_tutti(directory_path):
 
 from pyspark.sql.functions import col, avg, count
 
-def mappa_rotte(df, aeroporti_dict):
-    fig = go.Figure()
 
-    for _, row in df.iterrows():
-        # Estrai le coordinate degli aeroporti di origine e destinazione
-        lat_origin, lon_origin = aeroporti_dict.get(row['Origin'], (None, None))
-        lat_dest, lon_dest = aeroporti_dict.get(row['Dest'], (None, None))
-
-        # Verifica se le coordinate sono valide
-        if lat_origin and lon_origin and lat_dest and lon_dest:
-            fig.add_trace(go.Scattergeo(
-                locationmode='ISO-3',
-                locations=[row['Origin'], row['Dest']],
-                line=dict(
-                    width=2,
-                    color='rgba(0, 0, 255, 0.5)'  # Colore blu con trasparenza
-                ),
-                opacity=0.7
-            ))
-
-    fig.update_layout(
-        geo=dict(
-            scope='world',
-            projection_type='mercator',
-            showland=True,
-            landcolor='rgb(255, 255, 255)',
-            countrycolor='rgb(204, 204, 204)'
-        ),
-        title="Mappa delle Rotte Aeree"
+def prepare_route_data(df, coordinate_df):
+    # Conta i voli per rotta
+    route_counts = df.groupBy('Origin', 'Dest').agg(
+        F.count('*').alias('flight_count'),
+        F.collect_set('Reporting_Airline').alias('airlines')
     )
 
-    return fig
+    # Prepara aeroporti origine
+    origin_airports = coordinate_df.select(
+        F.col('iata').alias('Origin'),
+        F.col('latitude').alias('origin_lat'),
+        F.col('longitude').alias('origin_lon')
+    )
+
+    # Prepara aeroporti destinazione
+    dest_airports = coordinate_df.select(
+        F.col('iata').alias('Dest'),
+        F.col('latitude').alias('dest_lat'),
+        F.col('longitude').alias('dest_lon')
+    )
+
+    # Join per aggiungere lat/lon
+    enriched_routes = route_counts \
+        .join(origin_airports, on='Origin', how='left') \
+        .join(dest_airports, on='Dest', how='left')
+
+    return enriched_routes
 
 def get_lat_lon(iata_code, aeroporti_dict):
     return aeroporti_dict.get(iata_code, (None, None))
 
-def mappa_rotteNO(df, aeroporti_info):
-    """
-    Funzione per generare una mappa interattiva delle rotte aeree.
+import pyspark.sql.functions as F
 
-    :param df: DataFrame contenente i voli, con le colonne 'Origin' e 'Dest'.
-    :param aeroporti_info: DataFrame contenente le informazioni sugli aeroporti (inclusi latitudine e longitudine).
-    :return: grafico Plotly con la mappa interattiva delle rotte.
-    """
-    # Creiamo un dizionario per ottenere latitudine e longitudine per ogni aeroporto
-    aeroporti_dict = aeroporti_info.set_index('iata')[['latitude', 'longitude']].to_dict('index')
+from pyspark.sql.functions import col, to_date, count
 
-    # Creiamo una lista per memorizzare le rotte
-    rotte = []
+from pyspark.sql.functions import col, to_date, count
+import calendar
+import plotly.graph_objects as go
 
-    # Calcoliamo la frequenza dei voli tra ogni coppia di aeroporti (origine e destinazione)
-    rotte_frequenza = df.groupBy('Origin', 'Dest').count().toPandas()
+from pyspark.sql.functions import col, avg, month, year, when, hour, dayofweek
 
-    for index, row in rotte_frequenza.iterrows():
-        origine = row['Origin']
-        destinazione = row['Dest']
-        frequenza = row['count']
-
-        # Otteniamo latitudine e longitudine per origine e destinazione
-        lat_origine, lon_origine = aeroporti_dict.get(origine, (None, None))
-        lat_destinazione, lon_destinazione = aeroporti_dict.get(destinazione, (None, None))
-
-        if lat_origine is not None and lat_destinazione is not None:
-            rotte.append({
-                'origine': origine,
-                'destinazione': destinazione,
-                'frequenza': frequenza,
-                'lat_origine': lat_origine,
-                'lon_origine': lon_origine,
-                'lat_destinazione': lat_destinazione,
-                'lon_destinazione': lon_destinazione
-            })
-
-    # Creiamo la mappa con Plotly
-    fig = go.Figure()
-
-    for rotta in rotte:
-        fig.add_trace(go.Scattergeo(
-            locationmode='USA-states',
-            lon=[rotta['lon_origine'], rotta['lon_destinazione']],
-            lat=[rotta['lat_origine'], rotta['lat_destinazione']],
-            mode='lines',
-            line=dict(width=rotta['frequenza'] / 10, color='blue', opacity=0.5),
-            hoverinfo='text',
-            text=f"Rotta: {rotta['origine']} -> {rotta['destinazione']}<br>Frequenza: {rotta['frequenza']}"
-        ))
-
-    # Aggiungiamo le informazioni della mappa
-    fig.update_layout(
-        title="Mappa Interattiva delle Rotte Aeree",
-        geo=dict(
-            scope='world',
-            showland=True,
-            landcolor='white',
-            showlakes=True,
-            lakecolor='rgb(255, 255, 255)',
-            projection_type='mercator'
-        ),
-        showlegend=False
+# 1. Ritardi medi per compagnia
+def ritardi_medi_per_compagnia(df):
+    return df.groupBy("IATA_CODE_Reporting_Airline").agg(
+        avg("DepDelayMinutes").alias("Ritardo_Medio_Partenza"),
+        avg("ArrDelayMinutes").alias("Ritardo_Medio_Arrivo")
     )
 
+# 2. Ritardi medi per mese
+def ritardi_medi_per_mese(df):
+    return df.withColumn("Mese", month("FlightDate")).groupBy("Mese").agg(
+        avg("DepDelayMinutes").alias("Ritardo_Medio_Partenza"),
+        avg("ArrDelayMinutes").alias("Ritardo_Medio_Arrivo")
+    ).orderBy("Mese")
+
+
+from pyspark.sql.functions import lpad, col, concat_ws, to_timestamp, hour
+# 3. Ritardi per ora del giorno e giorno della settimana
+def heatmap_ritardi(df):
+    df_filtered = df.filter((col("DepDelayMinutes").isNotNull()) & (col("DepDelayMinutes") > 0))
+    # Converti CRSDepTime da INT a stringa nel formato HHMM
+    df_filtered = df_filtered.withColumn("CRSDepTimeStr", lpad(col("CRSDepTime").cast("string"), 4, "0"))
+
+    # Crea una colonna stringa oraria HH:MM
+    df_filtered = df_filtered.withColumn("CRSDepTimeFormatted",
+                                         concat_ws(":", col("CRSDepTimeStr").substr(1, 2),
+                                                   col("CRSDepTimeStr").substr(3, 2)))
+
+    # Converti la stringa in timestamp (assumendo un riferimento fittizio per la data)
+    df_filtered = df_filtered.withColumn("CRSDepTimeTS",
+                                         to_timestamp(col("CRSDepTimeFormatted"), "HH:mm"))
+
+    # Ora puoi estrarre l'ora correttamente
+    df_heatmap = df_filtered.withColumn("Ora", hour(col("CRSDepTimeTS")))
+    df_heatmap = df_filtered.withColumn("Ora", hour("CRSDepTime")) \
+                            .withColumn("GiornoSettimana", dayofweek("FlightDate")) \
+                            .groupBy("Ora", "GiornoSettimana") \
+                            .agg(avg("DepDelayMinutes").alias("Ritardo_Medio"))
+    return df_heatmap
+
+# 4. Distribuzione dei ritardi
+def distribuzione_ritardi(df):
+    return df.select("DepDelayMinutes").filter(col("DepDelayMinutes").isNotNull())
+
+# 5. Confronto Dep vs Arr Delay
+def confronto_ritardi(df):
+    return df.select("DepDelayMinutes", "ArrDelayMinutes") \
+             .filter(col("DepDelayMinutes").isNotNull() & col("ArrDelayMinutes").isNotNull())
+
+# 6. Gruppi di ritardo
+def gruppi_ritardo(df):
+    return df.groupBy("DepartureDelayGroups", "ArrivalDelayGroups").count()
+
+# 7. Percentuale ritardi > 15 minuti
+def percentuali_ritardi(df):
+    totali = df.count()
+    dep15 = df.filter(col("DepDel15") == 1).count()
+    arr15 = df.filter(col("ArrDel15") == 1).count()
+
+    return {
+        "DepDel15": round(dep15 / totali * 100, 2),
+        "ArrDel15": round(arr15 / totali * 100, 2)
+    }
+
+def crea_heatmap_calendario(df_pandas):
+    df_pandas["FlightDate"] = pd.to_datetime(df_pandas["FlightDate"])
+    df_pandas["Year"] = df_pandas["FlightDate"].dt.year
+    df_pandas["Month"] = df_pandas["FlightDate"].dt.month
+    df_pandas["Day"] = df_pandas["FlightDate"].dt.day
+    df_pandas["Weekday"] = df_pandas["FlightDate"].dt.weekday  # Monday=0
+    df_pandas["Week"] = df_pandas["FlightDate"].dt.isocalendar().week
+
+    # Per ogni mese, costruisci un subplot
+    fig = make_subplots(rows=3, cols=4, subplot_titles=[calendar.month_name[i] for i in range(1, 13)],
+                        vertical_spacing=0.05, horizontal_spacing=0.03)
+
+    for month in range(1, 13):
+        df_mese = df_pandas[df_pandas["Month"] == month]
+        if df_mese.empty:
+            continue
+
+        # Calcola settimana del mese
+        df_mese["WeekOfMonth"] = df_mese["FlightDate"].apply(lambda d: (d.day - 1) // 7)
+
+        z = []
+        x_labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        y_labels = sorted(df_mese["WeekOfMonth"].unique())
+
+        for week in y_labels:
+            row_vals = []
+            for wd in range(7):
+                match = df_mese[(df_mese["Weekday"] == wd) & (df_mese["WeekOfMonth"] == week)]
+                if not match.empty:
+                    row_vals.append(match["Numero_Voli"].values[0])
+                else:
+                    row_vals.append(None)
+            z.append(row_vals)
+
+        r = (month - 1) // 4 + 1
+        c = (month - 1) % 4 + 1
+        fig.add_trace(go.Heatmap(z=z, x=x_labels, y=[f"Week {w + 1}" for w in y_labels],
+                                 colorscale='YlOrRd', showscale=False), row=r, col=c)
+
+    fig.update_layout(height=900, width=1200, title_text="Heatmap Calendario Giornaliero per Mese")
     return fig
 
+
+def calcola_voli_per_giorno(df, compagnie=None):
+    df_filtrato = df.select("FlightDate", "IATA_CODE_Reporting_Airline")
+
+    if compagnie:
+        df_filtrato = df_filtrato.filter(col("IATA_CODE_Reporting_Airline").isin(compagnie))
+
+    df_filtrato = df_filtrato.withColumn("FlightDate", to_date(col("FlightDate")))
+
+    voli_per_giorno = df_filtrato.groupBy("FlightDate").agg(count("*").alias("Numero_Voli"))
+
+    return voli_per_giorno
+
+
+def mappa_rotte(flights_df, airports_pd):
+    # Carichiamo info aeroporti come DataFrame Spark
+    spark = flights_df.sql_ctx.sparkSession
+    airports_df = spark.createDataFrame(airports_pd)
+
+    # Conta voli per ogni rotta
+    route_counts = flights_df.groupBy('Origin', 'Dest').agg(
+        F.count('*').alias('flight_count'),
+        F.collect_set('Reporting_Airline').alias('airlines')
+    )
+
+    # Seleziona latitudine e longitudine origine
+    origin_info = airports_df.select(
+        F.col('iata').alias('Origin'),
+        F.col('latitude').alias('origin_lat'),
+        F.col('longitude').alias('origin_lon')
+    )
+
+    # Seleziona latitudine e longitudine destinazione
+    dest_info = airports_df.select(
+        F.col('iata').alias('Dest'),
+        F.col('latitude').alias('dest_lat'),
+        F.col('longitude').alias('dest_lon')
+    )
+
+    # Join
+    enriched_routes = route_counts \
+        .join(origin_info, on='Origin', how='left') \
+        .join(dest_info, on='Dest', how='left') \
+        .dropna(subset=['origin_lat', 'origin_lon', 'dest_lat', 'dest_lon'])
+
+    return enriched_routes
+
+
+def statistiche_compagnia_aerea(compagnia_aerea, df=None):
+    """
+    Calcola le statistiche di volo per una specifica compagnia aerea.
+
+    Args:
+        compagnia_aerea (str): Il codice IATA della compagnia aerea (es. 'AA').
+        df (DataFrame): Il DataFrame contenente i dati dei voli.
+
+    Returns:
+        dict: Un dizionario contenente le statistiche della compagnia aerea.
+    """
+    query = df.filter(col("Reporting_Airline") == compagnia_aerea)
+
+    totale_voli = query.count()
+    # Media dei ritardi in partenza e in arrivo
+    res = query.agg(
+        avg("DepDelayMinutes").alias("ritardo_partenza"),
+        avg("ArrDelayMinutes").alias("ritardo_arrivo")
+    ).collect()[0]
+    ritardo_medio_partenza = res["ritardo_partenza"]
+    ritardo_medio_arrivo = res["ritardo_arrivo"]
+    # Numero di voli cancellati
+    voli_cancellati = query.filter(col("Cancelled") == 1).count()
+    # Numero di voli dirottati
+    voli_dirottati = query.filter(col("Diverted") == 1).count()
+    # Creazione dizionario risultati
+    statistiche = {
+        "Compagnia Aerea": compagnia_aerea,
+        "Totale Voli": totale_voli,
+        "Ritardo Medio Partenza": ritardo_medio_partenza,
+        "Ritardo Medio Arrivo": ritardo_medio_arrivo,
+        "Voli Cancellati": voli_cancellati,
+        "Voli Dirottati": voli_dirottati
+    }
+    return statistiche
 
 def statistiche_aeroporto(aeroporto,df=None):
     query = df.filter((col("Origin") == aeroporto) | (col("Dest") == aeroporto))
@@ -196,6 +325,11 @@ def elenco_aeroporti_NY(df=None):
 def elenco_tutti_aeroporti(df=None):
     aeroporti = df.select("Origin").union(df.select("Dest")).distinct().orderBy("Origin")
     return aeroporti
+
+def elenco_tutte_compagnie(df=None):
+    compagnie = df.select("Reporting_Airline").distinct().orderBy("Reporting_Airline")
+    return compagnie
+
 
 def collegamenti_aeroporto(aeroporto, df=None):
     destinazioni = df.filter(df['Origin'] == aeroporto).select('Dest').distinct().collect()
