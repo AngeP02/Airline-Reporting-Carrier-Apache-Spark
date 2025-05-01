@@ -453,8 +453,6 @@ def main():
 
 
     elif scelta == "Aeroporto":
-        st.title("Cancellazioni e deviazioni")
-        st.write("Statistiche sulla cancellazione e deviazione.")
         mostra_aeroporto(df, aeroporti_info)
         # Aggiungi codice per questa sezione
 
