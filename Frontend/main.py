@@ -27,6 +27,8 @@ from Backend.query import statistiche_aeroporto, \
     ritardi_medi_per_mese, ritardi_medi_per_compagnia
 from Frontend.Aeroporto import mostra_aeroporto
 from Frontend.CompagnieAeree import mostra_compagnia
+from Frontend.Citta import mostra_citta
+
 file_paths = [
     "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_1_clean.csv",
     "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_2_clean.csv",
@@ -73,7 +75,7 @@ def main():
         "Ritardi e puntualità",
         "Aeroporto",
         "Compagnie aeree",
-        "Condizioni operative",
+        "Città",
         "Informazioni tecniche"
     ]
     menu_icons = ["house", "clock-history", "x-circle", "airplane", "cloud-sun", "gear"]
@@ -460,10 +462,8 @@ def main():
     elif scelta == "Compagnie aeree":
         mostra_compagnia(df, aeroporti_info)
 
-    elif scelta == "Condizioni operative":
-        st.title("Condizioni operative")
-        st.write("Dati su meteo e congestioni.")
-        # Aggiungi codice per questa sezione
+    elif scelta == "Città":
+        mostra_citta(df,aeroporti_info)
 
     elif scelta == "Informazioni tecniche":
         st.title("Informazioni tecniche")
