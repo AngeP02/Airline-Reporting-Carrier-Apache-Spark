@@ -1,14 +1,15 @@
+import pandas as pd
 import streamlit as st
 from streamlit_folium import st_folium
 from Backend.query_aeroporto import (
     mappa_tratte_aeroporto, lista_aeroporti_unici, num_voli_partiti, num_voli_arrivati,
     num_voli_cancellati, nome_citta_aeroporto, cause_ritardi_per_aeroporto,
     distribuzione_ritardi_mensile, trend_cancellazioni_stagionale,
-    valutazione_compagnie_aeroporto, metriche_compagnie
+    valutazione_compagnie_aeroporto, metriche_compagnie, elenco_tutti_aeroporti, statistiche_aeroporto
 )
 import pydeck as pdk
 import plotly.express as px
-
+from pyspark.sql import Row
 def mostra_aeroporto(df, aeroporti_info):
     st.title("Analisi per Aeroporto")
 
@@ -222,3 +223,73 @@ def mostra_aeroporto(df, aeroporti_info):
                     fig_worst.update_traces(texttemplate="%{text:.2f}", textposition="outside", marker_color="crimson")
                     fig_worst.update_layout(xaxis_title="Compagnia", yaxis_title="Punteggio")
                     st.plotly_chart(fig_worst, use_container_width=True)
+
+
+
+    with st.container(border=True):
+        st.subheader("Seleziona Aeroporto/i")
+        compagnie_df = elenco_tutti_aeroporti(df)
+        compagnie_list = [aeroporto['Origin'] for aeroporto in compagnie_df.collect()]
+        compagnie_list = sorted(compagnie_list)
+        compagnie_selezionate = st.multiselect("Seleziona uno o più aeroporti", compagnie_list)
+
+        if compagnie_selezionate :
+            if len(compagnie_selezionate) < 2:
+                modalita = "Media"  # Se un solo aeroporto è selezionato, seleziona automaticamente "Media"
+            else:
+                options = ["Media", "Confronto"]
+                modalita = st.pills("Seleziona modalità", options)
+
+            # Calcolare le statistiche degli aeroporti selezionati
+            stats_list = [statistiche_aeroporto(aeroporto, df) for aeroporto in compagnie_selezionate]
+
+            # Creazione del DataFrame PySpark per il confronto
+            rows = []
+            for stat in stats_list:
+                rows.append(Row(Aeroporto=stat["Aeroporto"],
+                                Totale_Voli=stat["Totale Voli"],
+                                Ritardo_Medio_Partenza=stat["Ritardo Medio Partenza"],
+                                Ritardo_Medio_Arrivo=stat["Ritardo Medio Arrivo"],
+                                Voli_Cancellati=stat["Voli Cancellati"],
+                                Voli_Dirottati=stat["Voli Dirottati"]))
+
+            stats_spark_df = df.sparkSession.createDataFrame(rows)
+
+            if modalita == "Media":
+                # Calcolo delle statistiche medie
+                media_stats = stats_spark_df.agg(
+                    {'Totale_Voli': 'avg', 'Ritardo_Medio_Partenza': 'avg', 'Ritardo_Medio_Arrivo': 'avg',
+                     'Voli_Cancellati': 'avg', 'Voli_Dirottati': 'avg'}).collect()[0]
+
+                st.subheader("Statistiche Medie")
+
+                # Visualizzazione grafica con Plotly
+                fig = px.bar(
+                    x=['Totale_Voli', 'Ritardo_Medio_Partenza', 'Ritardo_Medio_Arrivo', 'Voli_Cancellati',
+                       'Voli_Dirottati'],
+                    y=[media_stats['avg(Totale_Voli)'], media_stats['avg(Ritardo_Medio_Partenza)'],
+                       media_stats['avg(Ritardo_Medio_Arrivo)'], media_stats['avg(Voli_Cancellati)'],
+                       media_stats['avg(Voli_Dirottati)']],
+                    title="Statistiche Medie Aeroporti"
+                )
+                st.plotly_chart(fig)
+
+            else:
+                st.subheader("Confronto Aeroporti")
+                # Conversione del DataFrame Spark in Pandas
+                stats_spark_df = stats_spark_df.toPandas()
+
+                # Creazione di un DataFrame che raggruppa le statistiche per ogni metrica
+                metrics = ["Totale_Voli", "Ritardo_Medio_Partenza", "Ritardo_Medio_Arrivo", "Voli_Cancellati",
+                           "Voli_Dirottati"]
+
+                # Creazione di un DataFrame "lungo" per Plotly
+                stats_long_df = pd.melt(stats_spark_df, id_vars=["Aeroporto"], value_vars=metrics,
+                                        var_name="Metrica", value_name="Valore")
+
+                # Creazione del grafico a barre raggruppate per ogni metrica
+                fig = px.bar(stats_long_df, x="Metrica", y="Valore", color="Aeroporto",
+                             barmode="group", title="Confronto Statistiche Aeroporti")
+
+                # Mostra il grafico
+                st.plotly_chart(fig)

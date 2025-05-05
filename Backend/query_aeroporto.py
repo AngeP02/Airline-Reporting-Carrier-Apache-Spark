@@ -1,6 +1,7 @@
 from pyspark.sql import functions as F, Window
 import pydeck as pdk
 import pandas as pd
+from pyspark.sql.functions import col, avg
 
 def lista_aeroporti_unici(df):
     origin_airports = df.select("Origin").distinct().withColumnRenamed("Origin", "IATA")
@@ -146,3 +147,33 @@ def valutazione_compagnie_aeroporto(df, aeroporto):
 
     return stats.select("Carrier", "NumVoli", "RitardoMedio", "PercCancellazioni", "Punteggio")
 
+def statistiche_aeroporto(aeroporto,df=None):
+    query = df.filter((col("Origin") == aeroporto) | (col("Dest") == aeroporto))
+
+    totale_voli = query.count()
+    # Media dei ritardi in partenza e in arrivo
+    res = query.agg(
+        avg("DepDelayMinutes").alias("ritardo_partenza"),
+        avg("ArrDelayMinutes").alias("ritardo_arrivo")
+    ).collect()[0]
+    ritardo_medio_partenza = res["ritardo_partenza"]
+    ritardo_medio_arrivo = res["ritardo_arrivo"]
+    # Numero di voli cancellati
+    voli_cancellati = query.filter(col("Cancelled") == 1).count()
+    # Numero di voli dirottati
+    voli_dirottati = query.filter(col("Diverted") == 1).count()
+    # Creazione dizionario risultati
+    statistiche = {
+        "Aeroporto": aeroporto,
+        "Totale Voli": totale_voli,
+        "Ritardo Medio Partenza": ritardo_medio_partenza,
+        "Ritardo Medio Arrivo": ritardo_medio_arrivo,
+        "Voli Cancellati": voli_cancellati,
+        "Voli Dirottati": voli_dirottati
+    }
+    return statistiche
+
+
+def elenco_tutti_aeroporti(df=None):
+    aeroporti = df.select("Origin").union(df.select("Dest")).distinct().orderBy("Origin")
+    return aeroporti

@@ -1,7 +1,7 @@
 
 ### Backend: query_compagnia.py
 from pyspark.sql import functions as F, Window
-
+from pyspark.sql.functions import col, avg
 
 def lista_compagnie_uniche(df):
     return [row['IATA_CODE_Reporting_Airline'] for row in df.select('IATA_CODE_Reporting_Airline').distinct().collect()]
@@ -84,3 +84,39 @@ def distribuzione_voli_per_citta_compagnia(df, compagnia):
              .agg(F.count('*').alias('flight_count')) \
              .withColumnRenamed('DestCityName', 'City') \
              .orderBy(F.col('flight_count').desc())
+
+def statistiche_compagnia_aerea(compagnia_aerea, df=None):
+    """
+    Calcola le statistiche di volo per una specifica compagnia aerea.
+
+    Args:
+        compagnia_aerea (str): Il codice IATA della compagnia aerea (es. 'AA').
+        df (DataFrame): Il DataFrame contenente i dati dei voli.
+
+    Returns:
+        dict: Un dizionario contenente le statistiche della compagnia aerea.
+    """
+    query = df.filter(col("Reporting_Airline") == compagnia_aerea)
+
+    totale_voli = query.count()
+    # Media dei ritardi in partenza e in arrivo
+    res = query.agg(
+        avg("DepDelayMinutes").alias("ritardo_partenza"),
+        avg("ArrDelayMinutes").alias("ritardo_arrivo")
+    ).collect()[0]
+    ritardo_medio_partenza = res["ritardo_partenza"]
+    ritardo_medio_arrivo = res["ritardo_arrivo"]
+    # Numero di voli cancellati
+    voli_cancellati = query.filter(col("Cancelled") == 1).count()
+    # Numero di voli dirottati
+    voli_dirottati = query.filter(col("Diverted") == 1).count()
+    # Creazione dizionario risultati
+    statistiche = {
+        "Compagnia Aerea": compagnia_aerea,
+        "Totale Voli": totale_voli,
+        "Ritardo Medio Partenza": ritardo_medio_partenza,
+        "Ritardo Medio Arrivo": ritardo_medio_arrivo,
+        "Voli Cancellati": voli_cancellati,
+        "Voli Dirottati": voli_dirottati
+    }
+    return statistiche

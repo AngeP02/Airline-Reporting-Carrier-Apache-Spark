@@ -7,10 +7,11 @@ from Backend.query_compagnie_aeree import (
     top5_citta_servite_compagnia,
     ranking_mensile_performance_compagnia,
     distribuzione_voli_per_aeroporto_compagnia,
-    distribuzione_voli_per_citta_compagnia
+    distribuzione_voli_per_citta_compagnia, statistiche_compagnia_aerea
 )
 import plotly.express as px
 import pandas as pd
+from pyspark.sql import Row
 
 def mostra_compagnia(df, aeroporti_info):
     st.title("Analisi per Compagnia Aerea")
@@ -148,3 +149,79 @@ def mostra_compagnia(df, aeroporti_info):
                 st.plotly_chart(fig_dist_city, use_container_width=True)
             else:
                 st.info("Nessun dato per distribuzione città.")
+    with st.container(border=True):
+
+        st.subheader("Seleziona Compagnia/e Aeree")
+        compagnie_df = df.select("IATA_CODE_Reporting_Airline").distinct()
+        compagnie_list = sorted(
+            [compagnia['IATA_CODE_Reporting_Airline'] for compagnia in compagnie_df.collect()])
+        compagnie_selezionate = st.multiselect("Seleziona una o più compagnie aeree", compagnie_list)
+
+        if compagnie_selezionate:
+            if len(compagnie_selezionate) < 2:
+                modalita = "Media"  # Se una sola compagnia è selezionata, seleziona automaticamente "Media"
+            else:
+                options = ["Media", "Confronto"]
+                modalita = st.pills("Seleziona modalità", options)
+
+            # Calcolare le statistiche delle compagnie aeree selezionate
+            stats_list = [statistiche_compagnia_aerea(compagnia, df) for compagnia in compagnie_selezionate]
+
+            # Creazione del DataFrame PySpark per il confronto
+            rows = []
+            for stat in stats_list:
+                rows.append(Row(Compagnia_Aerea=stat["Compagnia Aerea"],
+                                Totale_Voli=stat["Totale Voli"],
+                                Ritardo_Medio_Partenza=stat["Ritardo Medio Partenza"],
+                                Ritardo_Medio_Arrivo=stat["Ritardo Medio Arrivo"],
+                                Voli_Cancellati=stat["Voli Cancellati"],
+                                Voli_Dirottati=stat["Voli Dirottati"]))
+
+            stats_spark_df = df.sparkSession.createDataFrame(rows)
+
+            if modalita == "Media":
+                # Calcolo delle statistiche medie
+                media_stats = stats_spark_df.agg(
+                    {'Totale_Voli': 'avg', 'Ritardo_Medio_Partenza': 'avg', 'Ritardo_Medio_Arrivo': 'avg',
+                     'Voli_Cancellati': 'avg', 'Voli_Dirottati': 'avg'}).collect()[0]
+
+                st.subheader("Statistiche Medie Compagnie Aeree")
+
+                # Visualizzazione grafica con Plotly
+                fig = px.bar(
+                    x=['Totale_Voli', 'Ritardo_Medio_Partenza', 'Ritardo_Medio_Arrivo', 'Voli_Cancellati',
+                       'Voli_Dirottati'],
+                    y=[media_stats['avg(Totale_Voli)'], media_stats['avg(Ritardo_Medio_Partenza)'],
+                       media_stats['avg(Ritardo_Medio_Arrivo)'], media_stats['avg(Voli_Cancellati)'],
+                       media_stats['avg(Voli_Dirottati)']],
+                    title="Statistiche Medie Compagnie Aeree",
+                    text=[media_stats['avg(Totale_Voli)'], media_stats['avg(Ritardo_Medio_Partenza)'],
+                          media_stats['avg(Ritardo_Medio_Arrivo)'], media_stats['avg(Voli_Cancellati)'],
+                          media_stats['avg(Voli_Dirottati)']]
+                )
+                fig.update_traces(textposition='outside')
+                fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+
+                st.plotly_chart(fig)
+
+            else:
+                st.subheader("Confronto Compagnie Aeree")
+                # Conversione del DataFrame Spark in Pandas
+                stats_pandas_df = stats_spark_df.toPandas()
+
+                # Creazione di un DataFrame "lungo" per Plotly
+                metrics = ["Totale_Voli", "Ritardo_Medio_Partenza", "Ritardo_Medio_Arrivo", "Voli_Cancellati",
+                           "Voli_Dirottati"]
+
+                stats_long_df = pd.melt(stats_pandas_df, id_vars=["Compagnia_Aerea"], value_vars=metrics,
+                                        var_name="Metrica", value_name="Valore")
+
+                # Creazione del grafico a barre raggruppate per ogni metrica
+                fig = px.bar(stats_long_df, x="Metrica", y="Valore", color="Compagnia_Aerea",
+                             barmode="group", title="Confronto Statistiche Compagnie Aeree",
+                             text="Valore")
+                fig.update_traces(textposition='outside')
+                fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+
+                # Mostra il grafico
+                st.plotly_chart(fig)
