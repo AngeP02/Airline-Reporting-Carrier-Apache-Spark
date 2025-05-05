@@ -15,6 +15,7 @@ import pyspark.sql.functions as F
 from pyspark.sql.types import FloatType
 
 
+
 os.environ["PYSPARK_PYTHON"] = "python"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -28,7 +29,7 @@ from Frontend.Aeroporto import mostra_aeroporto
 from Frontend.CompagnieAeree import mostra_compagnia
 from Frontend.Citta import mostra_citta
 from Frontend.RitardiCancellazioni import mostra_ritardi_cancellazioni
-
+from Frontend.TratteAeree import mostra_tratte
 
 file_paths = [
     "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_1_clean.csv",
@@ -73,11 +74,11 @@ def main():
     # Definizione del menu orizzontale full-width
     menu_items = [
         "Home",
-        "Ritardi e puntualità",
         "Aeroporto",
         "Compagnie aeree",
         "Città",
         "Ritardi e cancellazioni",
+        "Tratte aeree",
         "Informazioni tecniche"
     ]
     menu_icons = ["house", "clock-history", "x-circle", "airplane", "cloud-sun", "gear"]
@@ -410,53 +411,6 @@ def main():
             #display_routes_map(df)
 
 
-    elif scelta == "Ritardi e puntualità":
-        st.title("Ritardi")
-        st.write("Analisi dei ritardi e della puntualità dei voli.")
-        with st.container(border=True):
-            st.subheader("Ritardi Medi per Compagnia Aerea")
-            df_stats = ritardi_medi_per_compagnia(df).toPandas()
-            fig = px.bar(df_stats, x="IATA_CODE_Reporting_Airline",
-                         y=["Ritardo_Medio_Partenza", "Ritardo_Medio_Arrivo"],
-                         barmode="group", title="Ritardi Medi per Compagnia")
-            st.plotly_chart(fig, use_container_width=True)
-
-        with st.container(border=True):
-            st.subheader("Ritardi Medi per Mese")
-            df_mese = ritardi_medi_per_mese(df).toPandas()
-            fig = px.line(df_mese, x="Mese", y=["Ritardo_Medio_Partenza", "Ritardo_Medio_Arrivo"], markers=True,
-                          title="Ritardi Medi Mensili")
-            st.plotly_chart(fig, use_container_width=True)
-
-
-        with st.container(border=True):
-            st.subheader("Distribuzione dei Ritardi in Partenza")
-            df_hist = distribuzione_ritardi(df).toPandas()
-            fig = px.histogram(df_hist, x="DepDelayMinutes", nbins=50, title="Distribuzione Ritardi")
-            st.plotly_chart(fig, use_container_width=True)
-
-        with st.container(border=True):
-            st.subheader("Confronto Ritardi Partenza vs Arrivo")
-            df_comp = confronto_ritardi(df).toPandas()
-            fig = px.scatter(df_comp, x="DepDelayMinutes", y="ArrDelayMinutes",
-                             title="Confronto Ritardi Partenza vs Arrivo", trendline="ols")
-            st.plotly_chart(fig, use_container_width=True)
-
-        with st.container(border=True):
-            st.subheader("Analisi Gruppi Ritardo Partenza e Arrivo")
-            df_gruppi = gruppi_ritardo(df).toPandas()
-            fig = px.density_heatmap(df_gruppi, x="DepartureDelayGroups", y="ArrivalDelayGroups", z="count",
-                                     color_continuous_scale="Viridis", title="Distribuzione Gruppi di Ritardo")
-            st.plotly_chart(fig, use_container_width=True)
-
-        with st.container(border=True):
-            st.subheader("Percentuale Ritardi oltre 15 Minuti")
-            percentuali = percentuali_ritardi(df)
-            st.metric(label="Partenze con Ritardo > 15 min", value=f"{percentuali['DepDel15']}%")
-            st.metric(label="Arrivi con Ritardo > 15 min", value=f"{percentuali['ArrDel15']}%")
-
-
-
     elif scelta == "Aeroporto":
         mostra_aeroporto(df, aeroporti_info)
 
@@ -470,6 +424,10 @@ def main():
 
     elif scelta == "Ritardi e cancellazioni":
         mostra_ritardi_cancellazioni(df)
+
+    elif scelta == "Tratte aeree":
+        mostra_tratte(df, aeroporti_info)
+
 
     elif scelta == "Informazioni tecniche":
         st.title("Informazioni tecniche")
