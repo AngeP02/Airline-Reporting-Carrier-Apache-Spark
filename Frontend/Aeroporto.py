@@ -1,11 +1,10 @@
 import pandas as pd
 import streamlit as st
-from streamlit_folium import st_folium
 from Backend.query_aeroporto import (
     mappa_tratte_aeroporto, lista_aeroporti_unici, num_voli_partiti, num_voli_arrivati,
     num_voli_cancellati, nome_citta_aeroporto, cause_ritardi_per_aeroporto,
     distribuzione_ritardi_mensile, trend_cancellazioni_stagionale,
-    valutazione_compagnie_aeroporto, metriche_compagnie, elenco_tutti_aeroporti, statistiche_aeroporto
+    metriche_compagnie, elenco_tutti_aeroporti, statistiche_aeroporto
 )
 import pydeck as pdk
 import plotly.express as px
@@ -22,13 +21,10 @@ def mostra_aeroporto(df, aeroporti_info):
         "",
         options=sorted(aeroporti_disponibili)
     )
-    #aeroporto_selezionato = st.selectbox("Seleziona un aeroporto", sorted(aeroporti_disponibili))
-
     if not aeroporto_selezionato:
         st.warning("Seleziona un aeroporto per iniziare.")
         return
 
-    # ---------------- STATISTICHE GENERALI ----------------
     with st.container(border=True):
         st.subheader("Statistiche Generali")
         n_partiti = num_voli_partiti(df, aeroporto_selezionato).collect()[0]["NumVoliPartiti"]
@@ -44,7 +40,6 @@ def mostra_aeroporto(df, aeroporti_info):
 
         st.markdown(f"**Città in cui è situato l'aeroporto**: {nome_citta}")
 
-    # ---------------- MAPPA TRATTE ----------------
     with st.container(border=True):
         st.subheader("Mappa delle Tratte")
 

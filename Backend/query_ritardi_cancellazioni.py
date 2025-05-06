@@ -1,6 +1,5 @@
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, avg, count, dayofweek, date_format, month, round as spark_round, sum as spark_sum
-import builtins
 
 def perc_voli_in_orario(df):
     """

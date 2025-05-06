@@ -1,16 +1,12 @@
 import streamlit as st
-from Backend.query_home import (calcola_kpi, aggregazione_voli_per_mese, \
-
-                                calcola_voli_per_giorno, crea_heatmap_calendario, calcola_puntualita,
+from Backend.query_home import (calcola_kpi, aggregazione_voli_per_mese, calcola_puntualita,
                                 calcola_percentuale_ritardi_15, calcola_numero_aeroporti, calcola_numero_citta,
                                 calcola_top5_compagnie_puntuali, calcola_top5_aeroporti_piu_ritardi,
                                 calcola_top5_tratte_trafficate, calcola_top5_compagnie_piu_voli,
                                 calcola_top5_compagnie_meno_cancellazioni, calcola_mappa_aeroporti)
 
 import plotly.express as px
-
 import plotly.graph_objects as go
-import pandas as pd
 import pydeck as pdk
 
 

@@ -1,5 +1,3 @@
-
-### Backend: query_compagnia.py
 from pyspark.sql import functions as F, Window
 from pyspark.sql.functions import col, avg
 

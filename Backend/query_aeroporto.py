@@ -1,6 +1,4 @@
 from pyspark.sql import functions as F, Window
-import pydeck as pdk
-import pandas as pd
 from pyspark.sql.functions import col, avg
 
 def lista_aeroporti_unici(df):
@@ -126,26 +124,6 @@ def metriche_compagnie(df, aeroporto):
         F.avg("DepDelayMinutes").alias("RitardoMedio"),
         (F.sum(F.col("Cancelled")) / F.count("*") * 100).alias("PercCancellazioni")
     )
-
-
-def valutazione_compagnie_aeroporto(df, aeroporto):
-    df_filtrato = df.filter(df["Origin"] == aeroporto)
-
-    stats = df_filtrato.groupBy("Carrier").agg(
-        F.count("*").alias("NumVoli"),
-        F.avg("DepDelay").alias("RitardoMedio"),
-        F.avg(F.col("Cancelled").cast("double")).alias("PercCancellazioni")
-    )
-
-    # Normalizza ogni metrica su scala 0-1
-    stats = stats.withColumn("Norm_Ritardo", (F.max("RitardoMedio").over(Window.partitionBy()) - F.col("RitardoMedio")) / (F.max("RitardoMedio").over(Window.partitionBy()) - F.min("RitardoMedio").over(Window.partitionBy())))
-    stats = stats.withColumn("Norm_Cancellazioni", (F.max("PercCancellazioni").over(Window.partitionBy()) - F.col("PercCancellazioni")) / (F.max("PercCancellazioni").over(Window.partitionBy()) - F.min("PercCancellazioni").over(Window.partitionBy())))
-    stats = stats.withColumn("Norm_Voli", (F.col("NumVoli") - F.min("NumVoli").over(Window.partitionBy())) / (F.max("NumVoli").over(Window.partitionBy()) - F.min("NumVoli").over(Window.partitionBy())))
-
-    # Calcola punteggio: media pesata
-    stats = stats.withColumn("Punteggio", F.col("Norm_Ritardo") * 0.4 + F.col("Norm_Cancellazioni") * 0.3 + F.col("Norm_Voli") * 0.3)
-
-    return stats.select("Carrier", "NumVoli", "RitardoMedio", "PercCancellazioni", "Punteggio")
 
 def statistiche_aeroporto(aeroporto,df=None):
     query = df.filter((col("Origin") == aeroporto) | (col("Dest") == aeroporto))

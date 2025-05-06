@@ -1,16 +1,10 @@
 
-from pyspark.sql.functions import round as spark_round, coalesce, lit
-from pyspark.sql import DataFrame, Window
+from pyspark.sql.functions import round as spark_round, lit
+from pyspark.sql import DataFrame
 from pyspark.sql.functions import (
-    col, count, sum as spark_sum, avg, collect_set, stddev,
-    month, row_number, collect_list, when, floor, date_format
+    col, count, avg, stddev, when, floor
 )
-from pyspark.sql.types import ArrayType, StringType, IntegerType
-
-import pyspark.sql.functions as F
-from pyspark.sql import Window
-from pyspark.worker import chain
-
+from pyspark.sql import functions as F
 
 def classifica_tratte_ritardo(df: DataFrame) -> DataFrame:
     """
@@ -67,7 +61,7 @@ def ritardo_per_fascia_oraria(df: DataFrame) -> DataFrame:
 
 
 
-from pyspark.sql import functions as F
+
 
 def mappa_rotte_completa(flights_df, airports_pd):
     spark = flights_df.sql_ctx.sparkSession
@@ -128,48 +122,5 @@ def mappa_rotte_completa(flights_df, airports_pd):
     # Top 5 compagnie e top 2 mesi
     routes = routes.withColumn("top_airlines", F.expr("slice(array_sort(array_distinct(airlines_list)), 1, 5)"))
     routes = routes.withColumn("top_months", F.expr("slice(array_sort(array_distinct(months_list)), 1, 2)"))
-
-    return routes
-
-def mappa_rotte_completa1(flights_df, airports_pd):
-    spark = flights_df.sql_ctx.sparkSession
-    airports_df = spark.createDataFrame(airports_pd)
-
-    # Statistiche di base per tratta
-    route_stats = (
-        flights_df.groupBy("Origin", "Dest")
-        .agg(
-            F.count("*").alias("flight_count"),
-            F.collect_set("Reporting_Airline").alias("airlines_set")
-        )
-    )
-
-    # Informazioni su aeroporti (lat/lon + nome città)
-    origin_info = (
-        airports_df
-        .select(
-            F.col("iata").alias("Origin"),
-            F.col("city").alias("origin_city"),
-            F.col("latitude").alias("origin_lat"),
-            F.col("longitude").alias("origin_lon")
-        )
-    )
-    dest_info = (
-        airports_df
-        .select(
-            F.col("iata").alias("Dest"),
-            F.col("city").alias("dest_city"),
-            F.col("latitude").alias("dest_lat"),
-            F.col("longitude").alias("dest_lon")
-        )
-    )
-
-    # Join statistiche + info aeroporti
-    routes = (
-        route_stats
-        .join(origin_info, on="Origin", how="left")
-        .join(dest_info, on="Dest", how="left")
-        .dropna(subset=["origin_lat", "origin_lon", "dest_lat", "dest_lon"])
-    )
 
     return routes

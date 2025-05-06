@@ -1,13 +1,10 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-
 import sys
 import os
 from pyspark import StorageLevel
 from pyspark.sql import SparkSession
 import pandas as pd
-
-
 
 os.environ["PYSPARK_PYTHON"] = "python"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -59,8 +56,6 @@ df.persist(StorageLevel.MEMORY_AND_DISK)
 
 def main():
     st.set_page_config(page_title="Analisi Voli", layout="wide")
-
-    # Definizione del menu orizzontale full-width
     menu_items = [
         "Home",
         "Aeroporto",
@@ -71,13 +66,13 @@ def main():
         "Previsione AI"
     ]
     menu_icons = [
-        "house",  # Home
-        "geo-alt",  # Aeroporto
-        "airplane",  # Compagnie aeree
-        "building",  # Città
-        "clock-history",  # Ritardi e cancellazioni
-        "map",  # Tratte aeree
-        "cpu"  # Previsione AI
+        "house",
+        "geo-alt",
+        "airplane",
+        "building",
+        "clock-history",
+        "map",
+        "cpu"
     ]
 
     scelta = option_menu(

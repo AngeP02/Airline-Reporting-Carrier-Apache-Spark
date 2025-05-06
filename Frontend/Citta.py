@@ -1,11 +1,10 @@
 import streamlit as st
 from Backend.query_citta import (
     num_voli_partiti_citta, num_voli_arrivati_citta, num_voli_cancellati_citta,
-    aeroporti_in_citta, distribuzione_partenze_per_aeroporto_in_citta,
-    distribuzione_arrivi_per_aeroporto_in_citta, metriche_compagnie_citta,
+    metriche_compagnie_citta,
     compagnie_attive_in_citta, voli_partiti_mensili_citta,
     voli_arrivati_mensili_citta, voli_totali_mensili_citta,
-    cancellazioni_mensili_citta, lista_citta_uniche, mappa_tratte_citta, num_aeroporti_citta
+    cancellazioni_mensili_citta, lista_citta_uniche, num_aeroporti_citta
 )
 import pydeck as pdk
 import plotly.express as px
