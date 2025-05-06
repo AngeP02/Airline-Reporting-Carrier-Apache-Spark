@@ -7,6 +7,8 @@ from pyspark import StorageLevel
 from pyspark.sql import SparkSession
 import pandas as pd
 
+
+
 os.environ["PYSPARK_PYTHON"] = "python"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -16,6 +18,7 @@ from Frontend.Citta import mostra_citta
 from Frontend.RitardiCancellazioni import mostra_ritardi_cancellazioni
 from Frontend.TratteAeree import mostra_tratte
 from Frontend.Home import mostra_home
+from Frontend.AI import mostra_ai
 
 file_paths = [
     "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_1_clean.csv",
@@ -65,9 +68,18 @@ def main():
         "Città",
         "Ritardi e cancellazioni",
         "Tratte aeree",
-        "Informazioni tecniche"
+        "Previsione AI"
     ]
-    menu_icons = ["house", "clock-history", "x-circle", "airplane", "cloud-sun", "gear"]
+    menu_icons = [
+        "house",  # Home
+        "geo-alt",  # Aeroporto
+        "airplane",  # Compagnie aeree
+        "building",  # Città
+        "clock-history",  # Ritardi e cancellazioni
+        "map",  # Tratte aeree
+        "cpu"  # Previsione AI
+    ]
+
     scelta = option_menu(
         menu_title=None,
         options=menu_items,
@@ -112,12 +124,8 @@ def main():
         mostra_tratte(df, aeroporti_info)
 
 
-    elif scelta == "Informazioni tecniche":
-        st.title("Informazioni tecniche")
-        st.write("Inserire informazioni tecniche sui dati, come tipo di dataset, numero di righe, numero di colonne, etc.."
-                 ""
-                 "Inserire ad esempio una sezione dove l'utente seleziona la tratta e sulla base dei dati fa dellle previsioni utilizzando l'ia, in qualche modo")
-        # Aggiungi codice per questa sezione
+    elif scelta == "Previsione AI":
+        mostra_ai(df)
 
 if __name__ == "__main__":
     main()
