@@ -23,10 +23,17 @@ def mostra_ai(df):
         pipeline = Pipeline(stages=[indexer, assembler, lr])
         model = pipeline.fit(dati)
 
-        st.markdown("Simula volo")
+        st.markdown("Inserisci parametri del volo")
         distanza = st.slider("Distanza (miglia)", 0, 3000, 500, key="canc_distanza")
         dep_delay = st.slider("Ritardo partenza previsto (minuti)", 0, 500, 0, key="canc_dep_delay")
-        crs_dep = st.slider("Orario schedulato (HHMM)", 0, 2400, 1200, key="canc_crs_dep")
+        col1, col2 = st.columns(2)
+        with col1:
+            ora = st.slider("Ora schedulata (HH)", 0, 23, 12, key="canc_ora")
+        with col2:
+            minuti = st.slider("Minuti schedulati (MM)", 0, 59, 0, key="canc_minuti")
+        crs_dep = ora * 100 + minuti
+
+        #crs_dep = st.slider("Orario schedulato (HHMM)", 0, 2400, 1200, key="canc_crs_dep")
         month = st.slider("Mese", 1, 12, 6, key="canc_month")
         dow = st.slider("Giorno della settimana", 1, 7, 3, key="canc_dow")
 
@@ -50,7 +57,14 @@ def mostra_ai(df):
         model = pipeline.fit(dati)
 
         distanza = st.slider("Distanza (miglia)", 0, 3000, 500, key="rit_distanza")
-        crs_dep = st.slider("Orario schedulato (HHMM)", 0, 2400, 1200, key="rit_crs_dep")
+        #crs_dep = st.slider("Orario schedulato (HHMM)", 0, 2400, 1200, key="rit_crs_dep")
+        col1, col2 = st.columns(2)
+        with col1:
+            ora = st.slider("Ora schedulata (HH)", 0, 23, 12, key="canc_ora_rit")
+        with col2:
+            minuti = st.slider("Minuti schedulati (MM)", 0, 59, 0, key="canc_minuti_rit")
+        crs_dep = ora * 100 + minuti
+
         month = st.slider("Mese", 1, 12, 6, key="rit_month")
         dow = st.slider("Giorno della settimana", 1, 7, 3, key="rit_dow")
 
@@ -60,6 +74,47 @@ def mostra_ai(df):
         )
         prediction = model.transform(input_df).select("prediction").first()["prediction"]
         st.success(f"Ritardo previsto: **{round(prediction, 2)} minuti**")
+
+    with st.container(border=True):
+        st.subheader("Clustering delle tratte (analisi gruppi)")
+
+        tratte_df = df.select("Distance", "DepDelay", "ArrDelay").na.drop()
+        assembler = VectorAssembler(inputCols=["Distance", "DepDelay", "ArrDelay"], outputCol="features")
+        data = assembler.transform(tratte_df)
+
+        kmeans = KMeans(k=4, seed=42)
+        model = kmeans.fit(data)
+        clustered = model.transform(data).select("Distance", "DepDelay", "ArrDelay", "prediction")
+        pd_clustered = clustered.toPandas()
+
+        # Etichette leggibili per i cluster: medie per cluster
+        cluster_stats = pd_clustered.groupby("prediction").mean(numeric_only=True).round(2)
+        st.markdown("**Statistiche per cluster:**")
+        st.dataframe(cluster_stats)
+
+        import plotly.express as px
+        positive_arr_delay = pd_clustered[pd_clustered["ArrDelay"] >= 0]
+        fig = px.scatter(
+            positive_arr_delay.sample(n=2000),
+            x="Distance", y="DepDelay",
+            color="prediction",
+            size="ArrDelay",
+            labels={
+                "Distance": "Distanza (miglia)",
+                "DepDelay": "Ritardo Partenza (min)",
+                "ArrDelay": "Ritardo Arrivo (min)",
+                "prediction": "Cluster"
+            },
+            title="Cluster dei voli"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        fig_box = px.box(
+            pd_clustered, x="prediction", y="DepDelay", color="prediction",
+            labels={"prediction": "Cluster", "DepDelay": "Ritardo Partenza (min)"},
+            title="Distribuzione ritardi in partenza per cluster"
+        )
+        st.plotly_chart(fig_box, use_container_width=True)
 
     with st.container(border=True):
         st.subheader("Clustering delle tratte: Distanza vs Ritardo Partenza")

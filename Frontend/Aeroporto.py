@@ -9,12 +9,13 @@ from Backend.query_aeroporto import (
 import pydeck as pdk
 import plotly.express as px
 from pyspark.sql import Row
+
 def mostra_aeroporto(df, aeroporti_info):
     st.title("Analisi per Aeroporto")
 
     aeroporti_disponibili = lista_aeroporti_unici(df)
     st.markdown(
-        "<p style='font-size:24px; font-weight:bold; margin-bottom:0;'> Seleziona un aeroporto</p>",
+        "<p style='font-size:20px; margin-bottom:0;'> Seleziona un aeroporto</p>",
         unsafe_allow_html=True
     )
     aeroporto_selezionato = st.selectbox(
@@ -38,7 +39,7 @@ def mostra_aeroporto(df, aeroporti_info):
         col2.metric("Voli Arrivati", f"{n_arrivati:,}")
         col3.metric("Voli Cancellati", f"{n_cancellati:,}")
 
-        st.markdown(f"**Città in cui è situato l'aeroporto**: {nome_citta}")
+        st.markdown(f"Città in cui è situato l'aeroporto: {nome_citta}")
 
     with st.container(border=True):
         st.subheader("Mappa delle Tratte")
@@ -94,7 +95,7 @@ def mostra_aeroporto(df, aeroporti_info):
         st.subheader("Ritardi e Cancellazioni")
 
         # Cause ritardi
-        st.markdown("#### Cause dei Ritardi")
+        st.markdown("Cause dei Ritardi")
         delay_causes_df = cause_ritardi_per_aeroporto(df, aeroporto_selezionato).toPandas()
         if not delay_causes_df.empty:
             delay_causes_df = delay_causes_df.T.reset_index()
@@ -115,7 +116,7 @@ def mostra_aeroporto(df, aeroporti_info):
             st.info("Nessun dato di ritardo disponibile per questo aeroporto.")
 
         # Ritardo medio mensile
-        st.markdown("#### Ritardo Medio Mensile")
+        st.markdown("Ritardo Medio Mensile")
         delay_monthly_df = distribuzione_ritardi_mensile(df, aeroporto_selezionato).toPandas()
         if not delay_monthly_df.empty:
             delay_monthly_df["Month"] = delay_monthly_df["Month"].astype(int)
@@ -130,12 +131,13 @@ def mostra_aeroporto(df, aeroporti_info):
             )
             fig_monthly.update_traces(texttemplate='%{text:.1f}', textposition='top center')
             fig_monthly.update_layout(yaxis_title="Ritardo Medio (min)", xaxis_title="Mese")
+            fig_monthly.update_layout(xaxis=dict(tickmode='linear'))
             st.plotly_chart(fig_monthly, use_container_width=True)
         else:
             st.info("Nessun ritardo disponibile per questo aeroporto.")
 
         # Cancellazioni per mese
-        st.markdown("#### Cancellazioni per Mese")
+        st.markdown("Cancellazioni per Mese")
         cancel_trend_df = trend_cancellazioni_stagionale(df, aeroporto_selezionato).toPandas()
         if not cancel_trend_df.empty:
             cancel_trend_df["Month"] = cancel_trend_df["Month"].astype(int)
@@ -149,12 +151,13 @@ def mostra_aeroporto(df, aeroporti_info):
             )
             fig_cancel.update_traces(texttemplate='%{text}', textposition='outside')
             fig_cancel.update_layout(yaxis_title="Cancellazioni", xaxis_title="Mese")
+            fig_cancel.update_layout(xaxis=dict(tickmode='linear'))
             st.plotly_chart(fig_cancel, use_container_width=True)
         else:
             st.info("Nessuna cancellazione registrata per questo aeroporto.")
 
     with st.container(border=True):
-        st.subheader("Compagnie Aeree in partenza da questo aeroporto)")
+        st.subheader("Compagnie Aeree in partenza da questo aeroporto")
         df_metrics = metriche_compagnie(df, aeroporto_selezionato).toPandas()
         df_metrics = df_metrics.rename(columns={"IATA_CODE_Reporting_Airline": "Compagnia"})
 
@@ -218,73 +221,3 @@ def mostra_aeroporto(df, aeroporti_info):
                     fig_worst.update_traces(texttemplate="%{text:.2f}", textposition="outside", marker_color="crimson")
                     fig_worst.update_layout(xaxis_title="Compagnia", yaxis_title="Punteggio")
                     st.plotly_chart(fig_worst, use_container_width=True)
-
-
-
-    with st.container(border=True):
-        st.subheader("Seleziona Aeroporto/i")
-        compagnie_df = elenco_tutti_aeroporti(df)
-        compagnie_list = [aeroporto['Origin'] for aeroporto in compagnie_df.collect()]
-        compagnie_list = sorted(compagnie_list)
-        compagnie_selezionate = st.multiselect("Seleziona uno o più aeroporti", compagnie_list)
-
-        if compagnie_selezionate :
-            if len(compagnie_selezionate) < 2:
-                modalita = "Media"  # Se un solo aeroporto è selezionato, seleziona automaticamente "Media"
-            else:
-                options = ["Media", "Confronto"]
-                modalita = st.pills("Seleziona modalità", options)
-
-            # Calcolare le statistiche degli aeroporti selezionati
-            stats_list = [statistiche_aeroporto(aeroporto, df) for aeroporto in compagnie_selezionate]
-
-            # Creazione del DataFrame PySpark per il confronto
-            rows = []
-            for stat in stats_list:
-                rows.append(Row(Aeroporto=stat["Aeroporto"],
-                                Totale_Voli=stat["Totale Voli"],
-                                Ritardo_Medio_Partenza=stat["Ritardo Medio Partenza"],
-                                Ritardo_Medio_Arrivo=stat["Ritardo Medio Arrivo"],
-                                Voli_Cancellati=stat["Voli Cancellati"],
-                                Voli_Dirottati=stat["Voli Dirottati"]))
-
-            stats_spark_df = df.sparkSession.createDataFrame(rows)
-
-            if modalita == "Media":
-                # Calcolo delle statistiche medie
-                media_stats = stats_spark_df.agg(
-                    {'Totale_Voli': 'avg', 'Ritardo_Medio_Partenza': 'avg', 'Ritardo_Medio_Arrivo': 'avg',
-                     'Voli_Cancellati': 'avg', 'Voli_Dirottati': 'avg'}).collect()[0]
-
-                st.subheader("Statistiche Medie")
-
-                # Visualizzazione grafica con Plotly
-                fig = px.bar(
-                    x=['Totale_Voli', 'Ritardo_Medio_Partenza', 'Ritardo_Medio_Arrivo', 'Voli_Cancellati',
-                       'Voli_Dirottati'],
-                    y=[media_stats['avg(Totale_Voli)'], media_stats['avg(Ritardo_Medio_Partenza)'],
-                       media_stats['avg(Ritardo_Medio_Arrivo)'], media_stats['avg(Voli_Cancellati)'],
-                       media_stats['avg(Voli_Dirottati)']],
-                    title="Statistiche Medie Aeroporti"
-                )
-                st.plotly_chart(fig)
-
-            else:
-                st.subheader("Confronto Aeroporti")
-                # Conversione del DataFrame Spark in Pandas
-                stats_spark_df = stats_spark_df.toPandas()
-
-                # Creazione di un DataFrame che raggruppa le statistiche per ogni metrica
-                metrics = ["Totale_Voli", "Ritardo_Medio_Partenza", "Ritardo_Medio_Arrivo", "Voli_Cancellati",
-                           "Voli_Dirottati"]
-
-                # Creazione di un DataFrame "lungo" per Plotly
-                stats_long_df = pd.melt(stats_spark_df, id_vars=["Aeroporto"], value_vars=metrics,
-                                        var_name="Metrica", value_name="Valore")
-
-                # Creazione del grafico a barre raggruppate per ogni metrica
-                fig = px.bar(stats_long_df, x="Metrica", y="Valore", color="Aeroporto",
-                             barmode="group", title="Confronto Statistiche Aeroporti")
-
-                # Mostra il grafico
-                st.plotly_chart(fig)

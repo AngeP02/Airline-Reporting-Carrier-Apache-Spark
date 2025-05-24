@@ -40,6 +40,7 @@ def mostra_ritardi_cancellazioni(df):
                 labels={"DayOfWeek": "Giorno della settimana", "TotalDepDelay": "Ritardo cumulativo (min)"},
             )
             fig_w_delay.update_traces(texttemplate="%{text:.0f}", textposition="outside")
+            fig_w_delay.update_layout(xaxis=dict(tickmode='linear'))
             st.plotly_chart(fig_w_delay, use_container_width=True)
         with col2:
             # Ritardi cumulativi mensili
@@ -54,6 +55,7 @@ def mostra_ritardi_cancellazioni(df):
                 labels={"Month": "Mese", "TotalDepDelay": "Ritardo cumulativo (min)"},
             )
             fig_m_delay.update_traces(texttemplate="%{text:.0f}", textposition="top center")
+            fig_m_delay.update_layout(xaxis=dict(tickmode='linear'))
             st.plotly_chart(fig_m_delay, use_container_width=True)
         col1, col2 = st.columns(2)
         with col1:
@@ -68,6 +70,7 @@ def mostra_ritardi_cancellazioni(df):
                 labels={"DayOfWeek": "Giorno della settimana", "Cancellazioni": "Numero di cancellazioni"},
             )
             fig_w_cancel.update_traces(texttemplate="%{text}", textposition="outside")
+            fig_w_cancel.update_layout(xaxis=dict(tickmode='linear'))
             st.plotly_chart(fig_w_cancel, use_container_width=True)
         with col2:
             # Cancellazioni mensili
@@ -82,6 +85,7 @@ def mostra_ritardi_cancellazioni(df):
                 labels={"Month": "Mese", "Cancellazioni": "Numero di cancellazioni"},
             )
             fig_m_cancel.update_traces(texttemplate="%{text}", textposition="top center")
+            fig_m_cancel.update_layout(xaxis=dict(tickmode='linear'))
             st.plotly_chart(fig_m_cancel, use_container_width=True)
 
         # --- Analisi Temporale Ritardo Medio ---
@@ -101,6 +105,7 @@ def mostra_ritardi_cancellazioni(df):
                 labels={"Month": "Mese", "AvgDepDelay": "Ritardo medio (min)"},
             )
             fig_avg_m.update_traces(texttemplate="%{text:.1f}", textposition="outside")
+            fig_avg_m.update_layout(xaxis=dict(tickmode='linear'))
             st.plotly_chart(fig_avg_m, use_container_width=True)
         with col2:
             # Ritardo medio per giorno della settimana
@@ -118,7 +123,7 @@ def mostra_ritardi_cancellazioni(df):
 
         # --- Classifiche Compagnie ---
         with st.container(border=True):
-            st.subheader("Classifiche Compagnie Aeree (Ritardi e cancellazioni")
+            st.subheader("Classifiche Compagnie Aeree per ritardi e cancellazioni")
             df_comp = classifica_compagnie(df).toPandas()
             # rinomina le colonne in italiano
             df_comp_ita = df_comp.rename(columns={
@@ -166,7 +171,6 @@ def mostra_ritardi_cancellazioni(df):
                                  title="Percentuale di minuti di ritardo per causa")
                 st.plotly_chart(fig_pct, use_container_width=True)
             with col2:
-                st.markdown("Andamento mensile delle cause")
                 df_trend = trend_cause_mensile(df)
                 fig_trend = px.line(df_trend, x="Month", y=["Carrier", "Weather", "NAS", "Security", "LateAircraft"],
                                     markers=True, labels={"value": "Minuti di ritardo", "variable": "Causa"},

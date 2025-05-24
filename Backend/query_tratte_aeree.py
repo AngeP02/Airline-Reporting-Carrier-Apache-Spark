@@ -51,9 +51,10 @@ def ritardo_per_fascia_oraria(df: DataFrame) -> DataFrame:
     return (
         df.filter((col("Cancelled") == 0) & col("DepDelay").isNotNull())
           .withColumn("Hour", floor(col("DepTime")/100))
-          .withColumn("TimeBlock", when((col("Hour") >= 5) & (col("Hour") <= 11), "Mattina (05:00 - 11:00)")
-                                   .when((col("Hour") >= 17) & (col("Hour") <= 23), "Sera (17:00 - 23:00)")
-                                   .otherwise("Notte (23:00 - 05:00)"))
+          .withColumn("TimeBlock", when((col("Hour") >= 6) & (col("Hour") <= 12), "Mattina (06:00 - 12:00)")
+                                    .when((col("Hour") >= 12) & (col("Hour") <= 18), "Pomeriggio (12:00 - 18:00)")
+                                   .when((col("Hour") >= 18) & (col("Hour") <= 24), "Sera (18:00 - 24:00)")
+                                   .otherwise("Notte (00:00 - 06:00)"))
           .groupBy("TimeBlock")
           .agg(spark_round(avg("DepDelay"), 2).alias("AvgDepDelay"))
           .orderBy("TimeBlock")

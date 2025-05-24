@@ -1,14 +1,20 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-import sys
-import os
 from pyspark import StorageLevel
 from pyspark.sql import SparkSession
 import pandas as pd
+import sys
+import os
+
+
+# Layout Streamlit
+st.set_page_config(page_title="Analisi Voli", layout="wide")
 
 os.environ["PYSPARK_PYTHON"] = "python"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+
+# Import delle funzioni di visualizzazione ottimizzate
 from Frontend.Aeroporto import mostra_aeroporto
 from Frontend.CompagnieAeree import mostra_compagnia
 from Frontend.Citta import mostra_citta
@@ -16,111 +22,102 @@ from Frontend.RitardiCancellazioni import mostra_ritardi_cancellazioni
 from Frontend.TratteAeree import mostra_tratte
 from Frontend.Home import mostra_home
 from Frontend.AI import mostra_ai
+from Frontend.Graph import mostra_graph
 
-file_paths = [
-    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_1_clean.csv",
-    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_2_clean.csv",
-    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_3_clean.csv",
-    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_4_clean.csv",
-    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_5_clean.csv",
-    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_6_clean.csv",
-    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_7_clean.csv",
-    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_8_clean.csv",
-    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_9_clean.csv",
-    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_10_clean.csv",
-    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_11_clean.csv",
-    "C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/Preprocessing/Puliti/On_Time_Reporting_Carrier_12_clean.csv",
 
-]
-aeroporti_info = pd.read_csv("C:/Users/ANGELICA/Desktop/ANGELICA/UNICAL/MAGISTRALE/I ANNO/PRIMO SEMESTRE/MODELLI E TECNICHE PER BIG DATA/PROGETTO/CODICE/distutils/usa-airports.csv")
-
-def get_spark_session(app_name="ProgettoVoli"):
-    return (
+# Impostazioni Spark e caching
+@st.cache_resource
+def init_spark(app_name: str = "ProgettoVoli") -> SparkSession:
+    spark = (
         SparkSession.builder
         .appName(app_name)
         .master("local[*]")
-        .config("spark.driver.memory", "16g")
+        # Configurazioni di ottimizzazione
+        .config("spark.driver.memory", "18g")
         .config("spark.sql.shuffle.partitions", "8")
+        .config("spark.sql.adaptive.enabled", "true")
+        .config("spark.sql.autoBroadcastJoinThreshold", "104857600")  # 100 MB
+        .config("spark.jars.packages","graphframes:graphframes:0.8.2-spark3.2-s_2.12")
         .getOrCreate()
     )
+    checkpoint_dir = "./tmp/checkpoints"
+    spark.sparkContext.setCheckpointDir(checkpoint_dir)
 
-spark = get_spark_session()
-
-
-df = None
-for file in file_paths:
-    temp_df = spark.read.csv(file, header=True, inferSchema=True)
-    df = temp_df if df is None else df.union(temp_df)
-df.persist(StorageLevel.MEMORY_AND_DISK)
+    return spark
 
 
-def main():
-    st.set_page_config(page_title="Analisi Voli", layout="wide")
-    menu_items = [
-        "Home",
-        "Aeroporto",
-        "Compagnie aeree",
-        "Città",
-        "Ritardi e cancellazioni",
-        "Tratte aeree",
-        "Previsione AI"
-    ]
-    menu_icons = [
-        "house",
-        "geo-alt",
-        "airplane",
-        "building",
-        "clock-history",
-        "map",
-        "cpu"
-    ]
+@st.cache_resource
+def load_flights(file_paths: list[str]) -> 'DataFrame':
+    spark = init_spark()
+    parquet_path = "./dataset/voli_parquet"
 
-    scelta = option_menu(
-        menu_title=None,
-        options=menu_items,
-        icons=menu_icons,
-        default_index=0,
-        orientation="horizontal",
-        styles={
-            "container": {"padding": "0px", "background-color": "#f0f2f6"},
-            "nav-link": {
-                "font-size": "16px",
-                "text-align": "center",
-                "margin": "0px",
-                "padding": "10px 0px",
-                "flex": "1"
-            },
-            "nav-link-selected": {
-                "background-color": "#0275d8",
-                "color": "white",
-                "font-weight": "bold"
-            }
-        }
-    )
+    if not os.path.exists(parquet_path):
+        df = (
+            spark.read
+            .option("header", True)
+            .option("inferSchema", True)
+            .csv(file_paths)
+        )
+        #df = df.repartition("Origin").persist(StorageLevel.MEMORY_ONLY)
+        df.count()
+        df.write.mode("overwrite").parquet(parquet_path)
+    else:
+        df = spark.read.parquet(parquet_path).persist(StorageLevel.MEMORY_ONLY)
+        df.count()
 
-    if scelta == "Home":
-        mostra_home(df, aeroporti_info)
-
-    elif scelta == "Aeroporto":
-        mostra_aeroporto(df, aeroporti_info)
+    return df
 
 
-    elif scelta == "Compagnie aeree":
-        mostra_compagnia(df, aeroporti_info)
+@st.cache_data(show_spinner=False)
+def load_airports(csv_path: str) -> pd.DataFrame:
+    # Carica solo colonne necessarie
+    df = pd.read_csv(csv_path)
+    return df
 
-    elif scelta == "Città":
-        mostra_citta(df,aeroporti_info)
+# Inizializza dati
+file_paths = [
+    "./Preprocessing/Puliti/On_Time_Reporting_Carrier_*_clean.csv"
+]
+aeroporti_info = load_airports("./distutils/usa-airports.csv")
+flights_df = load_flights(file_paths)
 
 
-    elif scelta == "Ritardi e cancellazioni":
-        mostra_ritardi_cancellazioni(df)
+# Definisce il menu di navigazione
+menu_options = [
+    ("Home", "house"),
+    ("Aeroporto", "geo-alt"),
+    ("Compagnie aeree", "airplane"),
+    ("Città", "building"),
+    ("Ritardi e cancellazioni", "clock-history"),
+    ("Tratte aeree", "map"),
+    ("Previsione AI", "cpu"),
+    ("Graph", "graph-up"),
+]
 
-    elif scelta == "Tratte aeree":
-        mostra_tratte(df, aeroporti_info)
+choice = option_menu(
+    menu_title=None,
+    options=[opt[0] for opt in menu_options],
+    icons=[opt[1] for opt in menu_options],
+    default_index=0,
+    orientation="horizontal",
+    styles={
+        "container": {"background-color": "#f0f2f6", "padding": "0"},
+        "nav-link": {"font-size": "16px", "padding": "10px 0"},
+        "nav-link-selected": {"background-color": "#0275d8", "color": "white"}
+    }
+)
 
+# Mappa scelta a funzione
+page_funcs = {
+    "Home": lambda: mostra_home(flights_df, aeroporti_info),
+    "Aeroporto": lambda: mostra_aeroporto(flights_df, aeroporti_info),
+    "Compagnie aeree": lambda: mostra_compagnia(flights_df, aeroporti_info),
+    "Città": lambda: mostra_citta(flights_df, aeroporti_info),
+    "Ritardi e cancellazioni": lambda: mostra_ritardi_cancellazioni(flights_df),
+    "Tratte aeree": lambda: mostra_tratte(flights_df, aeroporti_info),
+    "Previsione AI": lambda: mostra_ai(flights_df),
+    "Graph": lambda: mostra_graph(flights_df)
+}
 
-    elif scelta == "Previsione AI":
-        mostra_ai(df)
-
-if __name__ == "__main__":
-    main()
+# Esecuzione della pagina selezionata
+page_funcs[choice]()

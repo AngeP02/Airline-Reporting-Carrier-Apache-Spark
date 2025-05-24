@@ -162,14 +162,17 @@ def mostra_home(df, aeroporti_info):
             max_delay = mappa_df["avg_delay"].max()
             min_flights = mappa_df["flight_count"].min()
             max_flights = mappa_df["flight_count"].max()
+            col1,col2 = st.columns(2)
+            with col1:
+                st.markdown("**Legenda Dimensione Cerchi**")
+                st.markdown(f"Cerchio piccolo: circa {min_flights} voli")
+                st.markdown(f"Cerchio grande: circa {max_flights} voli")
 
-            st.markdown("**Legenda Colore (ritardo medio)**")
-            st.markdown(f"- 🟩 Verde = {min_delay:.1f} min di ritardo medio")
-            st.markdown(f"- 🟥 Rosso = {max_delay:.1f} min di ritardo medio")
-
-            st.markdown("**Legenda Dimensione (numero voli)**")
-            st.markdown(f"- 🔵 Cerchio piccolo = {min_flights} voli")
-            st.markdown(f"- 🔴 Cerchio grande = {max_flights} voli")
+            with col2:
+                st.markdown("**Legenda Colore Cerchi**")
+                # Puoi definire una scala di colori più precisa se lo desideri
+                st.markdown(f"Colore chiaro: ritardo medio vicino a {min_delay:.2f} min")
+                st.markdown(f"Colore scuro: ritardo medio vicino a {max_delay:.2f} min")
         else:
             st.warning("Nessun dato disponibile per la mappa aeroporti.")
 
@@ -184,15 +187,15 @@ def mostra_home(df, aeroporti_info):
                 x=agg_df_pandas['Month'],
                 y=agg_df_pandas['NumeroVoli'],
                 name='Numero di voli per mese',
-                marker=dict(color='lightblue')
+                marker=dict(color='steelblue')
             ))
             fig.update_layout(
-                title='Numero di voli per mese',
                 xaxis_title='Mese',
                 yaxis_title='Numero di voli',
                 template='plotly_dark',
                 showlegend=False
             )
+            fig.update_layout(xaxis=dict(tickmode='linear'))
             st.plotly_chart(fig)
 
         with col2:
@@ -206,7 +209,6 @@ def mostra_home(df, aeroporti_info):
                 marker=dict(colors=["#00cc96", "#f44336", "#ff9800"])  # Colori personalizzati
             )])
             fig.update_layout(
-                title="Puntualità vs. Ritardi dei Voli",
                 showlegend=True
             )
             st.plotly_chart(fig)

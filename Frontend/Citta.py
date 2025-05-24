@@ -15,7 +15,7 @@ def mostra_citta(df, aeroporti_info):
 
     lista_citta = lista_citta_uniche(df)
     st.markdown(
-        "<p style='font-size:24px; font-weight:bold; margin-bottom:0;'> Seleziona una città</p>",
+        "<p style='font-size:20px; margin-bottom:0;'> Seleziona una città</p>",
         unsafe_allow_html=True
     )
     citta = st.selectbox(
@@ -162,43 +162,43 @@ def mostra_citta(df, aeroporti_info):
 
         if n_ae > 1:
             col11, col12 = st.columns(2)
-            aeroporti_selezionati = st.multiselect(
-                "Seleziona aeroporti:",
-                options=sorted(aeroporti_citta),
-                default=sorted(aeroporti_citta)
-            )
+
             with col11:
                 # distribuzione partenze
                 dep_df = (
                     df.filter(col("Origin").isin(aeroporti_selezionati))
                     .groupBy("Origin")
-                    .agg(count("*").alias("num_flights"))
+                    .agg(count("*").alias("Numero_voli"))
                     .toPandas()
                 )
-                fig_dep = px.bar(dep_df, x="Origin", y="num_flights",
+                fig_dep = px.bar(dep_df, x="Origin", y="Numero_voli",
                                  title="Voli Partiti per Aeroporto",
                                  text_auto=True)
+                fig_dep.update_layout(xaxis_title="Aeroporto di Partenza", yaxis_title="Numero di Voli")
                 st.plotly_chart(fig_dep, use_container_width=True)
             with col12:
                 # distribuzione arrivi
                 arr_df = (
                     df.filter(col("Dest").isin(aeroporti_selezionati))
                     .groupBy("Dest")
-                    .agg(count("*").alias("num_flights"))
+                    .agg(count("*").alias("Numero_voli"))
                     .toPandas()
                 )
-                fig_arr = px.bar(arr_df, x="Dest", y="num_flights",
+                fig_arr = px.bar(arr_df, x="Dest", y="Numero_voli",
                                  title="Voli Arrivati per Aeroporto",
                                  text_auto=True)
+                fig_arr.update_layout(xaxis_title="Aeroporto di Destinazione", yaxis_title="Numero di Voli")
                 st.plotly_chart(fig_arr, use_container_width=True)
 
             # se c'è un solo aeroporto → metriche semplici
         elif n_ae == 1:
+            st.markdown("E' presente un solo aeroporto in città:")
             a = aeroporti_citta[0]
             n_dep = df.filter(col("Origin") == a).count()
             n_arr = df.filter(col("Dest") == a).count()
-            st.metric("Voli Partiti", f"{n_dep:,}")
-            st.metric("Voli Arrivati", f"{n_arr:,}")
+            col1, col2 = st.columns(2)
+            col1.metric("Voli Partiti", f"{n_dep:,}")
+            col2.metric("Voli Arrivati", f"{n_arr:,}")
 
         else:
             st.info("Nessun aeroporto trovato per questa città.")
@@ -267,16 +267,13 @@ def mostra_citta(df, aeroporti_info):
                         st.plotly_chart(fig2, use_container_width=True)
 
             st.markdown("**Compagnie attive in città:**")
-            st.markdown(
-                "<div style='display: flex; flex-wrap: wrap; gap: 8px;'>"
-                + "".join(
-                    f"<span style='background-color: #e0f0ff; padding: 5px 10px; border-radius: 15px;"
-                    f" border: 1px solid #ccc; font-size: 14px;'>{iata}</span>"
-                    for iata in sorted(active)
-                )
-                + "\n</div>",
-                unsafe_allow_html=True
-            )
+            active_sorted = sorted(active)
+            num_columns = 15  # Puoi provare con 3 o un altro numero
+            cols = st.columns(num_columns)
+
+            for i, iata in enumerate(active_sorted):
+                with cols[i % num_columns]:
+                    st.info(iata)  # Puoi usare anche st.success, st.warning, st.error o st.markdown con stili
 
     with st.container(border=True):
         st.subheader("Analisi Mensile")
@@ -295,6 +292,7 @@ def mostra_citta(df, aeroporti_info):
                     color_discrete_sequence=["#1f77b4"]
                 )
                 fig.update_traces(mode="lines+markers", hovertemplate="Mese: %{x}<br>Voli: %{y}")
+                fig.update_layout(xaxis=dict(tickmode='linear'))
                 st.plotly_chart(fig, use_container_width=True)
 
         # Voli arrivati
@@ -309,6 +307,7 @@ def mostra_citta(df, aeroporti_info):
                     color_discrete_sequence=["#2ca02c"]
                 )
                 fig.update_traces(mode="lines+markers", hovertemplate="Mese: %{x}<br>Voli: %{y}")
+                fig.update_layout(xaxis=dict(tickmode='linear'))
                 st.plotly_chart(fig, use_container_width=True)
 
         # Voli totali
@@ -323,6 +322,7 @@ def mostra_citta(df, aeroporti_info):
                     color_discrete_sequence=["#9467bd"]
                 )
                 fig.update_traces(mode="lines+markers", hovertemplate="Mese: %{x}<br>Voli: %{y}")
+                fig.update_layout(xaxis=dict(tickmode='linear'))
                 st.plotly_chart(fig, use_container_width=True)
 
         # Cancellazioni
@@ -337,4 +337,5 @@ def mostra_citta(df, aeroporti_info):
                     color_discrete_sequence=["#d62728"]
                 )
                 fig.update_traces(mode="lines+markers", hovertemplate="Mese: %{x}<br>Cancellazioni: %{y}")
+                fig.update_layout(xaxis=dict(tickmode='linear'))
                 st.plotly_chart(fig, use_container_width=True)

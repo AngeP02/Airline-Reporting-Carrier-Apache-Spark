@@ -36,6 +36,8 @@ for i, file_path in enumerate(file_paths, start=1):
 
     df = pd.read_csv(file_path, low_memory=False)  # low_memory evita warning su colonne con tipi misti
     df_clean = df.drop(columns=[col for col in colonne_da_rimuovere if col in df.columns], errors='ignore')
+    df_clean = df_clean.drop_duplicates()
+    df_clean = df_clean.dropna(how='all')
 
     # Salva il DataFrame pulito in CSV
     output_path = os.path.join(output_folder, f"On_Time_Reporting_Carrier_{i}_clean.csv")

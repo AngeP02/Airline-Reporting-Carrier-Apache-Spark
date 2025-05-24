@@ -1,21 +1,24 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
-
-# configurazione ambiente (aggiorna i percorsi se necessario)
 import os
 
 os.environ["HADOOP_HOME"] = "C:\\hadoop"
 os.environ["SPARK_HOME"] = "C:\\spark"
 
-# Creazione della sessione Spark (sul driver)
-spark = SparkSession.builder \
-    .appName("AnalisiDatiVoli") \
-    .config("spark.driver.memory", "24g") \
-    .config("spark.sql.debug.maxToStringFields", "1000") \
-    .config("spark.hadoop.fs.defaultFS", "file:///") \
-    .config("spark.hadoop.fs.file.impl", "org.apache.hadoop.fs.LocalFileSystem") \
-    .master("local[*]") \
-    .getOrCreate()
+spark = (
+        SparkSession.builder
+        .appName("ProgettoVoli")
+        .master("local[*]")
+        .config("spark.driver.memory", "18g")
+        .config("spark.sql.shuffle.partitions", "8")
+        .config("spark.sql.adaptive.enabled", "true")
+        .config("spark.sql.autoBroadcastJoinThreshold", "104857600")
+        .config("spark.sql.debug.maxToStringFields", "1000")
+        .config("spark.hadoop.fs.defaultFS", "file:///")
+        .config("spark.hadoop.fs.file.impl", "org.apache.hadoop.fs.LocalFileSystem")
+        .getOrCreate()
+)
+
 
 print("PYSPARK_PYTHON:", os.environ.get("PYSPARK_PYTHON"))
 print("Spark Version:", spark.version)
