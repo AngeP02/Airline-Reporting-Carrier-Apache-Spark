@@ -116,7 +116,7 @@ page_funcs = {
     "Ritardi e cancellazioni": lambda: mostra_ritardi_cancellazioni(flights_df),
     "Tratte aeree": lambda: mostra_tratte(flights_df, aeroporti_info),
     "Previsione AI": lambda: mostra_ai(flights_df),
-    "Graph": lambda: mostra_graph(flights_df)
+    "Graph": lambda: mostra_graph(flights_df, aeroporti_info)
 }
 
 # Esecuzione della pagina selezionata

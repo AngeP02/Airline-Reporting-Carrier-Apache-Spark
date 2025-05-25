@@ -1,128 +1,284 @@
-from pyspark.sql.functions import col
-from graphframes import GraphFrame
-import pandas as pd
-from pyvis.network import Network
-import streamlit.components.v1 as components
 import streamlit as st
-import matplotlib.pyplot as plt
-import plotly.express as px
+import pandas as pd
+import pydeck as pdk
+from graphframes import GraphFrame
+from matplotlib import pyplot as plt
+from pyspark.sql.functions import col, avg, desc, month
+import networkx as nx
+from node2vec import Node2Vec
+from pyvis.network import Network
+import random
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 
-def mostra_graph(flights_df):
-    st.title("Analisi del Grafo delle Rotte Aeree")
+@st.cache_resource
+def build_graph(_flights_df):
+    clean_df = _flights_df.filter("Cancelled == 0 AND Diverted == 0")
+    vertices = clean_df.select(col("Origin").alias("id")).union(
+        clean_df.select(col("Dest").alias("id"))
+    ).distinct()
+    edges = clean_df.groupBy("Origin", "Dest").agg(avg("ArrDelay").alias("weight")) \
+        .select(col("Origin").alias("src"), col("Dest").alias("dst"), "weight")
+    return GraphFrame(vertices, edges)
 
-    # Selezione modalità di costruzione
-    st.markdown("### Seleziona una modalità per costruire il grafo")
-    filtro = st.selectbox("Metodo di costruzione", [
-        "Top 500 rotte più frequenti",
-        "Solo voli da un aeroporto specifico",
-        "Campione casuale del 2%",
-    ])
+@st.cache_resource
+def compute_pagerank(_g):
+    return _g.pageRank(resetProbability=0.15, maxIter=10)
 
-    if filtro == "Top 500 rotte più frequenti":
-        rotte = flights_df.groupBy("Origin", "Dest").count().orderBy("count", ascending=False).limit(500)
-    elif filtro == "Solo voli da un aeroporto specifico":
-        aeroporto = st.text_input("Inserisci codice aeroporto (es. JFK)", value="JFK")
-        rotte = flights_df.filter(col("Origin") == aeroporto).select("Origin", "Dest").distinct()
+@st.cache_resource
+def compute_components(_g):
+    return _g.connectedComponents()
+
+@st.cache_resource
+def compute_motifs(_g):
+    return _g.find("(a)-[ab]->(b); (b)-[bc]->(c); (c)-[ca]->(a)")
+
+
+@st.cache_resource
+def build_monthly_graph(flights_df, selected_month):
+    snapshot_df = flights_df.filter(month("FlightDate") == selected_month).filter("Cancelled == 0 AND Diverted == 0")
+    return build_graph(snapshot_df)
+
+
+def visualizza_mappa_dinamica(opzione, aeroporti_info, top_hubs_df=None, motifs_clean=None, components=None):
+    st.write(f"Visualizzazione scelta: '{opzione}'")
+
+    if opzione == "PageRank":
+        if top_hubs_df is not None:
+            dati = top_hubs_df.merge(aeroporti_info, left_on="id", right_on="iata", how="left").dropna()
+            if dati.empty:
+                st.warning("Nessun dato geolocalizzato dopo il merge.")
+                return
+
+            # Scala raggio per evidenziare PageRank (esempio: moltiplica pagerank per 5000)
+            dati['radius'] = dati['pagerank'] * 25000
+
+            # Colore rosso, ma con trasparenza modulata dal pagerank (più alto = più intenso)
+            max_pr = dati['pagerank'].max()
+            dati['color_intensity'] = (dati['pagerank'] / max_pr * 255).astype(int)
+            dati['color'] = dati['color_intensity'].apply(lambda c: [200, 30, 0, c])
+
+            # Usare una colonna di colore e radius
+            st.pydeck_chart(pdk.Deck(
+                map_style='mapbox://styles/mapbox/light-v9',
+                initial_view_state=pdk.ViewState(latitude=37.7749, longitude=-95.0, zoom=3),
+                layers=[
+                    pdk.Layer(
+                        'ScatterplotLayer',
+                        data=dati,
+                        get_position='[longitude, latitude]',
+                        get_radius='radius',
+                        get_fill_color='color',
+                        pickable=True,
+                        auto_highlight=True,
+                    ),
+                    # Rimosso TextLayer
+                ],
+                tooltip={
+                    "html": "<b>Aeroporto:</b> {iata}<br><b>PageRank:</b> {pagerank}",
+                    "style": {
+                        "backgroundColor": "steelblue",
+                        "color": "white",
+                        "fontWeight": "bold",
+                        "padding": "5px",
+                        "borderRadius": "5px",
+                    }
+                }
+            ))
+        else:
+            st.warning("Nessun dato PageRank disponibile.")
+
+
+
+    elif opzione.lower() == "motif":
+        if motifs_clean is not None and not motifs_clean.empty:
+            motifs_clean['total_delay'] = (
+                    motifs_clean['Delay_AB'] + motifs_clean['Delay_BC'] + motifs_clean['Delay_CA']
+            )
+            top_motifs = motifs_clean.sort_values('total_delay', ascending=False).head(50)
+
+            def build_triangles(row):
+                try:
+                    A = aeroporti_info.loc[aeroporti_info['iata'] == row['Airport_A']]
+                    B = aeroporti_info.loc[aeroporti_info['iata'] == row['Airport_B']]
+                    C = aeroporti_info.loc[aeroporti_info['iata'] == row['Airport_C']]
+                    if A.empty or B.empty or C.empty:
+                        return None
+                    return [
+                        [A['longitude'].values[0], A['latitude'].values[0]],
+                        [B['longitude'].values[0], B['latitude'].values[0]],
+                        [C['longitude'].values[0], C['latitude'].values[0]],
+                        [A['longitude'].values[0], A['latitude'].values[0]],
+                    ]
+                except Exception as e:
+                    print(f"Errore triangolo: {e}")
+                    return None
+
+            top_motifs['triangle'] = top_motifs.apply(build_triangles, axis=1)
+            colormap = cm.get_cmap('tab20', len(top_motifs))  # 20+ colori ben distinti
+
+            def get_unique_color(idx):
+                rgba = colormap(idx)
+                return [int(rgba[0] * 255), int(rgba[1] * 255), int(rgba[2] * 255), int(180)]  # opacità fissa
+
+            top_motifs['fill_color'] = [[0, 0, 0, 0] for _ in range(len(top_motifs))]
+            top_motifs['line_color'] = [get_unique_color(i) for i in range(len(top_motifs))]
+
+            data_for_layer = top_motifs.apply(lambda r: {
+                'polygon': r['triangle'],
+                'fill_color': r['fill_color'],
+                'line_color': r['line_color'],
+                'total_delay': r['total_delay'],
+                'Airport_A': r['Airport_A'],
+                'Airport_B': r['Airport_B'],
+                'Airport_C': r['Airport_C'],
+            }, axis=1).tolist()
+
+            st.pydeck_chart(pdk.Deck(
+                map_style='mapbox://styles/mapbox/light-v9',
+                initial_view_state=pdk.ViewState(latitude=37.7749, longitude=-95.0, zoom=3),
+                layers=[
+                    pdk.Layer(
+                        "PolygonLayer",
+                        data=data_for_layer,
+                        get_polygon="polygon",
+                        get_fill_color="fill_color",
+                        get_line_color="line_color",
+                        line_width_min_pixels=5,
+                        pickable=True,
+                        auto_highlight=True,
+                    )
+                ],
+
+                tooltip={
+                    "html": "<b>Triangolo Motif</b><br>Aeroporti: {Airport_A}, {Airport_B}, {Airport_C}<br>Ritardo totale: {total_delay}",
+                    "style": {
+                        "backgroundColor": "steelblue",
+                        "color": "white",
+                        "fontWeight": "bold",
+                        "padding": "5px",
+                        "borderRadius": "5px",
+                    }
+                }
+            ))
+        else:
+            st.warning("Nessun dato Motif disponibile o motifs_clean è vuoto.")
     else:
-        rotte = flights_df.sample(fraction=0.02, seed=42).select("Origin", "Dest").distinct()
+        st.warning("Seleziona una visualizzazione valida.")
+        return
 
-    aeroporti = rotte.selectExpr("Origin as id").union(rotte.selectExpr("Dest as id")).distinct()
-    archi = rotte.selectExpr("Origin as src", "Dest as dst")
-    g = GraphFrame(aeroporti, archi)
 
-    # PageRank
-    with st.spinner("Calcolo PageRank..."):
-        pagerank = g.pageRank(resetProbability=0.15, maxIter=10).vertices.toPandas()
-    st.subheader("Aeroporti più centrali (PageRank)")
-    top_pr = pagerank.sort_values("pagerank", ascending=False).head(20)
-    fig = px.bar(top_pr, x="id", y="pagerank", title="Top 20 Aeroporti per PageRank", labels={"id": "Aeroporto"})
-    st.plotly_chart(fig)
+def mostra_graph(flights_df, aeroporti_info):
+    st.title("Analisi di rete del traffico aereo")
 
-    # Degree
-    with st.spinner("Calcolo Degree..."):
-        degrees = g.degrees.toPandas()
-    st.subheader("Grado (Numero di Connessioni) per Aeroporto")
-    top_deg = degrees.sort_values("degree", ascending=False).head(20)
-    fig2 = px.bar(top_deg, x="id", y="degree", title="Top 20 Aeroporti per Connessioni", labels={"id": "Aeroporto"})
-    st.plotly_chart(fig2)
+    with st.spinner("Costruzione del grafo..."):
+        g = build_graph(flights_df)
 
-    # Connected components (comunità)
-    with st.spinner("Calcolo componenti connesse..."):
-        connected_components = g.connectedComponents().select("id", "component").toPandas()
-    st.subheader("Comunità (Gruppi di Aeroporti Connessi)")
-    n_components = connected_components["component"].nunique()
-    st.markdown(f"**Numero di componenti connesse trovate:** {n_components}")
-    st.markdown(f"Visualizzazione delle componenti connesse nel grafo.")
+    edges_pd = g.edges.select("src", "dst").toPandas()
+    Gnx = nx.from_pandas_edgelist(edges_pd, source="src", target="dst", create_using=nx.DiGraph())
+    with st.expander("Visualizza rete completa"):
+        plt.figure(figsize=(12, 8))
+        pos = nx.spring_layout(Gnx, k=0.2, iterations=20)
+        nx.draw(Gnx, pos, with_labels=True, node_size=80, font_size=7, arrows=True)
+        st.pyplot(plt.gcf())
 
-    # Motif finding
-    with st.spinner("Calcolo motif A→B→C"):
-        motifs = g.find("(a)-[]->(b); (b)-[]->(c)")\
-            .selectExpr("a.id as from", "b.id as via", "c.id as to")\
-            .toPandas()
 
-    st.subheader("Motif Finding (A → B → C)")
-    via_nodes = motifs['via'].unique()
-    if len(via_nodes) == 0:
-        st.info("Nessun pattern A→B→C trovato.")
-    else:
-        selezionato = st.selectbox("Seleziona un aeroporto hub (via):", sorted(via_nodes))
+    col_analisi, col_mappa = st.columns([1,2])
+    pagerank = compute_pagerank(g)
+    components = compute_components(g)
+    motifs = compute_motifs(g)
 
-        filtrati = motifs[motifs['via'] == selezionato]
+    top_hubs_df = pagerank.vertices.orderBy(desc("pagerank")).toPandas()
+    motifs_clean = motifs.select(
+        col("a.id").alias("Airport_A"),
+        col("b.id").alias("Airport_B"),
+        col("c.id").alias("Airport_C"),
+        col("ab.weight").alias("Delay_AB"),
+        col("bc.weight").alias("Delay_BC"),
+        col("ca.weight").alias("Delay_CA")
+    ).toPandas()
 
-        st.markdown(f"### Motif con nodo centrale **{selezionato}**")
+    with col_mappa:
+        try:
+            st.subheader("Rete aeroporti")
+            options = ["PageRank", "Motif"]
+            scelta = st.pills("Directions", options, selection_mode="single")
+            if scelta is None:
+                scelta = "PageRank"
+            visualizza_mappa_dinamica(scelta, aeroporti_info,
+                                      top_hubs_df=top_hubs_df,
+                                      motifs_clean=motifs_clean,
+                                      components=components)
+        except Exception as e:
+            st.error(f"Errore nella visualizzazione mappa: {e}")
 
-        for idx, row in filtrati.iterrows():
-            mini_net = Network(height="300px", width="100%", bgcolor="#111", font_color="white")
-            mini_net.add_node(row['from'], label=row['from'], color="lightblue")
-            mini_net.add_node(row['via'], label=row['via'], color="orange")
-            mini_net.add_node(row['to'], label=row['to'], color="lightgreen")
-            mini_net.add_edge(row['from'], row['via'])
-            mini_net.add_edge(row['via'], row['to'])
+    with col_analisi:
+        st.subheader("Risultati analisi (1)")
 
-            file_name = f"motif_{idx}.html"
-            mini_net.save_graph(file_name)
-            with open(file_name, 'r', encoding='utf-8') as f:
-                components.html(f.read(), height=300)
+        with st.spinner("Calcolo PageRank e Componenti connesse"):
+            pagerank = compute_pagerank(g)
+            top_hubs_df = pagerank.vertices.orderBy(desc("pagerank")).toPandas()
+            components = compute_components(g)
+            component_df = components.groupBy("component").count().orderBy(desc("count")).toPandas()
+        st.write("Top aeroporti per PageRank:")
+        st.dataframe(top_hubs_df)
+        st.write("Componenti connesse:")
+        st.dataframe(component_df)
 
-    # Analisi della resilienza della rete
-    st.subheader("Analisi della resilienza della rete")
-    top_degree_node = degrees.sort_values("degree", ascending=False).iloc[0]['id']
-    st.markdown(f"**Aeroporto con il massimo grado (più connesso): {top_degree_node}**")
+        with st.spinner("Calcolo Motif Finding"):
+            motifs = compute_motifs(g)
+            motifs_clean = motifs.select(
+                col("a.id").alias("Airport_A"),
+                col("b.id").alias("Airport_B"),
+                col("c.id").alias("Airport_C"),
+                col("ab.weight").alias("Delay_AB"),
+                col("bc.weight").alias("Delay_BC"),
+                col("ca.weight").alias("Delay_CA")
+            ).toPandas()
+        st.write("Motifs:")
+        st.dataframe(motifs_clean)
 
-    # Rimuovere l'aeroporto più connesso e ricalcolare la rete
-    nodes_pdf = aeroporti.toPandas().merge(connected_components, on="id", how="left")
-    g_resilienza = g.subgraph([row['id'] for idx, row in nodes_pdf.iterrows() if row['id'] != top_degree_node])
+    with st.spinner("Calcolo Gradi e Triangoli"):
+        indegree = g.inDegrees.orderBy(desc("inDegree")).toPandas()
+        outdegree = g.outDegrees.orderBy(desc("outDegree")).toPandas()
+        triangles = g.triangleCount().orderBy(desc("count")).toPandas()
+    col1,col2, col3 = st.columns(3)
+    with col1:
+        st.write("In-degree:")
+        st.dataframe(indegree)
+    with col2:
+        st.write("Out-degree:")
+        st.dataframe(outdegree)
+    with col3:
+        st.write("Conteggio triangoli:")
+        st.dataframe(triangles)
 
-    st.markdown(f"**Componente connessa dopo la rimozione di {top_degree_node}:**")
-    connected_components_resilienza = g_resilienza.connectedComponents().select("id", "component").toPandas()
-    st.write(connected_components_resilienza)
+    with st.spinner("💥 Simulazione guasto aeroporto"):
+        airport_to_remove = st.selectbox("Aeroporto da simulare come guasto", top_hubs_df["id"].tolist())
+        reduced_edges = g.edges.filter((col("src") != airport_to_remove) & (col("dst") != airport_to_remove))
+        reduced_vertices = g.vertices.filter(col("id") != airport_to_remove)
+        g_removed = GraphFrame(reduced_vertices, reduced_edges)
+        comp_removed = g_removed.connectedComponents()
+    st.write(f"Connettività dopo guasto a {airport_to_remove}:")
+    st.dataframe(comp_removed.groupBy("component").count().orderBy(desc("count")).toPandas())
 
-    # Percorsi più brevi
-    st.subheader("Percorsi più brevi tra aeroporti")
-    aeroporto_iniziale = st.text_input("Aeroporto di partenza (es. JFK):", value="JFK")
-    aeroporto_destinazione = st.text_input("Aeroporto di arrivo (es. LAX):", value="LAX")
+    with st.spinner("🧠 Betweenness Centrality"):
+        centrality = nx.betweenness_centrality(Gnx, weight='weight')
+        cent_df = pd.DataFrame(centrality.items(), columns=["Airport", "Centrality"]).sort_values("Centrality",                                                                                      ascending=False)
+    st.dataframe(cent_df.head(10))
 
-    shortest_paths = g.shortestPaths(landmarks=[aeroporto_iniziale, aeroporto_destinazione])\
-        .select("id", "distances").toPandas()
+    with st.spinner("📆 Snapshot mensile"):
+        selected_month = st.slider("Seleziona mese", 1, 12, 1)
+        g_month = build_monthly_graph(flights_df, selected_month)
+        pagerank_month_df = g_month.pageRank(resetProbability=0.15, maxIter=5).vertices \
+            .orderBy(desc("pagerank")).limit(10).toPandas()
+    st.write(f"Top aeroporti per PageRank nel mese {selected_month}:")
+    st.dataframe(pagerank_month_df)
 
-    st.write(shortest_paths)
-
-    # Visualizzazione Pyvis con componenti
-    st.subheader("Visualizzazione Interattiva del Grafo")
-    edges_pdf = archi.toPandas()
-
-    net = Network(height="600px", width="100%", bgcolor="#222222", font_color="white")
-    color_map = px.colors.qualitative.Set3
-    comp_colors = {comp: color_map[i % len(color_map)] for i, comp in enumerate(nodes_pdf['component'].unique())}
-
-    for _, row in nodes_pdf.iterrows():
-        color = comp_colors.get(row['component'], "#cccccc")
-        net.add_node(row['id'], label=row['id'], color=color)
-
-    for _, row in edges_pdf.iterrows():
-        net.add_edge(row['src'], row['dst'])
-
-    net.save_graph("graph.html")
-    with open("graph.html", 'r', encoding='utf-8') as HtmlFile:
-        components.html(HtmlFile.read(), height=600)
-
+    with st.spinner("🤖 Node2Vec - Nuove tratte"):
+        G_undir = nx.from_pandas_edgelist(edges_pd, source='src', target='dst', edge_attr='weight')
+        n2v = Node2Vec(G_undir, dimensions=32, walk_length=20, num_walks=200, workers=1)
+        model = n2v.fit(window=5, min_count=1)
+        aeroporto = st.selectbox("Seleziona aeroporto per suggerimenti", list(G_undir.nodes))
+        similar = model.wv.most_similar(aeroporto, topn=5)
+    st.write("Suggerimenti di nuove tratte:", similar)
