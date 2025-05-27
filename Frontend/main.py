@@ -22,7 +22,7 @@ from Frontend.RitardiCancellazioni import mostra_ritardi_cancellazioni
 from Frontend.TratteAeree import mostra_tratte
 from Frontend.Home import mostra_home
 from Frontend.AI import mostra_ai
-from Frontend.Graph import mostra_graph
+from Frontend.GraphFrame import mostra_graph
 
 
 # Impostazioni Spark e caching

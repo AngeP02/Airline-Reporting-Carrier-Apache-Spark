@@ -11,15 +11,24 @@ import random
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 
+
 @st.cache_resource
-def build_graph(_flights_df):
+def build_graph(_flights_df, excluded_airports=None):
+    if excluded_airports is None:
+        excluded_airports = []
+
     clean_df = _flights_df.filter("Cancelled == 0 AND Diverted == 0")
+
+    if excluded_airports:
+        clean_df = clean_df.filter(~col("Origin").isin(excluded_airports) & ~col("Dest").isin(excluded_airports))
+
     vertices = clean_df.select(col("Origin").alias("id")).union(
         clean_df.select(col("Dest").alias("id"))
     ).distinct()
     edges = clean_df.groupBy("Origin", "Dest").agg(avg("ArrDelay").alias("weight")) \
         .select(col("Origin").alias("src"), col("Dest").alias("dst"), "weight")
     return GraphFrame(vertices, edges)
+
 
 @st.cache_resource
 def compute_pagerank(_g):
@@ -32,12 +41,6 @@ def compute_components(_g):
 @st.cache_resource
 def compute_motifs(_g):
     return _g.find("(a)-[ab]->(b); (b)-[bc]->(c); (c)-[ca]->(a)")
-
-
-@st.cache_resource
-def build_monthly_graph(flights_df, selected_month):
-    snapshot_df = flights_df.filter(month("FlightDate") == selected_month).filter("Cancelled == 0 AND Diverted == 0")
-    return build_graph(snapshot_df)
 
 
 def visualizza_mappa_dinamica(opzione, aeroporti_info, top_hubs_df=None, motifs_clean=None, components=None):
@@ -168,25 +171,42 @@ def visualizza_mappa_dinamica(opzione, aeroporti_info, top_hubs_df=None, motifs_
         return
 
 
-def mostra_graph(flights_df, aeroporti_info):
+def mostra_grafo(flights_df, aeroporti_info):
     st.title("Analisi di rete del traffico aereo")
 
-    with st.spinner("Costruzione del grafo..."):
-        g = build_graph(flights_df)
+    all_airports = sorted(list(set(flights_df.select("Origin").union(flights_df.select("Dest")).rdd.flatMap(lambda x: x).collect())))
+    aeroporto_da_rimuovere = st.selectbox("✈️ Simula la disconnessione di un aeroporto", ["Nessuno"] + all_airports)
 
-    edges_pd = g.edges.select("src", "dst").toPandas()
+    excluded = [aeroporto_da_rimuovere] if aeroporto_da_rimuovere != "Nessuno" else []
+    if excluded:
+        st.warning(f"Aeroporto **{excluded[0]}** disconnesso: analisi aggiornata sul grafo modificato.")
+
+    with st.spinner("Costruzione del grafo con eventuali esclusioni..."):
+        g = build_graph(flights_df, excluded_airports=excluded)
+
+    g_filtrato = None
+    if aeroporto_da_rimuovere:
+        vertices_filtrati = g.vertices.filter(col("id") != aeroporto_da_rimuovere)
+        edges_filtrati = g.edges.filter(
+            (col("src") != aeroporto_da_rimuovere) & (col("dst") != aeroporto_da_rimuovere)
+        )
+        g_filtrato = GraphFrame(vertices_filtrati, edges_filtrati)
+
+    g_attivo = g_filtrato if g_filtrato is not None else g
+
+    edges_pd = g_attivo.edges.select("src", "dst").toPandas()
     Gnx = nx.from_pandas_edgelist(edges_pd, source="src", target="dst", create_using=nx.DiGraph())
+
     with st.expander("Visualizza rete completa"):
         plt.figure(figsize=(12, 8))
         pos = nx.spring_layout(Gnx, k=0.2, iterations=20)
         nx.draw(Gnx, pos, with_labels=True, node_size=80, font_size=7, arrows=True)
         st.pyplot(plt.gcf())
 
-
-    col_analisi, col_mappa = st.columns([1,2])
-    pagerank = compute_pagerank(g)
-    components = compute_components(g)
-    motifs = compute_motifs(g)
+    with st.spinner("Calcolo nuove metriche sulla rete modificata..."):
+        pagerank = compute_pagerank(g_attivo)
+        components = compute_components(g_attivo)
+        motifs = compute_motifs(g_attivo)
 
     top_hubs_df = pagerank.vertices.orderBy(desc("pagerank")).toPandas()
     motifs_clean = motifs.select(
@@ -198,6 +218,7 @@ def mostra_graph(flights_df, aeroporti_info):
         col("ca.weight").alias("Delay_CA")
     ).toPandas()
 
+    col_analisi, col_mappa = st.columns([1,2])
     with col_mappa:
         try:
             st.subheader("Rete aeroporti")
@@ -215,18 +236,21 @@ def mostra_graph(flights_df, aeroporti_info):
     with col_analisi:
         st.subheader("Risultati analisi (1)")
 
-        with st.spinner("Calcolo PageRank e Componenti connesse"):
-            pagerank = compute_pagerank(g)
-            top_hubs_df = pagerank.vertices.orderBy(desc("pagerank")).toPandas()
-            components = compute_components(g)
-            component_df = components.groupBy("component").count().orderBy(desc("count")).toPandas()
+        component_df = components.groupBy("component").count().orderBy(desc("count")).toPandas()
         st.write("Top aeroporti per PageRank:")
         st.dataframe(top_hubs_df)
         st.write("Componenti connesse:")
         st.dataframe(component_df)
+        st.markdown("### 📉 Impatto della disconnessione")
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.metric("Numero nodi", g_attivo.vertices.count())
+            st.metric("Numero archi", g_attivo.edges.count())
+        with col_b:
+            st.metric("Numero componenti connesse", len(component_df))
 
         with st.spinner("Calcolo Motif Finding"):
-            motifs = compute_motifs(g)
+            motifs = compute_motifs(g_attivo)
             motifs_clean = motifs.select(
                 col("a.id").alias("Airport_A"),
                 col("b.id").alias("Airport_B"),
@@ -239,9 +263,9 @@ def mostra_graph(flights_df, aeroporti_info):
         st.dataframe(motifs_clean)
 
     with st.spinner("Calcolo Gradi e Triangoli"):
-        indegree = g.inDegrees.orderBy(desc("inDegree")).toPandas()
-        outdegree = g.outDegrees.orderBy(desc("outDegree")).toPandas()
-        triangles = g.triangleCount().orderBy(desc("count")).toPandas()
+        indegree = g_attivo.inDegrees.orderBy(desc("inDegree")).toPandas()
+        outdegree = g_attivo.outDegrees.orderBy(desc("outDegree")).toPandas()
+        triangles = g_attivo.triangleCount().orderBy(desc("count")).toPandas()
     col1,col2, col3 = st.columns(3)
     with col1:
         st.write("In-degree:")
@@ -252,28 +276,6 @@ def mostra_graph(flights_df, aeroporti_info):
     with col3:
         st.write("Conteggio triangoli:")
         st.dataframe(triangles)
-
-    with st.spinner("💥 Simulazione guasto aeroporto"):
-        airport_to_remove = st.selectbox("Aeroporto da simulare come guasto", top_hubs_df["id"].tolist())
-        reduced_edges = g.edges.filter((col("src") != airport_to_remove) & (col("dst") != airport_to_remove))
-        reduced_vertices = g.vertices.filter(col("id") != airport_to_remove)
-        g_removed = GraphFrame(reduced_vertices, reduced_edges)
-        comp_removed = g_removed.connectedComponents()
-    st.write(f"Connettività dopo guasto a {airport_to_remove}:")
-    st.dataframe(comp_removed.groupBy("component").count().orderBy(desc("count")).toPandas())
-
-    with st.spinner("🧠 Betweenness Centrality"):
-        centrality = nx.betweenness_centrality(Gnx, weight='weight')
-        cent_df = pd.DataFrame(centrality.items(), columns=["Airport", "Centrality"]).sort_values("Centrality",                                                                                      ascending=False)
-    st.dataframe(cent_df.head(10))
-
-    with st.spinner("📆 Snapshot mensile"):
-        selected_month = st.slider("Seleziona mese", 1, 12, 1)
-        g_month = build_monthly_graph(flights_df, selected_month)
-        pagerank_month_df = g_month.pageRank(resetProbability=0.15, maxIter=5).vertices \
-            .orderBy(desc("pagerank")).limit(10).toPandas()
-    st.write(f"Top aeroporti per PageRank nel mese {selected_month}:")
-    st.dataframe(pagerank_month_df)
 
     with st.spinner("🤖 Node2Vec - Nuove tratte"):
         G_undir = nx.from_pandas_edgelist(edges_pd, source='src', target='dst', edge_attr='weight')
