@@ -1,18 +1,15 @@
-import pandas as pd
 import streamlit as st
 from Backend.query_aeroporto import (
     mappa_tratte_aeroporto, lista_aeroporti_unici, num_voli_partiti, num_voli_arrivati,
     num_voli_cancellati, nome_citta_aeroporto, cause_ritardi_per_aeroporto,
     distribuzione_ritardi_mensile, trend_cancellazioni_stagionale,
-    metriche_compagnie, elenco_tutti_aeroporti, statistiche_aeroporto
-)
+    metriche_compagnie)
 import pydeck as pdk
 import plotly.express as px
-from pyspark.sql import Row
+
 
 def mostra_aeroporto(df, aeroporti_info):
     st.title("Analisi per Aeroporto")
-
     aeroporti_disponibili = lista_aeroporti_unici(df)
     st.markdown(
         "<p style='font-size:20px; margin-bottom:0;'> Seleziona un aeroporto</p>",
@@ -25,9 +22,9 @@ def mostra_aeroporto(df, aeroporti_info):
     if not aeroporto_selezionato:
         st.warning("Seleziona un aeroporto per iniziare.")
         return
-
     with st.container(border=True):
         st.subheader("Statistiche Generali")
+
         n_partiti = num_voli_partiti(df, aeroporto_selezionato).collect()[0]["NumVoliPartiti"]
         n_arrivati = num_voli_arrivati(df, aeroporto_selezionato).collect()[0]["NumVoliArrivati"]
         n_cancellati = num_voli_cancellati(df, aeroporto_selezionato).collect()[0]["NumVoliCancellati"]
@@ -43,18 +40,14 @@ def mostra_aeroporto(df, aeroporti_info):
 
     with st.container(border=True):
         st.subheader("Mappa delle Tratte")
-
         tipo = st.selectbox(
             "Visualizza tratte in cui l'aeroporto è:",
             options=["Partenza", "Arrivo"]
         )
-
         tratte_df = mappa_tratte_aeroporto(df, aeroporti_info, aeroporto_selezionato, tipo)
         tratte_pd = tratte_df.toPandas()
-
         if not tratte_pd.empty:
             tratte_pd["width"] = tratte_pd["flight_count"] / tratte_pd["flight_count"].max() * 10
-
             routes_layer = pdk.Layer(
                 "ArcLayer",
                 data=tratte_pd,
@@ -66,14 +59,12 @@ def mostra_aeroporto(df, aeroporti_info):
                 pickable=True,
                 auto_highlight=True
             )
-
             view_state = pdk.ViewState(
                 latitude=tratte_pd["origin_lat"].mean(),
                 longitude=tratte_pd["origin_lon"].mean(),
                 zoom=3,
                 pitch=0
             )
-
             r = pdk.Deck(
                 layers=[routes_layer],
                 initial_view_state=view_state,
@@ -85,43 +76,37 @@ def mostra_aeroporto(df, aeroporti_info):
                     "style": {"backgroundColor": "steelblue", "color": "white"}
                 }
             )
-
             st.pydeck_chart(r)
         else:
             st.warning("Nessuna rotta disponibile per questo aeroporto nella modalità selezionata.")
 
-    # ---------------- RITARDI E CANCELLAZIONI ----------------
     with st.container(border=True):
         st.subheader("Ritardi e Cancellazioni")
-
-        # Cause ritardi
         st.markdown("Cause dei Ritardi")
-        delay_causes_df = cause_ritardi_per_aeroporto(df, aeroporto_selezionato).toPandas()
-        if not delay_causes_df.empty:
-            delay_causes_df = delay_causes_df.T.reset_index()
-            delay_causes_df.columns = ["Causa", "Minuti di Ritardo"]
-
-            fig_delay = px.bar(
-                delay_causes_df,
+        cause_ritardo = cause_ritardi_per_aeroporto(df, aeroporto_selezionato).toPandas()
+        if not cause_ritardo.empty:
+            cause_ritardo = cause_ritardo.T.reset_index()
+            cause_ritardo.columns = ["Causa", "Minuti di Ritardo"]
+            fig_ritardi = px.bar(
+                cause_ritardo,
                 x="Causa",
                 y="Minuti di Ritardo",
                 text="Minuti di Ritardo",
                 labels={"Minuti di Ritardo": "Minuti di Ritardo"},
                 title=""
             )
-            fig_delay.update_traces(texttemplate='%{text:.0f}', textposition='outside')
-            fig_delay.update_layout(yaxis_title="Minuti di Ritardo", xaxis_title="Causa")
-            st.plotly_chart(fig_delay, use_container_width=True)
+            fig_ritardi.update_traces(texttemplate='%{text:.0f}', textposition='outside')
+            fig_ritardi.update_layout(yaxis_title="Minuti di Ritardo", xaxis_title="Causa")
+            st.plotly_chart(fig_ritardi, use_container_width=True)
         else:
             st.info("Nessun dato di ritardo disponibile per questo aeroporto.")
 
-        # Ritardo medio mensile
         st.markdown("Ritardo Medio Mensile")
-        delay_monthly_df = distribuzione_ritardi_mensile(df, aeroporto_selezionato).toPandas()
-        if not delay_monthly_df.empty:
-            delay_monthly_df["Month"] = delay_monthly_df["Month"].astype(int)
-            fig_monthly = px.line(
-                delay_monthly_df,
+        ritardi_mensili = distribuzione_ritardi_mensile(df, aeroporto_selezionato).toPandas()
+        if not ritardi_mensili.empty:
+            ritardi_mensili["Month"] = ritardi_mensili["Month"].astype(int)
+            fig_mese = px.line(
+                ritardi_mensili,
                 x="Month",
                 y="AvgDepDelay",
                 markers=True,
@@ -129,43 +114,41 @@ def mostra_aeroporto(df, aeroporti_info):
                 labels={"Month": "Mese", "AvgDepDelay": "Ritardo Medio (minuti)"},
                 title=""
             )
-            fig_monthly.update_traces(texttemplate='%{text:.1f}', textposition='top center')
-            fig_monthly.update_layout(yaxis_title="Ritardo Medio (min)", xaxis_title="Mese")
-            fig_monthly.update_layout(xaxis=dict(tickmode='linear'))
-            st.plotly_chart(fig_monthly, use_container_width=True)
+            fig_mese.update_traces(texttemplate='%{text:.1f}', textposition='top center')
+            fig_mese.update_layout(yaxis_title="Ritardo Medio (min)", xaxis_title="Mese")
+            fig_mese.update_layout(xaxis=dict(tickmode='linear'))
+            st.plotly_chart(fig_mese, use_container_width=True)
         else:
             st.info("Nessun ritardo disponibile per questo aeroporto.")
 
-        # Cancellazioni per mese
         st.markdown("Cancellazioni per Mese")
-        cancel_trend_df = trend_cancellazioni_stagionale(df, aeroporto_selezionato).toPandas()
-        if not cancel_trend_df.empty:
-            cancel_trend_df["Month"] = cancel_trend_df["Month"].astype(int)
-            fig_cancel = px.bar(
-                cancel_trend_df,
+        tend_cancellazioni = trend_cancellazioni_stagionale(df, aeroporto_selezionato).toPandas()
+        if not tend_cancellazioni.empty:
+            tend_cancellazioni["Month"] = tend_cancellazioni["Month"].astype(int)
+            fig_cancellazioni = px.bar(
+                tend_cancellazioni,
                 x="Month",
                 y="Cancellazioni",
                 text="Cancellazioni",
                 labels={"Month": "Mese", "Cancellazioni": "Numero di Cancellazioni"},
                 title=""
             )
-            fig_cancel.update_traces(texttemplate='%{text}', textposition='outside')
-            fig_cancel.update_layout(yaxis_title="Cancellazioni", xaxis_title="Mese")
-            fig_cancel.update_layout(xaxis=dict(tickmode='linear'))
-            st.plotly_chart(fig_cancel, use_container_width=True)
+            fig_cancellazioni.update_traces(texttemplate='%{text}', textposition='outside')
+            fig_cancellazioni.update_layout(yaxis_title="Cancellazioni", xaxis_title="Mese")
+            fig_cancellazioni.update_layout(xaxis=dict(tickmode='linear'))
+            st.plotly_chart(fig_cancellazioni, use_container_width=True)
         else:
             st.info("Nessuna cancellazione registrata per questo aeroporto.")
 
     with st.container(border=True):
         st.subheader("Compagnie Aeree in partenza da questo aeroporto")
-        df_metrics = metriche_compagnie(df, aeroporto_selezionato).toPandas()
-        df_metrics = df_metrics.rename(columns={"IATA_CODE_Reporting_Airline": "Compagnia"})
+        df_metriche = metriche_compagnie(df, aeroporto_selezionato).toPandas()
+        df_metriche = df_metriche.rename(columns={"IATA_CODE_Reporting_Airline": "Compagnia"})
 
-        if df_metrics.empty:
+        if df_metriche.empty:
             st.info("Nessun dato compagnie disponibile per questo aeroporto.")
         else:
-            # 2) Normalizzo le metriche
-            df = df_metrics.copy()
+            df = df_metriche.copy()
             df["Norm_Ritardo"] = (df["RitardoMedio"].max() - df["RitardoMedio"]) \
                                  / (df["RitardoMedio"].max() - df["RitardoMedio"].min())
             df["Norm_Cancellazioni"] = (df["PercCancellazioni"].max() - df["PercCancellazioni"]) \
@@ -177,9 +160,8 @@ def mostra_aeroporto(df, aeroporti_info):
             n_compagnie = len(df)
 
             if n_compagnie < 10:
-                # Unico grafico per tutte le compagnie
                 df_all = df.sort_values("Punteggio", ascending=False)
-                fig_all = px.bar(
+                fig_tutti = px.bar(
                     df_all,
                     x="Compagnia",
                     y="Punteggio",
@@ -187,17 +169,14 @@ def mostra_aeroporto(df, aeroporti_info):
                     labels={"Punteggio": "Score"},
                     title=f"Tutte le compagnie ({n_compagnie}) ordinate per punteggio"
                 )
-                fig_all.update_traces(texttemplate="%{text:.2f}", textposition="outside")
-                fig_all.update_layout(xaxis_title="Compagnia", yaxis_title="Punteggio")
-                st.plotly_chart(fig_all, use_container_width=True)
+                fig_tutti.update_traces(texttemplate="%{text:.2f}", textposition="outside")
+                fig_tutti.update_layout(xaxis_title="Compagnia", yaxis_title="Punteggio")
+                st.plotly_chart(fig_tutti, use_container_width=True)
 
             else:
-                # Top 5 e Worst 5 affiancati
                 top5 = df.sort_values("Punteggio", ascending=False).head(5)
-                worst5 = df.sort_values("Punteggio", ascending=True).head(5)
-
+                peggiori5 = df.sort_values("Punteggio", ascending=True).head(5)
                 col1, col2 = st.columns(2)
-
                 with col1:
                     st.markdown("#### Top 5 migliori compagnie")
                     fig_top = px.bar(
@@ -209,15 +188,14 @@ def mostra_aeroporto(df, aeroporti_info):
                     fig_top.update_traces(texttemplate="%{text:.2f}", textposition="outside")
                     fig_top.update_layout(xaxis_title="Compagnia", yaxis_title="Punteggio")
                     st.plotly_chart(fig_top, use_container_width=True)
-
                 with col2:
                     st.markdown("#### Top 5 peggiori compagnie")
-                    fig_worst = px.bar(
-                        worst5,
+                    fig_peggiori = px.bar(
+                        peggiori5,
                         x="Compagnia", y="Punteggio", text="Punteggio",
                         labels={"Punteggio": "Score"},
                         title=""
                     )
-                    fig_worst.update_traces(texttemplate="%{text:.2f}", textposition="outside", marker_color="crimson")
-                    fig_worst.update_layout(xaxis_title="Compagnia", yaxis_title="Punteggio")
-                    st.plotly_chart(fig_worst, use_container_width=True)
+                    fig_peggiori.update_traces(texttemplate="%{text:.2f}", textposition="outside", marker_color="crimson")
+                    fig_peggiori.update_layout(xaxis_title="Compagnia", yaxis_title="Punteggio")
+                    st.plotly_chart(fig_peggiori, use_container_width=True)

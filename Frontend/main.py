@@ -6,15 +6,11 @@ import pandas as pd
 import sys
 import os
 
-
-# Layout Streamlit
 st.set_page_config(page_title="Analisi Voli", layout="wide")
 
 os.environ["PYSPARK_PYTHON"] = "python"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-
-# Import delle funzioni di visualizzazione ottimizzate
 from Frontend.Aeroporto import mostra_aeroporto
 from Frontend.CompagnieAeree import mostra_compagnia
 from Frontend.Citta import mostra_citta
@@ -22,17 +18,14 @@ from Frontend.RitardiCancellazioni import mostra_ritardi_cancellazioni
 from Frontend.TratteAeree import mostra_tratte
 from Frontend.Home import mostra_home
 from Frontend.AI import mostra_ai
-from Frontend.GraphFrame import mostra_graph
+from Frontend.GraphFrame import mostra_grafo
 
-
-# Impostazioni Spark e caching
 @st.cache_resource
 def init_spark(app_name: str = "ProgettoVoli") -> SparkSession:
     spark = (
         SparkSession.builder
         .appName(app_name)
         .master("local[*]")
-        # Configurazioni di ottimizzazione
         .config("spark.driver.memory", "18g")
         .config("spark.sql.shuffle.partitions", "8")
         .config("spark.sql.adaptive.enabled", "true")
@@ -42,15 +35,13 @@ def init_spark(app_name: str = "ProgettoVoli") -> SparkSession:
     )
     checkpoint_dir = "./tmp/checkpoints"
     spark.sparkContext.setCheckpointDir(checkpoint_dir)
-
     return spark
 
 
 @st.cache_resource
-def load_flights(file_paths: list[str]) -> 'DataFrame':
+def carica_dati(file_paths: list[str]) -> 'DataFrame':
     spark = init_spark()
-    parquet_path = "./dataset/voli_parquet"
-
+    parquet_path = "./Dati/voli_parquet"
     if not os.path.exists(parquet_path):
         df = (
             spark.read
@@ -58,32 +49,24 @@ def load_flights(file_paths: list[str]) -> 'DataFrame':
             .option("inferSchema", True)
             .csv(file_paths)
         )
-        #df = df.repartition("Origin").persist(StorageLevel.MEMORY_ONLY)
         df.count()
         df.write.mode("overwrite").parquet(parquet_path)
     else:
         df = spark.read.parquet(parquet_path).persist(StorageLevel.MEMORY_ONLY)
         df.count()
-
     return df
 
 
 @st.cache_data(show_spinner=False)
-def load_airports(csv_path: str) -> pd.DataFrame:
-    # Carica solo colonne necessarie
+def carica_coordinate_aeroporto(csv_path: str) -> pd.DataFrame:
     df = pd.read_csv(csv_path)
     return df
 
-# Inizializza dati
-file_paths = [
-    "./Preprocessing/Puliti/On_Time_Reporting_Carrier_*_clean.csv"
-]
-aeroporti_info = load_airports("./distutils/usa-airports.csv")
-flights_df = load_flights(file_paths)
+path_dataset_pulito = ["./Preprocessing/Puliti/On_Time_Reporting_Carrier_*_clean.csv"]
+aeroporti_info = carica_coordinate_aeroporto("./distutils/usa-airports.csv")
+voli_df = carica_dati(path_dataset_pulito)
 
-
-# Definisce il menu di navigazione
-menu_options = [
+menu = [
     ("Home", "house"),
     ("Aeroporto", "geo-alt"),
     ("Compagnie aeree", "airplane"),
@@ -91,13 +74,13 @@ menu_options = [
     ("Ritardi e cancellazioni", "clock-history"),
     ("Tratte aeree", "map"),
     ("Previsione AI", "cpu"),
-    ("Graph", "graph-up"),
+    ("Grafi", "graph-up"),
 ]
 
-choice = option_menu(
+scelta = option_menu(
     menu_title=None,
-    options=[opt[0] for opt in menu_options],
-    icons=[opt[1] for opt in menu_options],
+    options=[opt[0] for opt in menu],
+    icons=[opt[1] for opt in menu],
     default_index=0,
     orientation="horizontal",
     styles={
@@ -107,17 +90,15 @@ choice = option_menu(
     }
 )
 
-# Mappa scelta a funzione
-page_funcs = {
-    "Home": lambda: mostra_home(flights_df, aeroporti_info),
-    "Aeroporto": lambda: mostra_aeroporto(flights_df, aeroporti_info),
-    "Compagnie aeree": lambda: mostra_compagnia(flights_df, aeroporti_info),
-    "Città": lambda: mostra_citta(flights_df, aeroporti_info),
-    "Ritardi e cancellazioni": lambda: mostra_ritardi_cancellazioni(flights_df),
-    "Tratte aeree": lambda: mostra_tratte(flights_df, aeroporti_info),
-    "Previsione AI": lambda: mostra_ai(flights_df),
-    "Graph": lambda: mostra_graph(flights_df, aeroporti_info)
+funzionalita_pagine = {
+    "Home": lambda: mostra_home(voli_df, aeroporti_info),
+    "Aeroporto": lambda: mostra_aeroporto(voli_df, aeroporti_info),
+    "Compagnie aeree": lambda: mostra_compagnia(voli_df),
+    "Città": lambda: mostra_citta(voli_df, aeroporti_info),
+    "Ritardi e cancellazioni": lambda: mostra_ritardi_cancellazioni(voli_df),
+    "Tratte aeree": lambda: mostra_tratte(voli_df, aeroporti_info),
+    "Previsione AI": lambda: mostra_ai(voli_df),
+    "Grafi": lambda: mostra_grafo(voli_df, aeroporti_info)
 }
 
-# Esecuzione della pagina selezionata
-page_funcs[choice]()
+funzionalita_pagine[scelta]()

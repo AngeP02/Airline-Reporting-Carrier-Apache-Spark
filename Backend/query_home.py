@@ -1,48 +1,27 @@
-import pandas as pd
-from plotly.subplots import make_subplots
 import pyspark.sql.functions as F
-from pyspark.sql.functions import to_date, count
-import calendar
-import plotly.graph_objects as go
+from pyspark.sql.functions import avg, col, count, sum as spark_sum
 
-from pyspark.sql.functions import col, avg
 def calcola_percentuale_ritardi_15(df):
-    """
-    Restituisce la percentuale di voli con ritardo in partenza > 15 minuti.
-    """
     totale = df.filter(col("DepDelay").isNotNull()).count()
     rit15  = df.filter(col("DepDelay") > 15).count()
     return (rit15 / totale) * 100 if totale > 0 else 0.0
 
 def calcola_numero_aeroporti(df):
-    """
-    Conta tutti gli aeroporti distinti (origine o destinazione) nel dataset.
-    """
     return df.select("Origin") \
              .union(df.select("Dest")) \
              .distinct() \
              .count()
 
 def calcola_numero_citta(df, aeroporti_info):
-    """
-    Conta il numero di città coinvolte dalle rotte del dataset.
-    Usa il DataFrame pandas `aeroporti_info` che deve contenere
-    le colonne 'iata' e 'city'.
-    """
-    # Prendi tutti i codici IATA usati
-    unique_airports = [row["Origin"]
-                       for row in df.select("Origin")
-                                    .union(df.select("Dest"))
-                                    .distinct()
-                                    .collect()]
-    # Filtra il DataFrame pandas degli aeroporti
-    df_info = aeroporti_info[aeroporti_info["iata"].isin(unique_airports)]
+    aeroporti_unici = [row["Origin"]
+    for row in df.select("Origin")
+                .union(df.select("Dest"))
+                .distinct()
+                .collect()]
+    df_info = aeroporti_info[aeroporti_info["iata"].isin(aeroporti_unici)]
     return df_info["city"].nunique()
 
 def calcola_top5_compagnie_puntuali(df, n=5):
-    """
-    Restituisce le n compagnie con il minore ritardo medio di partenza.
-    """
     df_stats = df.groupBy("Reporting_Airline") \
                  .agg(avg("DepDelayMinutes").alias("Ritardo_Medio_Partenza")) \
                  .orderBy("Ritardo_Medio_Partenza")
@@ -51,11 +30,8 @@ def calcola_top5_compagnie_puntuali(df, n=5):
                                     "Ritardo_Medio_Partenza": "Ritardo Medio (min)"})
 
 def calcola_top5_aeroporti_piu_ritardi(df, n=5):
-    """
-    Restituisce i n aeroporti con il maggior numero di voli in ritardo (>0 min partenza).
-    """
-    df_delayed = df.filter(col("DepDelayMinutes") > 0)
-    df_stats  = df_delayed.groupBy("Origin") \
+    df_ritardi = df.filter(col("DepDelayMinutes") > 0)
+    df_stats  = df_ritardi.groupBy("Origin") \
                          .agg(count("*").alias("Numero_Ritardi")) \
                          .orderBy(col("Numero_Ritardi").desc())
     return df_stats.limit(n).toPandas() \
@@ -63,9 +39,6 @@ def calcola_top5_aeroporti_piu_ritardi(df, n=5):
                                     "Numero_Ritardi": "Voli in Ritardo"})
 
 def calcola_top5_tratte_trafficate(df, n=5):
-    """
-    Restituisce le n coppie (Origine, Destinazione) con più voli totali.
-    """
     df_stats = df.groupBy("Origin", "Dest") \
                  .agg(count("*").alias("Numero_Voli")) \
                  .orderBy(col("Numero_Voli").desc())
@@ -75,9 +48,6 @@ def calcola_top5_tratte_trafficate(df, n=5):
                                     "Numero_Voli": "Voli"})
 
 def calcola_top5_compagnie_piu_voli(df, n=5):
-    """
-    Restituisce le n compagnie con il maggior numero di voli totali.
-    """
     df_stats = df.groupBy("Reporting_Airline") \
                  .agg(count("*").alias("Totale_Voli")) \
                  .orderBy(col("Totale_Voli").desc())
@@ -85,22 +55,15 @@ def calcola_top5_compagnie_piu_voli(df, n=5):
                    .rename(columns={"Reporting_Airline": "Compagnia",
                                     "Totale_Voli": "Voli"})
 
-from pyspark.sql.functions import col, count, sum as spark_sum
-
 def calcola_top5_compagnie_meno_cancellazioni(df, n=5):
-    """
-    Restituisce le n compagnie con la percentuale più bassa di cancellazioni.
-    """
     stats = df.groupBy("Reporting_Airline") \
               .agg(
-                  count("*").alias("Totale"),                  # tutti i voli
-                  spark_sum("Cancelled").alias("Voli_Cancellati")  # somma dei cancel==1
+                  count("*").alias("Totale"),
+                  spark_sum("Cancelled").alias("Voli_Cancellati")
               ) \
               .withColumn("Pct_Cancellati",
                           col("Voli_Cancellati")/col("Totale")*100) \
               .orderBy(col("Pct_Cancellati").asc())
-
-    # Converto in pandas e rinomino per il grafico
     return stats.limit(n).toPandas() \
                 .rename(columns={
                     "Reporting_Airline": "Compagnia",
@@ -109,31 +72,17 @@ def calcola_top5_compagnie_meno_cancellazioni(df, n=5):
 
 
 def calcola_mappa_aeroporti(df, aeroporti_info):
-    """
-    Restituisce un DataFrame pandas con, per ogni aeroporto:
-      - iata: codice aeroporto
-      - latitude, longitude
-      - flight_count: numero totale di voli (arrivi+partenze)
-      - avg_delay: ritardo medio in partenza (minuti)
-      - radius: raggio normalizzato per pydeck
-      - color: lista RGBA in base al ritardo medio
-    """
-    # Unisco origini e destinazioni
     orig = df.select(col("Origin").alias("iata"),
                      col("DepDelayMinutes").alias("DepDelay"))
     dest = df.select(col("Dest").alias("iata"),
                      col("DepDelayMinutes").alias("DepDelay"))
-    all_flights = orig.union(dest)
-
-    # Calcolo conteggio e ritardo medio
-    stats = all_flights.groupBy("iata") \
+    tutti_voli = orig.union(dest)
+    stats = tutti_voli.groupBy("iata") \
         .agg(
             count("*").alias("flight_count"),
             avg("DepDelay").alias("avg_delay")
         )
     pdf = stats.toPandas()
-
-    # Merge con info aeroporti
     merged = pdf.merge(
         aeroporti_info[["iata",  "name", "latitude", "longitude"]],
         on="iata",
@@ -141,79 +90,49 @@ def calcola_mappa_aeroporti(df, aeroporti_info):
     ).dropna(subset=["latitude", "longitude"]).rename(
         columns={"name": "airport_name"}
     )
-
-    # Normalizzo raggio (usiamo 100 000 come raggio max)
     max_count = merged["flight_count"].max()
     merged["radius"] = merged["flight_count"] / max_count * 100_000
+    max_ritardo = merged["avg_delay"].max() or 1.0
 
-    # Normalizzo ritardo e creo colore RGBA
-    max_delay = merged["avg_delay"].max() or 1.0
     def delay_to_color(d):
-        norm = d / max_delay
+        norm = d / max_ritardo
         r = int(norm * 255)
         g = int((1 - norm) * 255)
-        return [r, g, 50, 180]  # blu fisso a 50, alpha 180
-    merged["color"] = merged["avg_delay"].apply(delay_to_color)
+        return [r, g, 50, 180]
 
+    merged["color"] = merged["avg_delay"].apply(delay_to_color)
     return merged[["iata", "airport_name", "latitude", "longitude", "flight_count", "avg_delay", "radius", "color"]]
 
 
 def calcola_puntualita(df):
-    # Aggiungi una colonna per identificare se il volo è in orario, in ritardo o deviato
     df = df.withColumn(
         "Status",
         F.when((df["ArrDelay"] <= 0) & (df["Cancelled"] == 0), "In Orario")
         .when((df["ArrDelay"] > 0) & (df["Cancelled"] == 0), "In Ritardo")
         .otherwise("Deviato")
     )
-
-    # Conta il numero di voli per ogni stato (In Orario, In Ritardo, Deviato)
     status_count = df.groupBy("Status").agg(F.count("*").alias("Count"))
-
-    # Calcola il totale dei voli per calcolare la percentuale
-    total_flights = df.count()
-
-    # Calcola la percentuale per ciascuno stato
-    status_percentage = status_count.withColumn(
-        "Percentage", (status_count["Count"] / total_flights) * 100
+    voli_totali = df.count()
+    status_percentuale = status_count.withColumn(
+        "Percentage", (status_count["Count"] / voli_totali) * 100
     )
-
-    return status_percentage
-
-
-
-
+    return status_percentuale
 
 def aggregazione_voli_per_mese(df):
     agg_df = df.groupBy("Month").agg(F.count("*").alias("NumeroVoli")).orderBy("Month")
     return agg_df
 
-
 def calcola_kpi(df):
-    # Totale voli
     totale_voli = df.count()
-
-    # Voli cancellati
     voli_cancellati = df.filter(col("Cancelled") == 1).count()
-
-    # Voli deviati
     voli_deviati = df.filter(col("Diverted") == 1).count()
-
-    # Ritardo medio partenza
     ritardo_medio_partenza = df.filter(col("DepDelay").isNotNull()) \
         .agg(avg("DepDelay").alias("avgDepDelay")).collect()[0]["avgDepDelay"]
-
-    # Ritardo medio arrivo
     ritardo_medio_arrivo = df.filter(col("ArrDelay").isNotNull()) \
         .agg(avg("ArrDelay").alias("avgArrDelay")).collect()[0]["avgArrDelay"]
-
-    # Distanza media
     distanza_media = df.filter(col("Distance").isNotNull()) \
         .agg(avg("Distance").alias("avgDistance")).collect()[0]["avgDistance"]
-
-    # Percentuale voli cancellati
     percentuale_cancellati = (voli_cancellati / totale_voli) * 100
-
     return {
         "totale_voli": totale_voli,
         "voli_cancellati": voli_cancellati,

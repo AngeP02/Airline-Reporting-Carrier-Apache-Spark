@@ -1,4 +1,3 @@
-
 from pyspark.sql.functions import round as spark_round, lit
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import (
@@ -6,10 +5,7 @@ from pyspark.sql.functions import (
 )
 from pyspark.sql import functions as F
 
-def classifica_tratte_ritardo(df: DataFrame) -> DataFrame:
-    """
-    Restituisce ciascuna tratta (Origin→Dest) con ritardo medio partenza.
-    """
+def classifica_tratte_ritardo(df):
     return (
         df.filter((col("Cancelled") == 0) & col("DepDelay").isNotNull())
           .groupBy("Origin", "Dest")
@@ -18,11 +14,7 @@ def classifica_tratte_ritardo(df: DataFrame) -> DataFrame:
           .orderBy(col("AvgDepDelay").desc())
     )
 
-
-def classifica_tratte_cancellazioni(df: DataFrame) -> DataFrame:
-    """
-    Restituisce ciascuna tratta con numero di cancellazioni.
-    """
+def classifica_tratte_cancellazioni(df):
     return (
         df.filter(col("Cancelled") == 1)
           .groupBy("Origin", "Dest")
@@ -31,10 +23,7 @@ def classifica_tratte_cancellazioni(df: DataFrame) -> DataFrame:
     )
 
 
-def variabilita_ritardi_tratte(df: DataFrame) -> DataFrame:
-    """
-    Restituisce deviazione standard ritardi partenza per tratta.
-    """
+def variabilita_ritardi_tratte(df):
     return (
         df.filter((col("Cancelled") == 0) & col("DepDelay").isNotNull())
           .groupBy("Origin", "Dest")
@@ -43,11 +32,7 @@ def variabilita_ritardi_tratte(df: DataFrame) -> DataFrame:
     )
 
 
-def ritardo_per_fascia_oraria(df: DataFrame) -> DataFrame:
-    """
-    Confronto ritardo medio partenza per fascia oraria (Mattina vs Sera).
-    Mattina: DepTime tra 0500 e 1159; Sera: 1700 e 2359.
-    """
+def ritardo_per_fascia_oraria(df):
     return (
         df.filter((col("Cancelled") == 0) & col("DepDelay").isNotNull())
           .withColumn("Hour", floor(col("DepTime")/100))
@@ -61,16 +46,11 @@ def ritardo_per_fascia_oraria(df: DataFrame) -> DataFrame:
     )
 
 
-
-
-
-def mappa_rotte_completa(flights_df, airports_pd):
-    spark = flights_df.sql_ctx.sparkSession
-    airports_df = spark.createDataFrame(airports_pd)
-
-    # Statistiche di base per tratta
-    route_stats = (
-        flights_df.groupBy("Origin", "Dest")
+def mappa_rotte_completa(df, aeroporti_info):
+    spark = df.sql_ctx.sparkSession
+    airports_df = spark.createDataFrame(aeroporti_info)
+    statistiche_tratta = (
+        df.groupBy("Origin", "Dest")
         .agg(
             F.count("*").alias("flight_count"),
             F.mean("ArrDelay").alias("avg_delay"),
@@ -79,9 +59,7 @@ def mappa_rotte_completa(flights_df, airports_pd):
             F.collect_list("Month").alias("months_list")
         )
     )
-
-    # Informazioni su aeroporti (lat/lon + nome città)
-    origin_info = (
+    origine_info = (
         airports_df
         .select(
             F.col("iata").alias("Origin"),
@@ -99,18 +77,14 @@ def mappa_rotte_completa(flights_df, airports_pd):
             F.col("longitude").alias("dest_lon")
         )
     )
-
-    # Join statistiche + info aeroporti
-    routes = (
-        route_stats
-        .join(origin_info, on="Origin", how="left")
+    rotte = (
+        statistiche_tratta
+        .join(origine_info, on="Origin", how="left")
         .join(dest_info, on="Dest", how="left")
         .dropna(subset=["origin_lat", "origin_lon", "dest_lat", "dest_lon"])
     )
-
-    # Calcola voli B->A (inverted)
-    inverted = (
-        flights_df.groupBy("Origin", "Dest")
+    inverti = (
+        df.groupBy("Origin", "Dest")
         .agg(F.count("*").alias("count_AB"))
         .select(
             F.col("Dest").alias("Origin"),
@@ -118,10 +92,7 @@ def mappa_rotte_completa(flights_df, airports_pd):
             F.col("count_AB").alias("count_BA")
         )
     )
-    routes = routes.join(inverted, on=["Origin", "Dest"], how="left").fillna({"count_BA": 0})
-
-    # Top 5 compagnie e top 2 mesi
-    routes = routes.withColumn("top_airlines", F.expr("slice(array_sort(array_distinct(airlines_list)), 1, 5)"))
-    routes = routes.withColumn("top_months", F.expr("slice(array_sort(array_distinct(months_list)), 1, 2)"))
-
-    return routes
+    rotte = rotte.join(inverti, on=["Origin", "Dest"], how="left").fillna({"count_BA": 0})
+    rotte = rotte.withColumn("top_airlines", F.expr("slice(array_sort(array_distinct(airlines_list)), 1, 5)"))
+    rotte = rotte.withColumn("top_months", F.expr("slice(array_sort(array_distinct(months_list)), 1, 2)"))
+    return rotte

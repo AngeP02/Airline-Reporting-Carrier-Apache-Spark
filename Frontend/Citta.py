@@ -8,11 +8,10 @@ from Backend.query_citta import (
 )
 import pydeck as pdk
 import plotly.express as px
-
 from pyspark.sql.functions import col, count, collect_set
+
 def mostra_citta(df, aeroporti_info):
     st.title("Analisi per Città")
-
     lista_citta = lista_citta_uniche(df)
     st.markdown(
         "<p style='font-size:20px; margin-bottom:0;'> Seleziona una città</p>",
@@ -25,39 +24,30 @@ def mostra_citta(df, aeroporti_info):
     if not citta:
         st.warning("Seleziona un aeroporto per iniziare.")
         return
-    n_ae = num_aeroporti_citta(df, citta).collect()[0]["NumAeroportiCitta"]
+    num_aer_citta = num_aeroporti_citta(df, citta).collect()[0]["NumAeroportiCitta"]
 
     with st.container(border=True):
         st.subheader("Statistiche Generali")
-        n_p = num_voli_partiti_citta(df, citta).collect()[0]["NumVoliPartiti"]
-        n_a = num_voli_arrivati_citta(df, citta).collect()[0]["NumVoliArrivati"]
-        n_c = num_voli_cancellati_citta(df, citta).collect()[0]["NumVoliCancellati"]
+        num_voli_partiti = num_voli_partiti_citta(df, citta).collect()[0]["NumVoliPartiti"]
+        num_voli_arrivati = num_voli_arrivati_citta(df, citta).collect()[0]["NumVoliArrivati"]
+        num_voli_cancellati = num_voli_cancellati_citta(df, citta).collect()[0]["NumVoliCancellati"]
 
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Voli Partiti", f"{n_p:,}")
-        col2.metric("Voli Arrivati", f"{n_a:,}")
-        col3.metric("Voli Cancellati", f"{n_c:,}")
-        col4.metric("Aeroporti in città", f"{n_ae:,}")
+        col1.metric("Voli Partiti", f"{num_voli_partiti:,}")
+        col2.metric("Voli Arrivati", f"{num_voli_arrivati:,}")
+        col3.metric("Voli Cancellati", f"{num_voli_cancellati:,}")
+        col4.metric("Aeroporti in città", f"{num_aer_citta:,}")
 
-
-    # dentro al container principale per “Analisi per Città”:
     with st.container(border=True):
         st.subheader("Mappa aeroporti e rotte da città")
-
-        # 1) selezione della città (assumo tu l'abbia già in `citta_selezionata`)
-        # st.selectbox già presente sopra
-
-        # 2) pesca gli aeroporti di partenza nella città
         aeroporti_citta = (
             df.filter(col("OriginCityName") == citta)
             .select("Origin").distinct()
             .rdd.flatMap(lambda x: x).collect()
         )
-
         if not aeroporti_citta:
             st.warning("Nessun aeroporto trovato per questa città.")
         else:
-            # 3) se ne trovi più di uno, permetti il filtro
             if len(aeroporti_citta) > 1:
                 aeroporti_selezionati = st.multiselect(
                     "Seleziona gli aeroporti di partenza:",
@@ -66,12 +56,9 @@ def mostra_citta(df, aeroporti_info):
                 )
             else:
                 aeroporti_selezionati = aeroporti_citta
-
-            # 4) prepara i dati geografici degli aeroporti
             aeroporti_info_citta = aeroporti_info[
                 aeroporti_info["iata"].isin(aeroporti_selezionati)
             ]
-            # scatter layer: punti aeroporti
             scatter_layer = pdk.Layer(
                 "ScatterplotLayer",
                 data=aeroporti_info_citta,
@@ -81,8 +68,6 @@ def mostra_citta(df, aeroporti_info):
                 auto_highlight=True,
                 get_fill_color=[0, 128, 255, 160]
             )
-
-            # 5) aggrega tutte le tratte in partenza dagli aeroporti selezionati
             routes_spark = (
                 df.filter(col("Origin").isin(aeroporti_selezionati))
                 .groupBy("Origin", "Dest")
@@ -91,37 +76,30 @@ def mostra_citta(df, aeroporti_info):
                     collect_set("Reporting_Airline").alias("airlines")
                 )
             )
-
-            # 6) arricchisci con lat/lon (usa il tuo DataFrame Pandas airports_pd → Spark)
             spark = df.sql_ctx.sparkSession
-            airports_df = spark.createDataFrame(aeroporti_info)
-
-            origin_info = airports_df.select(
+            aeroporti_df = spark.createDataFrame(aeroporti_info)
+            origine_info = aeroporti_df.select(
                 col("iata").alias("Origin"),
                 col("longitude").alias("origin_lon"),
                 col("latitude").alias("origin_lat")
             )
-            dest_info = airports_df.select(
+            dest_info = aeroporti_df.select(
                 col("iata").alias("Dest"),
                 col("longitude").alias("dest_lon"),
                 col("latitude").alias("dest_lat")
             )
-
-            enriched = (
+            aggiunta = (
                 routes_spark
-                .join(origin_info, on="Origin", how="left")
+                .join(origine_info, on="Origin", how="left")
                 .join(dest_info, on="Dest", how="left")
                 .dropna(subset=["origin_lat", "origin_lon", "dest_lat", "dest_lon"])
             )
-
-            # 7) converti in Pandas e calcola la “width” per spessore archi
-            routes_pd = enriched.toPandas()
-            if not routes_pd.empty:
-                routes_pd["width"] = routes_pd["flight_count"] / routes_pd["flight_count"].max() * 5
-
+            rotte_pd = aggiunta.toPandas()
+            if not rotte_pd.empty:
+                rotte_pd["width"] = rotte_pd["flight_count"] / rotte_pd["flight_count"].max() * 5
                 arc_layer = pdk.Layer(
                     "ArcLayer",
-                    data=routes_pd,
+                    data=rotte_pd,
                     get_source_position=["origin_lon", "origin_lat"],
                     get_target_position=["dest_lon", "dest_lat"],
                     get_width="width",
@@ -130,15 +108,12 @@ def mostra_citta(df, aeroporti_info):
                     pickable=True,
                     auto_highlight=True
                 )
-
-                # 8) view state calcolato sui punti di origine
                 view_state = pdk.ViewState(
-                    latitude=routes_pd["origin_lat"].mean(),
-                    longitude=routes_pd["origin_lon"].mean(),
+                    latitude=rotte_pd["origin_lat"].mean(),
+                    longitude=rotte_pd["origin_lon"].mean(),
                     zoom=4,
                     pitch=0
                 )
-
                 r = pdk.Deck(
                     layers=[scatter_layer, arc_layer],
                     initial_view_state=view_state,
@@ -156,28 +131,22 @@ def mostra_citta(df, aeroporti_info):
                 st.info("Nessuna rotta in partenza dagli aeroporti selezionati.")
 
     with st.container(border=True):
-
-        # Aeroporti: distribuzioni
         st.subheader("Distribuzione Partenze per Aeroporto")
-
-        if n_ae > 1:
+        if num_aer_citta > 1:
             col11, col12 = st.columns(2)
-
             with col11:
-                # distribuzione partenze
-                dep_df = (
+                part_df = (
                     df.filter(col("Origin").isin(aeroporti_selezionati))
                     .groupBy("Origin")
                     .agg(count("*").alias("Numero_voli"))
                     .toPandas()
                 )
-                fig_dep = px.bar(dep_df, x="Origin", y="Numero_voli",
+                fig_dep = px.bar(part_df, x="Origin", y="Numero_voli",
                                  title="Voli Partiti per Aeroporto",
                                  text_auto=True)
                 fig_dep.update_layout(xaxis_title="Aeroporto di Partenza", yaxis_title="Numero di Voli")
                 st.plotly_chart(fig_dep, use_container_width=True)
             with col12:
-                # distribuzione arrivi
                 arr_df = (
                     df.filter(col("Dest").isin(aeroporti_selezionati))
                     .groupBy("Dest")
@@ -190,31 +159,24 @@ def mostra_citta(df, aeroporti_info):
                 fig_arr.update_layout(xaxis_title="Aeroporto di Destinazione", yaxis_title="Numero di Voli")
                 st.plotly_chart(fig_arr, use_container_width=True)
 
-            # se c'è un solo aeroporto → metriche semplici
-        elif n_ae == 1:
+        elif num_aer_citta == 1:
             st.markdown("E' presente un solo aeroporto in città:")
             a = aeroporti_citta[0]
-            n_dep = df.filter(col("Origin") == a).count()
+            num_part = df.filter(col("Origin") == a).count()
             n_arr = df.filter(col("Dest") == a).count()
             col1, col2 = st.columns(2)
-            col1.metric("Voli Partiti", f"{n_dep:,}")
+            col1.metric("Voli Partiti", f"{num_part:,}")
             col2.metric("Voli Arrivati", f"{n_arr:,}")
-
         else:
             st.info("Nessun aeroporto trovato per questa città.")
 
     with st.container(border=True):
         st.subheader("Compagnie Aeree")
-
-        # Compagnie attive nella città
-        active = compagnie_attive_in_citta(df, citta)
-
-        if not active:
+        attive = compagnie_attive_in_citta(df, citta)
+        if not attive:
             st.info("Nessuna compagnia attiva trovata per questa città.")
-
-        elif len(active) == 1:
-            st.markdown(f"**Unica compagnia attiva in città:** `{active[0]}`")
-
+        elif len(attive) == 1:
+            st.markdown(f"**Unica compagnia attiva in città:** `{attive[0]}`")
             m = metriche_compagnie_citta(df, citta).toPandas()
             if not m.empty:
                 row = m.iloc[0]
@@ -233,8 +195,7 @@ def mostra_citta(df, aeroporti_info):
                 m['Norm_Voli'] = (m['NumVoli'] - m['NumVoli'].min()) / (m['NumVoli'].max() - m['NumVoli'].min())
                 m['Score'] = m['Norm_Ritardo'] * 0.4 + m['Norm_Cancellazioni'] * 0.3 + m['Norm_Voli'] * 0.3
 
-                if len(active) < 10:
-                    # Grafico per tutte le compagnie
+                if len(attive) < 10:
                     df_all = m.sort_values("Score", ascending=False)
                     fig_all = px.bar(
                         df_all,
@@ -242,16 +203,14 @@ def mostra_citta(df, aeroporti_info):
                         y="Score",
                         text="Score",
                         labels={"IATA_CODE_Reporting_Airline": "Compagnia", "Score": "Punteggio"},
-                        title=f"Tutte le compagnie ({len(active)}) ordinate per punteggio"
+                        title=f"Tutte le compagnie ({len(attive)}) ordinate per punteggio"
                     )
                     fig_all.update_traces(texttemplate="%{text:.2f}", textposition="outside")
                     fig_all.update_layout(xaxis_title="Compagnia", yaxis_title="Punteggio")
                     st.plotly_chart(fig_all, use_container_width=True)
                 else:
-                    # Mostra Top 5 migliori e peggiori
                     top5 = m.nlargest(5, 'Score')
                     worst5 = m.nsmallest(5, 'Score')
-
                     col1, col2 = st.columns(2)
                     with col1:
                         st.markdown("#### Top 5 Migliori")
@@ -267,20 +226,16 @@ def mostra_citta(df, aeroporti_info):
                         st.plotly_chart(fig2, use_container_width=True)
 
             st.markdown("**Compagnie attive in città:**")
-            active_sorted = sorted(active)
-            num_columns = 15  # Puoi provare con 3 o un altro numero
-            cols = st.columns(num_columns)
-
-            for i, iata in enumerate(active_sorted):
-                with cols[i % num_columns]:
-                    st.info(iata)  # Puoi usare anche st.success, st.warning, st.error o st.markdown con stili
+            attive_sorted = sorted(attive)
+            num_colonne = 15
+            cols = st.columns(num_colonne)
+            for i, iata in enumerate(attive_sorted):
+                with cols[i % num_colonne]:
+                    st.info(iata)
 
     with st.container(border=True):
         st.subheader("Analisi Mensile")
-
         tab1, tab2, tab3, tab4 = st.tabs(["Voli Partiti", "Voli Arrivati", "Voli Totali", "Cancellazioni"])
-
-        # Voli partiti
         with tab1:
             vp = voli_partiti_mensili_citta(df, citta).toPandas()
             if not vp.empty:
@@ -294,8 +249,6 @@ def mostra_citta(df, aeroporti_info):
                 fig.update_traces(mode="lines+markers", hovertemplate="Mese: %{x}<br>Voli: %{y}")
                 fig.update_layout(xaxis=dict(tickmode='linear'))
                 st.plotly_chart(fig, use_container_width=True)
-
-        # Voli arrivati
         with tab2:
             va = voli_arrivati_mensili_citta(df, citta).toPandas()
             if not va.empty:
@@ -309,8 +262,6 @@ def mostra_citta(df, aeroporti_info):
                 fig.update_traces(mode="lines+markers", hovertemplate="Mese: %{x}<br>Voli: %{y}")
                 fig.update_layout(xaxis=dict(tickmode='linear'))
                 st.plotly_chart(fig, use_container_width=True)
-
-        # Voli totali
         with tab3:
             vt = voli_totali_mensili_citta(df, citta).toPandas()
             if not vt.empty:
@@ -324,8 +275,6 @@ def mostra_citta(df, aeroporti_info):
                 fig.update_traces(mode="lines+markers", hovertemplate="Mese: %{x}<br>Voli: %{y}")
                 fig.update_layout(xaxis=dict(tickmode='linear'))
                 st.plotly_chart(fig, use_container_width=True)
-
-        # Cancellazioni
         with tab4:
             vc = cancellazioni_mensili_citta(df, citta).toPandas()
             if not vc.empty:

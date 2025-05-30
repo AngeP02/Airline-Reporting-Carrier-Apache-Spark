@@ -9,7 +9,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pydeck as pdk
 
-
 def mostra_home(df, aeroporti_info):
     st.title("Dashboard Analisi Voli")
     st.write("Statistiche generali dei dati")
@@ -37,80 +36,73 @@ def mostra_home(df, aeroporti_info):
     with st.container(border=True):
         st.subheader("Top 5 Analisi")
 
-        # Calcola tutti i Top 5
-        df1 = calcola_top5_compagnie_puntuali(df)           # Compagnie più puntuali
-        df2 = calcola_top5_aeroporti_piu_ritardi(df)       # Aeroporti con più ritardi
-        df3 = calcola_top5_tratte_trafficate(df)           # Tratte più trafficate
-        df4 = calcola_top5_compagnie_piu_voli(df)          # Compagnie con più voli
-        df5 = calcola_top5_compagnie_meno_cancellazioni(df) # Compagnie meno cancellazioni
+        df1 = calcola_top5_compagnie_puntuali(df)
+        df2 = calcola_top5_aeroporti_piu_ritardi(df)
+        df3 = calcola_top5_tratte_trafficate(df)
+        df4 = calcola_top5_compagnie_piu_voli(df)
+        df5 = calcola_top5_compagnie_meno_cancellazioni(df)
 
-        # Prima riga: 3 grafici
-        row1_cols = st.columns(3)
-        # 1. Compagnie più puntuali (ritardo medio minore)
+        colonne_riga1 = st.columns(3)
+        colonne_riga2 = st.columns(2)
+
         fig1 = px.bar(df1,
                       x="Compagnia",
                       y="Ritardo Medio (min)",
                       title="Compagnie più puntuali",
                       text_auto='.2f')
         fig1.update_layout(margin=dict(t=40, b=20))
-        row1_cols[0].plotly_chart(fig1, use_container_width=True)
+        colonne_riga1[0].plotly_chart(fig1, use_container_width=True)
 
-        # 2. Aeroporti con più ritardi
+        # Aeroporti con più ritardi
         fig2 = px.bar(df2,
                       x="Aeroporto",
                       y="Voli in Ritardo",
                       title="Aeroporti con più ritardi",
                       text_auto=True)
         fig2.update_layout(margin=dict(t=40, b=20))
-        row1_cols[1].plotly_chart(fig2, use_container_width=True)
+        colonne_riga1[1].plotly_chart(fig2, use_container_width=True)
 
-        # Trasforma il DataFrame di output calcola_top5_tratte_trafficate
+        # Tratte più trafficate
         df3["Rotta"] = df3["Origine"] + " → " + df3["Destinazione"]
-
         fig3 = px.bar(
-            df3.sort_values("Voli"),  # ordina per “Voli” crescente
+            df3.sort_values("Voli"),
             x="Voli",
             y="Rotta",
-            orientation="h",  # barre orizzontali
+            orientation="h",
             text="Voli",
             title="Top 5 Rotte più trafficate",
         )
-
         fig3.update_layout(
-            yaxis=dict(title="Rotta",  # titolo asse Y
-                       automargin=True),  # evita tagli sulle etichette lunghe
+            yaxis=dict(title="Rotta",
+                       automargin=True),
             xaxis=dict(title="Numero di Voli"),
-            margin=dict(l=150, t=40, b=20)  # lascia spazio alle etichette
+            margin=dict(l=150, t=40, b=20)
         )
+        colonne_riga1[2].plotly_chart(fig3, use_container_width=True)
 
-        row1_cols[2].plotly_chart(fig3, use_container_width=True)
-
-        # Seconda riga: 2 grafici
-        row2_cols = st.columns(2)
-        # 4. Compagnie con più voli
+        # Compagnie con più voli
         fig4 = px.bar(df4,
                       x="Compagnia",
                       y="Voli",
                       title="Compagnie con più voli",
                       text_auto=True)
         fig4.update_layout(margin=dict(t=40, b=20))
-        row2_cols[0].plotly_chart(fig4, use_container_width=True)
+        colonne_riga2[0].plotly_chart(fig4, use_container_width=True)
 
-        # 5. Compagnie con meno cancellazioni
+        # Compagnie con meno cancellazioni
         fig5 = px.bar(df5,
                       x="Compagnia",
                       y="% Cancellazioni",
                       title="Compagnie con meno cancellazioni",
                       text_auto='.2f')
         fig5.update_layout(margin=dict(t=40, b=20))
-        row2_cols[1].plotly_chart(fig5, use_container_width=True)
+        colonne_riga2[1].plotly_chart(fig5, use_container_width=True)
 
     with st.container(border=True):
         st.subheader("Mappa Aeroporti")
         mappa_df = calcola_mappa_aeroporti(df, aeroporti_info)
 
         if not mappa_df.empty:
-            # 1) ScatterplotLayer per cerchi
             scatter = pdk.Layer(
                 "ScatterplotLayer",
                 data=mappa_df,
@@ -132,16 +124,12 @@ def mostra_home(df, aeroporti_info):
                     "style": {"backgroundColor": "steelblue", "color": "white"}
                 }
             )
-
-
-
             view_state = pdk.ViewState(
                 latitude=mappa_df["latitude"].mean(),
                 longitude=mappa_df["longitude"].mean(),
                 zoom=3,
                 pitch=0
             )
-
             deck = pdk.Deck(
                 layers=[scatter],
                 initial_view_state=view_state,
@@ -157,27 +145,26 @@ def mostra_home(df, aeroporti_info):
             )
             st.pydeck_chart(deck)
 
-            # Legenda...
-            min_delay = mappa_df["avg_delay"].min()
-            max_delay = mappa_df["avg_delay"].max()
-            min_flights = mappa_df["flight_count"].min()
-            max_flights = mappa_df["flight_count"].max()
+            min_ritardo = mappa_df["avg_delay"].min()
+            max_ritardo = mappa_df["avg_delay"].max()
+            min_voli = mappa_df["flight_count"].min()
+            max_voli = mappa_df["flight_count"].max()
+
             col1,col2 = st.columns(2)
             with col1:
                 st.markdown("**Legenda Dimensione Cerchi**")
-                st.markdown(f"Cerchio piccolo: circa {min_flights} voli")
-                st.markdown(f"Cerchio grande: circa {max_flights} voli")
+                st.markdown(f"Cerchio piccolo: circa {min_voli} voli")
+                st.markdown(f"Cerchio grande: circa {max_voli} voli")
 
             with col2:
                 st.markdown("**Legenda Colore Cerchi**")
-                # Puoi definire una scala di colori più precisa se lo desideri
-                st.markdown(f"Colore chiaro: ritardo medio vicino a {min_delay:.2f} min")
-                st.markdown(f"Colore scuro: ritardo medio vicino a {max_delay:.2f} min")
+                st.markdown(f"Colore chiaro: ritardo medio vicino a {min_ritardo:.2f} min")
+                st.markdown(f"Colore scuro: ritardo medio vicino a {max_ritardo:.2f} min")
         else:
             st.warning("Nessun dato disponibile per la mappa aeroporti.")
 
     with st.container(border=True):
-        col1, col2 = st.columns(2)  # 2 colonne affiancate
+        col1, col2 = st.columns(2)
         with col1:
             st.subheader("Andamento dei Voli per Mese")
             agg_df = aggregazione_voli_per_mese(df)
@@ -212,5 +199,3 @@ def mostra_home(df, aeroporti_info):
                 showlegend=True
             )
             st.plotly_chart(fig)
-
-
