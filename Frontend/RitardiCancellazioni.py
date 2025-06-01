@@ -7,6 +7,7 @@ from Backend.query_ritardi_cancellazioni import perc_voli_in_orario, perc_voli_i
 import plotly.express as px
 
 def mostra_ritardi_cancellazioni(df):
+    st.title("Analisi Ritardi e Cancellazioni")
     with st.container(border=True):
         st.subheader("Statistiche Generali Ritardi e Cancellazioni")
 

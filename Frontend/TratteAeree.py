@@ -6,6 +6,7 @@ from Backend.query_tratte_aeree import classifica_tratte_ritardo, classifica_tra
 import pydeck as pdk
 
 def mostra_tratte(df, aeroporti_info):
+    st.title("Analisi per Tratte Aeree")
     with st.container(border=True):
         st.subheader("Criticità Tratte Aeree")
         col1, col2 = st.columns(2)
