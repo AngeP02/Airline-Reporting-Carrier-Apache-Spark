@@ -9,57 +9,58 @@ from pyspark.ml.evaluation import BinaryClassificationEvaluator
 import plotly.express as px
 import pandas as pd
 from pyspark.sql.functions import udf
-from pyspark.sql.functions import isnan, when, count, col
+from pyspark.sql.functions import isnan, when, col
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType
-from pyspark.sql.functions import avg, count, sum
+from pyspark.sql.functions import avg, count
 
 @st.cache_resource
-def train_modello_cancellazione(_train_data):
+def train_modello_cancellazione(_dati_addestramento):
     from pyspark.sql.functions import udf
     from pyspark.sql.types import DoubleType
-    indexer = StringIndexer(inputCol="Cancelled", outputCol="label")
-    assembler = VectorAssembler(inputCols=["Distance", "DepDelay", "CRSDepTime", "Month", "DayOfWeek"],
+    indicizzatore_etichetta = StringIndexer(inputCol="Cancelled", outputCol="label")
+    vettore_caratteristiche = VectorAssembler(inputCols=["Distance", "DepDelay", "CRSDepTime", "Month", "DayOfWeek"],
                                 outputCol="features")
-    label_counts = _train_data.groupBy("Cancelled").count().collect()
-    total = sum([r["count"] for r in label_counts])
-    class_weights = {r["Cancelled"]: total / r["count"] for r in label_counts}
-    weight_udf = udf(lambda x: float(class_weights[x]), DoubleType())
-    _train_data = _train_data.withColumn("weight", weight_udf(col("Cancelled")))
+    conteggio_classi = _dati_addestramento.groupBy("Cancelled").count().collect()
+    totale_voli = sum([r["count"] for r in conteggio_classi])
+    pesi_classi = {r["Cancelled"]: totale_voli / r["count"] for r in conteggio_classi}
+    calcola_peso = udf(lambda x: float(pesi_classi[x]), DoubleType())
+    _dati_addestramento = _dati_addestramento.withColumn("weight", calcola_peso(col("Cancelled")))
     rf = RandomForestClassifier(labelCol="label", featuresCol="features", numTrees=20, seed=42, weightCol="weight")
-    pipeline = Pipeline(stages=[indexer, assembler, rf])
-    return pipeline.fit(_train_data), assembler
+    pipeline = Pipeline(stages=[indicizzatore_etichetta, vettore_caratteristiche, rf])
+    return pipeline.fit(_dati_addestramento), vettore_caratteristiche
 
 @st.cache_resource
-def train_modello_ritardo(_train_data):
+def train_modello_ritardo(_dati_addestramento):
     assembler = VectorAssembler(inputCols=["Distance", "CRSDepTime", "Month", "DayOfWeek"], outputCol="features")
-    scaler = StandardScaler(inputCol="features", outputCol="scaledFeatures", withStd=True, withMean=False)
+    scalare = StandardScaler(inputCol="features", outputCol="scaledFeatures", withStd=True, withMean=False)
     lr = LinearRegression(featuresCol="scaledFeatures", labelCol="DepDelay")
-    pipeline = Pipeline(stages=[assembler, scaler, lr])
-    return pipeline.fit(_train_data), assembler
+    pipeline = Pipeline(stages=[assembler, scalare, lr])
+    return pipeline.fit(_dati_addestramento), assembler
 
 @st.cache_resource
-def train_kmeans(_data_scaled, features_col="scaledFeatures"):
+def train_kmeans(_dati_scalati, features_col="scaledFeatures"):
     kmeans = KMeans(k=4, seed=42, featuresCol=features_col)
-    return kmeans.fit(_data_scaled)
+    return kmeans.fit(_dati_scalati)
 
 @st.cache_resource
-def clustered_to_pandas(_clustered_df):
-    return _clustered_df.toPandas()
+def clustered_to_pandas(_cluster_df):
+    return _cluster_df.toPandas()
 
-def valutazione_classificatore(model, test_data):
-    predictions = model.transform(test_data)
+@st.cache_resource
+def valutazione_classificatore(_modello, _dati_test):
+    predizioni = _modello.transform(_dati_test)
     evaluator = BinaryClassificationEvaluator(labelCol="label", metricName="areaUnderROC")
-    return round(evaluator.evaluate(predictions), 3)
+    return round(evaluator.evaluate(predizioni), 3)
 
-def mostra_importanza(modello_pipeline, assembler, titolo="Importanza delle feature"):
+def mostra_importanza(modello_pipeline, assembler):
     modello_effettivo = modello_pipeline.stages[-1]
     if hasattr(modello_effettivo, "featureImportances"):
         importanza = modello_effettivo.featureImportances.toArray()
-        feature_names = assembler.getInputCols()
-        importance_df = pd.DataFrame({"feature": feature_names, "importance": importanza}).sort_values("importance",ascending=False)
-        st.markdown(f"**{titolo}**")
-        st.dataframe(importance_df)
+        nomi_feature = assembler.getInputCols()
+        df_importance = pd.DataFrame({"feature": nomi_feature, "importance": importanza}).sort_values("importance",ascending=False)
+        st.markdown("Importanza delle feature")
+        st.dataframe(df_importance)
 
 def mostra_diagnostica_dati_cancellazione(df, dati_canc_all_diagnostics, train_dati_canc_diagnostics):
     st.subheader("Analisi preliminare valutazione voli")
@@ -70,8 +71,8 @@ def mostra_diagnostica_dati_cancellazione(df, dati_canc_all_diagnostics, train_d
             st.markdown("DataFrame originale")
             if df is not None and "Cancelled" in df.columns:
                 try:
-                    original_counts_pd = df.groupBy("Cancelled").count().orderBy(col("Cancelled")).toPandas()
-                    st.dataframe(original_counts_pd)
+                    conteggio_pd_originale = df.groupBy("Cancelled").count().orderBy(col("Cancelled")).toPandas()
+                    st.dataframe(conteggio_pd_originale)
                     st.markdown(f"*Numero totale di righe: {df.count()}*")
                 except Exception as e:
                     st.error(f"Errore nel calcolare il bilanciamento per df: {e}")
@@ -90,8 +91,8 @@ def mostra_diagnostica_dati_cancellazione(df, dati_canc_all_diagnostics, train_d
             if train_dati_canc_diagnostics is not None and "Cancelled" in train_dati_canc_diagnostics.columns:
                 try:
                     num_righe_train_dati_canc = train_dati_canc_diagnostics.count()
-                    train_counts_pd = train_dati_canc_diagnostics.groupBy("Cancelled").count().orderBy(col("Cancelled")).toPandas()
-                    st.dataframe(train_counts_pd)
+                    train_df_conteggio = train_dati_canc_diagnostics.groupBy("Cancelled").count().orderBy(col("Cancelled")).toPandas()
+                    st.dataframe(train_df_conteggio)
                     st.markdown(f"*Numero totale di righe: {num_righe_train_dati_canc}*")
                 except Exception as e:
                     st.error(f"Errore nel calcolare il bilanciamento per train_dati_canc_diagnostics: {e}")
@@ -99,12 +100,12 @@ def mostra_diagnostica_dati_cancellazione(df, dati_canc_all_diagnostics, train_d
         st.markdown("#### Statistiche Descrittive delle **feature** nel set di addestramento")
         if train_dati_canc_diagnostics is not None and train_dati_canc_diagnostics.count() > 0:
             try:
-                features_to_check = ["Distance", "DepDelay", "CRSDepTime", "Month", "DayOfWeek"]
-                actual_features_to_check = [f for f in features_to_check if f in train_dati_canc_diagnostics.columns]
-                if not actual_features_to_check:
-                    st.warning(f"Nessuna delle feature specificate ({', '.join(features_to_check)}) trovata.")
+                feature_da_verificare = ["Distance", "DepDelay", "CRSDepTime", "Month", "DayOfWeek"]
+                feature_attuali_da_verificare = [f for f in feature_da_verificare if f in train_dati_canc_diagnostics.columns]
+                if not feature_attuali_da_verificare:
+                    st.warning(f"Nessuna delle feature specificate ({', '.join(feature_da_verificare)}) trovata.")
                 else:
-                    summary_pd = train_dati_canc_diagnostics.select(actual_features_to_check).summary("count", "mean", "stddev", "min", "max").toPandas()
+                    summary_pd = train_dati_canc_diagnostics.select(feature_attuali_da_verificare).summary("count", "mean", "stddev", "min", "max").toPandas()
                     traduzioni_colonne = {
                         "summary": "Statistica",
                         "Distance": "Distanza",
@@ -144,14 +145,14 @@ def mostra_diagnostica_dati_cancellazione(df, dati_canc_all_diagnostics, train_d
                 exprs.append(count(when(col(c).isNull() | isnan(col(c)), c)).alias(c))
             else:
                 exprs.append(count(when(col(c).isNull(), c)).alias(c))
-        null_counts = df_cancellati.select(exprs)
-        nulls_pd = null_counts.toPandas().T
-        nulls_pd.columns = ['conteggio_mancante']
-        nulls_pd["percentuale_mancante"] = (nulls_pd["conteggio_mancante"] / num_cancellati * 100).round(2)
-        nulls_pd["percentuale_mancante"] = nulls_pd["percentuale_mancante"].astype(str) + '%'
-        nulls_pd = nulls_pd[nulls_pd["conteggio_mancante"] > 0].sort_values("percentuale_mancante", ascending=False)
+        conteggio_nulli = df_cancellati.select(exprs)
+        nulli_pd = conteggio_nulli.toPandas().T
+        nulli_pd.columns = ['conteggio_mancante']
+        nulli_pd["percentuale_mancante"] = (nulli_pd["conteggio_mancante"] / num_cancellati * 100).round(2)
+        nulli_pd["percentuale_mancante"] = nulli_pd["percentuale_mancante"].astype(str) + '%'
+        nulli_pd = nulli_pd[nulli_pd["conteggio_mancante"] > 0].sort_values("percentuale_mancante", ascending=False)
         st.markdown("Colonne con nulli tra i voli cancellati:")
-        st.dataframe(nulls_pd)
+        st.dataframe(nulli_pd)
 
 def mostra_ai(df):
     st.title("Analisi Previsioni AI")
@@ -179,11 +180,11 @@ def mostra_ai(df):
 
         clustering_df_raw = df.select("Distance", "DepDelay", "ArrDelay").na.drop()
         assembler_cluster = VectorAssembler(inputCols=["Distance", "DepDelay", "ArrDelay"], outputCol="features")
-        clustering_data_unscaled = assembler_cluster.transform(clustering_df_raw)
+        clustering_data_non_scalati = assembler_cluster.transform(clustering_df_raw)
 
         scaler_cluster = StandardScaler(inputCol="features", outputCol="scaledFeatures", withStd=True, withMean=False)
-        scaler_model_cluster = scaler_cluster.fit(clustering_data_unscaled)
-        clustering_data_scaled = scaler_model_cluster.transform(clustering_data_unscaled)
+        scaler_model_cluster = scaler_cluster.fit(clustering_data_non_scalati)
+        clustering_data_scaled = scaler_model_cluster.transform(clustering_data_non_scalati)
 
         model_canc, assembler_canc = train_modello_cancellazione(train_dati_canc)
         model_rit, assembler_rit = train_modello_ritardo(
@@ -194,65 +195,65 @@ def mostra_ai(df):
         pd_clustered = clustered_to_pandas(clustered)
         with st.expander("Dettagli analisi dati dopo modifiche DataFrame"):
             st.markdown(f"**AUC del classificatore (su test set):** {valutazione_classificatore(model_canc, test_dati_canc)}")
-            mostra_importanza(model_canc, assembler_canc, titolo="Importanza Feature")
+            mostra_importanza(model_canc, assembler_canc)
 
     with st.container(border=True):
         st.subheader("Previsione cancellazione e ritardo volo")
         distanza_canc = st.slider("Distanza (miglia)", 0, 3000, 500, key="canc_distanza_v2")
-        dep_delay_canc = st.slider("Ritardo partenza previsto in minuti (Per previsione cancellazione)", 0, 500, 0, key="canc_dep_delay_v2")
+        ritardo_canc = st.slider("Ritardo partenza previsto in minuti (Per previsione cancellazione)", 0, 500, 0, key="canc_dep_delay_v2")
         col1_canc, col2_canc = st.columns(2)
         with col1_canc:
             ora_canc = st.slider("Ora schedulata", 0, 23, 12, key="canc_ora_v2")
         with col2_canc:
             minuti_canc = st.slider("Minuti schedulati", 0, 59, 0, key="canc_minuti_v2")
         crs_dep_canc = ora_canc * 100 + minuti_canc
-        month_canc = st.slider("Mese", 1, 12, 6, key="canc_month_v2")
-        dow_canc = st.slider("Giorno della settimana", 1, 7, 3, key="canc_dow_v2")
+        mesi_canc = st.slider("Mese", 1, 12, 6, key="canc_month_v2")
+        sett_canc = st.slider("Giorno della settimana", 1, 7, 3, key="canc_dow_v2")
         input_df_canc = df.sparkSession.createDataFrame(
-            [(float(distanza_canc), float(dep_delay_canc), float(crs_dep_canc), float(month_canc), float(dow_canc))],
+            [(float(distanza_canc), float(ritardo_canc), float(crs_dep_canc), float(mesi_canc), float(sett_canc))],
             ["Distance", "DepDelay", "CRSDepTime", "Month", "DayOfWeek"]
         )
         prediction_canc_val = model_canc.transform(input_df_canc).select("prediction").first()["prediction"]
         risultato_canc = "Cancellato" if prediction_canc_val == 1.0 else "Non cancellato"
         st.markdown(f"**Risultato previsto:** {risultato_canc}")
-        prediction_minuti = model_rit.transform(input_df_canc).select("prediction").first()["prediction"]
-        prediction_minuti = max(0, round(prediction_minuti))  # Arrotonda e assicura non sia negativo
+        predizione_minuti = model_rit.transform(input_df_canc).select("prediction").first()["prediction"]
+        predizione_minuti = max(0, round(predizione_minuti))  # Arrotonda e assicura non sia negativo
         input_prob_canc = df.sparkSession.createDataFrame(
-            [(float(distanza_canc), float(prediction_minuti), float(crs_dep_canc), float(month_canc), float(dow_canc))],
+            [(float(distanza_canc), float(predizione_minuti), float(crs_dep_canc), float(mesi_canc), float(sett_canc))],
             ["Distance", "DepDelay", "CRSDepTime", "Month", "DayOfWeek"]
         )
         probabilita_vector = model_canc.transform(input_prob_canc).select("probability").first()["probability"]
         probabilita_di_cancellazione = round(probabilita_vector[1] * 100, 2)
         rischio = "Basso"
-        if probabilita_di_cancellazione > 70 and prediction_minuti > 60:
+        if probabilita_di_cancellazione > 70 and predizione_minuti > 60:
             rischio = "Altissimo (Ritardo >60min e cancellazione >70%)"
         elif probabilita_di_cancellazione > 70:
             rischio = "Alto (Cancellazione >70%)"
-        elif prediction_minuti > 45:
+        elif predizione_minuti > 45:
             rischio = "Medio (Ritardo >45min)"
-        elif probabilita_di_cancellazione > 30 or prediction_minuti > 20:
+        elif probabilita_di_cancellazione > 30 or predizione_minuti > 20:
             rischio = "Medio-Basso (Cancellazione >30% o ritardo >20min)"
-        st.markdown(f"**Ritardo stimato:** {prediction_minuti} minuti")
+        st.markdown(f"**Ritardo stimato:** {predizione_minuti} minuti")
         st.markdown(f"**Probabilità di cancellazione (dato ritardo stimato):** {probabilita_di_cancellazione}%")
         st.markdown(f"**Livello di rischio combinato:** {rischio}")
 
     with st.container(border=True):
         st.subheader("Clustering delle tratte")
-        sample_df = pd_clustered.sample(n=min(2000, len(pd_clustered)), random_state=42)
-        cluster_stats = pd_clustered.groupby("prediction").mean(numeric_only=True).round(2)
+        df_campionato = pd_clustered.sample(n=min(2000, len(pd_clustered)), random_state=42)
+        statistiche_cluster = pd_clustered.groupby("prediction").mean(numeric_only=True).round(2)
         traduzioni_cluster_colonne = {
             "prediction": "Cluster",
             "Distance": "Distanza",
             "DepDelay": "RitardoPartenza",
             "ArrDelay": "RitardoArrivo"
         }
-        cluster_stats.rename(columns=traduzioni_cluster_colonne, inplace=True)
+        statistiche_cluster.rename(columns=traduzioni_cluster_colonne, inplace=True)
         st.markdown("Statistiche per cluster")
-        st.dataframe(cluster_stats)
-        sample_df["ArrDelayAbs"] = sample_df["ArrDelay"].abs()
-        sample_df["prediction"] = sample_df["prediction"].astype(str)
+        st.dataframe(statistiche_cluster)
+        df_campionato["ArrDelayAbs"] = df_campionato["ArrDelay"].abs()
+        df_campionato["prediction"] = df_campionato["prediction"].astype(str)
         fig1 = px.scatter(
-            sample_df, x="Distance", y="DepDelay", color="prediction", size="ArrDelayAbs",
+            df_campionato, x="Distance", y="DepDelay", color="prediction", size="ArrDelayAbs",
             color_discrete_sequence=px.colors.qualitative.Plotly,
             labels={"Distance": "Distanza (miglia)", "DepDelay": "Ritardo Partenza (min)",
                     "ArrDelayAbs": "Ritardo Arrivo Assoluto (min)", "prediction": "Cluster"},
@@ -269,17 +270,17 @@ def mostra_ai(df):
 
     with st.container(border=True):
         st.subheader("Analisi AI: Previsione rischio per tratte e compagnie")
-        sample = df.select("Reporting_Airline", "Origin", "Dest", "Distance", "DepDelay", "CRSDepTime", "Month",
+        campione = df.select("Reporting_Airline", "Origin", "Dest", "Distance", "DepDelay", "CRSDepTime", "Month",
                            "DayOfWeek") \
             .na.drop()
-        sample_rit = model_rit.transform(sample)
-        sample_canc_input = sample_rit.withColumnRenamed("prediction", "RitardoPrevisto")
-        sample_canc_input = sample_canc_input.withColumn("DepDelay", col("RitardoPrevisto")) \
+        campione_rit = model_rit.transform(campione)
+        campione_canc_input = campione_rit.withColumnRenamed("prediction", "RitardoPrevisto")
+        campione_canc_input = campione_canc_input.withColumn("DepDelay", col("RitardoPrevisto")) \
             .drop("features")
-        sample_canc = model_canc.transform(sample_canc_input)
-        extract_prob_udf = udf(lambda prob_vector: float(prob_vector[1]), DoubleType())
-        sample_canc = sample_canc.withColumn("CancelProb", extract_prob_udf(col("probability")))
-        tratte_rischio_ml = sample_canc.groupBy("Origin", "Dest") \
+        campione_canc = model_canc.transform(campione_canc_input)
+        extra_prob_udf = udf(lambda prob_vector: float(prob_vector[1]), DoubleType())
+        campione_canc = campione_canc.withColumn("CancelProb", extra_prob_udf(col("probability")))
+        tratte_rischio_ml = campione_canc.groupBy("Origin", "Dest") \
             .agg(
             avg("RitardoPrevisto").alias("RitardoStimato"),
             avg("CancelProb").alias("ProbCancellazioneStimata"),
@@ -288,7 +289,7 @@ def mostra_ai(df):
         tratte_pd = tratte_rischio_ml.withColumn("Tratta", F.concat_ws("-", "Origin", "Dest")).toPandas().round(2)
         st.markdown("#### Tratte con rischio più alto")
         st.dataframe(tratte_pd[["Tratta", "RitardoStimato", "ProbCancellazioneStimata", "NumCampioni"]].head(10))
-        compagnie_rischio_ml = sample_canc.groupBy("Reporting_Airline") \
+        compagnie_rischio_ml = campione_canc.groupBy("Reporting_Airline") \
             .agg(
             avg("RitardoPrevisto").alias("RitardoStimato"),
             avg("CancelProb").alias("ProbCancellazioneStimata"),
