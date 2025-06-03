@@ -65,6 +65,7 @@ def carica_coordinate_aeroporto(csv_path: str) -> pd.DataFrame:
 path_dataset_pulito = ["./Preprocessing/Puliti/On_Time_Reporting_Carrier_*_clean.csv"]
 aeroporti_info = carica_coordinate_aeroporto("./distutils/usa-airports.csv")
 voli_df = carica_dati(path_dataset_pulito)
+voli_grafo = carica_dati(["./Preprocessing/Puliti/On_Time_Reporting_Carrier_1_clean.csv"])
 
 menu = [
     ("Home", "house"),
@@ -98,7 +99,7 @@ funzionalita_pagine = {
     "Ritardi e cancellazioni": lambda: mostra_ritardi_cancellazioni(voli_df),
     "Tratte aeree": lambda: mostra_tratte(voli_df, aeroporti_info),
     "Previsione AI": lambda: mostra_ai(voli_df),
-    "Grafi": lambda: mostra_grafo(voli_df, aeroporti_info)
+    "Grafi": lambda: mostra_grafo(voli_grafo, aeroporti_info)
 }
 
 funzionalita_pagine[scelta]()
