@@ -1,0 +1,155 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 600px;
+                 background-color: #222222;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "JFK", "label": "JFK", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "BOS", "label": "BOS", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "IAH", "label": "IAH", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "ANC", "label": "ANC", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "JAX", "label": "JAX", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "PDX", "label": "PDX", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "MEM", "label": "MEM", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "ABQ", "label": "ABQ", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "PBI", "label": "PBI", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "IND", "label": "IND", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "VPS", "label": "VPS", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "XNA", "label": "XNA", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "LAX", "label": "LAX", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "PHX", "label": "PHX", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "KOA", "label": "KOA", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "MIA", "label": "MIA", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "MSP", "label": "MSP", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "AUS", "label": "AUS", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "MCI", "label": "MCI", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "IAD", "label": "IAD", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "RIC", "label": "RIC", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "SBA", "label": "SBA", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "SDF", "label": "SDF", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "OGG", "label": "OGG", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "HNL", "label": "HNL", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "TPA", "label": "TPA", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "BWI", "label": "BWI", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "PHL", "label": "PHL", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "EWR", "label": "EWR", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "MSY", "label": "MSY", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "SJU", "label": "SJU", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "STL", "label": "STL", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "ELP", "label": "ELP", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "BTR", "label": "BTR", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "MCO", "label": "MCO", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "DFW", "label": "DFW", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "PIT", "label": "PIT", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "TUS", "label": "TUS", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "SAV", "label": "SAV", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "GRK", "label": "GRK", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "SAN", "label": "SAN", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "DAL", "label": "DAL", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "DCA", "label": "DCA", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "SJC", "label": "SJC", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "CLT", "label": "CLT", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "MDW", "label": "MDW", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "SNA", "label": "SNA", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "BNA", "label": "BNA", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "CVG", "label": "CVG", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "BUR", "label": "BUR", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "DSM", "label": "DSM", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "CHS", "label": "CHS", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "OMA", "label": "OMA", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "CAE", "label": "CAE", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "FAT", "label": "FAT", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "LAS", "label": "LAS", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "LGA", "label": "LGA", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "HOU", "label": "HOU", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "DEN", "label": "DEN", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "SLC", "label": "SLC", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "SEA", "label": "SEA", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "DTW", "label": "DTW", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "SMF", "label": "SMF", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "OAK", "label": "OAK", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "RDU", "label": "RDU", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "SAT", "label": "SAT", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "RSW", "label": "RSW", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "BUF", "label": "BUF", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "PNS", "label": "PNS", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "BHM", "label": "BHM", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "TYS", "label": "TYS", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "TUL", "label": "TUL", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "ATL", "label": "ATL", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "ORD", "label": "ORD", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "FLL", "label": "FLL", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "ITO", "label": "ITO", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "CMH", "label": "CMH", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "SFO", "label": "SFO", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "LIH", "label": "LIH", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "CLE", "label": "CLE", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "MKE", "label": "MKE", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "ONT", "label": "ONT", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "RNO", "label": "RNO", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "ORF", "label": "ORF", "shape": "dot"}, {"color": "rgb(141,211,199)", "font": {"color": "white"}, "id": "MSN", "label": "MSN", "shape": "dot"}]);
+                  edges = new vis.DataSet([{"from": "SFO", "to": "LAX"}, {"from": "OGG", "to": "HNL"}, {"from": "LAX", "to": "LAS"}, {"from": "LAX", "to": "JFK"}, {"from": "LGA", "to": "ATL"}, {"from": "SAN", "to": "LAX"}, {"from": "LAX", "to": "PHX"}, {"from": "MCO", "to": "ATL"}, {"from": "ORD", "to": "LGA"}, {"from": "HNL", "to": "KOA"}, {"from": "SFO", "to": "LAS"}, {"from": "DFW", "to": "LAX"}, {"from": "SFO", "to": "ORD"}, {"from": "JFK", "to": "SFO"}, {"from": "DAL", "to": "HOU"}, {"from": "LAX", "to": "ORD"}, {"from": "DCA", "to": "BOS"}, {"from": "DEN", "to": "LAX"}, {"from": "SLC", "to": "DEN"}, {"from": "PHX", "to": "DEN"}, {"from": "SJC", "to": "LAX"}, {"from": "DFW", "to": "ORD"}, {"from": "SAN", "to": "SFO"}, {"from": "ORD", "to": "ATL"}, {"from": "LIH", "to": "HNL"}, {"from": "ATL", "to": "DFW"}, {"from": "ATL", "to": "FLL"}, {"from": "ATL", "to": "TPA"}, {"from": "DCA", "to": "ATL"}, {"from": "SEA", "to": "LAX"}, {"from": "SFO", "to": "SEA"}, {"from": "CLT", "to": "ATL"}, {"from": "ORD", "to": "BOS"}, {"from": "BWI", "to": "ATL"}, {"from": "ORD", "to": "CLT"}, {"from": "DTW", "to": "ORD"}, {"from": "LAS", "to": "DEN"}, {"from": "MIA", "to": "ATL"}, {"from": "MSP", "to": "ORD"}, {"from": "ATL", "to": "PHL"}, {"from": "ORD", "to": "DCA"}, {"from": "PHX", "to": "LAS"}, {"from": "SMF", "to": "LAX"}, {"from": "PHL", "to": "ORD"}, {"from": "DEN", "to": "DFW"}, {"from": "DEN", "to": "SFO"}, {"from": "ORD", "to": "EWR"}, {"from": "SAN", "to": "PHX"}, {"from": "LGA", "to": "CLT"}, {"from": "DFW", "to": "SFO"}, {"from": "IAH", "to": "ORD"}, {"from": "BOS", "to": "PHL"}, {"from": "ITO", "to": "HNL"}, {"from": "SLC", "to": "PHX"}, {"from": "SEA", "to": "ANC"}, {"from": "OAK", "to": "LAX"}, {"from": "JFK", "to": "BOS"}, {"from": "DEN", "to": "SEA"}, {"from": "CLE", "to": "ORD"}, {"from": "LGA", "to": "MIA"}, {"from": "DEN", "to": "MSP"}, {"from": "BWI", "to": "BOS"}, {"from": "MSP", "to": "ATL"}, {"from": "IAH", "to": "LAX"}, {"from": "DFW", "to": "IAH"}, {"from": "ATL", "to": "JAX"}, {"from": "JFK", "to": "MCO"}, {"from": "ATL", "to": "BOS"}, {"from": "MDW", "to": "ATL"}, {"from": "LAX", "to": "HNL"}, {"from": "ATL", "to": "RDU"}, {"from": "LAX", "to": "SLC"}, {"from": "BOS", "to": "EWR"}, {"from": "ATL", "to": "MSY"}, {"from": "SAT", "to": "DFW"}, {"from": "ATL", "to": "EWR"}, {"from": "ATL", "to": "IAH"}, {"from": "SFO", "to": "EWR"}, {"from": "PHX", "to": "SEA"}, {"from": "PHX", "to": "DFW"}, {"from": "LGA", "to": "DTW"}, {"from": "EWR", "to": "CLT"}, {"from": "DTW", "to": "ATL"}, {"from": "PHX", "to": "SFO"}, {"from": "DEN", "to": "ORD"}, {"from": "SNA", "to": "SFO"}, {"from": "AUS", "to": "DFW"}, {"from": "ATL", "to": "LAX"}, {"from": "MCO", "to": "EWR"}, {"from": "DEN", "to": "ATL"}, {"from": "ATL", "to": "HOU"}, {"from": "EWR", "to": "LAX"}, {"from": "PHL", "to": "MCO"}, {"from": "ORD", "to": "BNA"}, {"from": "LGA", "to": "DFW"}, {"from": "MCI", "to": "ORD"}, {"from": "CLT", "to": "DFW"}, {"from": "PDX", "to": "SFO"}, {"from": "DEN", "to": "IAH"}, {"from": "JFK", "to": "SJU"}, {"from": "LGA", "to": "DCA"}, {"from": "ATL", "to": "MEM"}, {"from": "CVG", "to": "ORD"}, {"from": "IAH", "to": "CLT"}, {"from": "SAN", "to": "DEN"}, {"from": "LAS", "to": "SEA"}, {"from": "IAD", "to": "LAX"}, {"from": "SNA", "to": "PHX"}, {"from": "BUR", "to": "OAK"}, {"from": "ORD", "to": "DSM"}, {"from": "SEA", "to": "ORD"}, {"from": "ABQ", "to": "PHX"}, {"from": "ORD", "to": "PHX"}, {"from": "ORD", "to": "CMH"}, {"from": "IAD", "to": "SFO"}, {"from": "SAT", "to": "DAL"}, {"from": "BOS", "to": "LGA"}, {"from": "RSW", "to": "ATL"}, {"from": "FLL", "to": "JFK"}, {"from": "ATL", "to": "LAS"}, {"from": "MIA", "to": "CLT"}, {"from": "PHX", "to": "MSP"}, {"from": "ATL", "to": "RIC"}, {"from": "ATL", "to": "PBI"}, {"from": "PDX", "to": "DEN"}, {"from": "SAN", "to": "LAS"}, {"from": "IAD", "to": "ATL"}, {"from": "LAS", "to": "DFW"}, {"from": "SLC", "to": "LAS"}, {"from": "SFO", "to": "BOS"}, {"from": "PHL", "to": "DFW"}, {"from": "STL", "to": "ATL"}, {"from": "ATL", "to": "IND"}, {"from": "LGA", "to": "FLL"}, {"from": "ATL", "to": "PIT"}, {"from": "ATL", "to": "MKE"}, {"from": "DFW", "to": "BOS"}, {"from": "LAS", "to": "JFK"}, {"from": "PHX", "to": "ONT"}, {"from": "EWR", "to": "IAH"}, {"from": "MDW", "to": "DEN"}, {"from": "PHX", "to": "ATL"}, {"from": "OAK", "to": "SAN"}, {"from": "PHX", "to": "BUR"}, {"from": "AUS", "to": "DAL"}, {"from": "SBA", "to": "LAX"}, {"from": "BOS", "to": "CLT"}, {"from": "BWI", "to": "CLT"}, {"from": "ORD", "to": "MIA"}, {"from": "MCI", "to": "ATL"}, {"from": "MKE", "to": "ORD"}, {"from": "DTW", "to": "CLT"}, {"from": "EWR", "to": "FLL"}, {"from": "DTW", "to": "MDW"}, {"from": "BWI", "to": "FLL"}, {"from": "ELP", "to": "PHX"}, {"from": "MCO", "to": "BWI"}, {"from": "ATL", "to": "SAT"}, {"from": "OAK", "to": "PHX"}, {"from": "DFW", "to": "MIA"}, {"from": "MSY", "to": "IAH"}, {"from": "MSP", "to": "LGA"}, {"from": "DEN", "to": "SNA"}, {"from": "DEN", "to": "LGA"}, {"from": "LGA", "to": "MCO"}, {"from": "IAH", "to": "SFO"}, {"from": "SEA", "to": "DFW"}, {"from": "DCA", "to": "DFW"}, {"from": "MCO", "to": "DFW"}, {"from": "LAX", "to": "BOS"}, {"from": "LAS", "to": "BUR"}, {"from": "CLT", "to": "MCO"}, {"from": "RDU", "to": "LGA"}, {"from": "JFK", "to": "BUF"}, {"from": "IAD", "to": "DEN"}, {"from": "PDX", "to": "LAX"}, {"from": "ATL", "to": "SDF"}, {"from": "PIT", "to": "ORD"}, {"from": "SEA", "to": "OAK"}, {"from": "CMH", "to": "ATL"}, {"from": "PHX", "to": "PDX"}, {"from": "CHS", "to": "ATL"}, {"from": "SJC", "to": "PHX"}, {"from": "LAS", "to": "RNO"}, {"from": "PNS", "to": "ATL"}, {"from": "BUF", "to": "ORD"}, {"from": "MCI", "to": "DEN"}, {"from": "BNA", "to": "ATL"}, {"from": "SEA", "to": "SLC"}, {"from": "PHX", "to": "TUS"}, {"from": "AUS", "to": "IAH"}, {"from": "SMF", "to": "PHX"}, {"from": "ATL", "to": "ORF"}, {"from": "LAX", "to": "FAT"}, {"from": "MCO", "to": "BOS"}, {"from": "SFO", "to": "SBA"}, {"from": "DCA", "to": "MCO"}, {"from": "IAH", "to": "SAT"}, {"from": "SAV", "to": "ATL"}, {"from": "TUS", "to": "LAX"}, {"from": "CLT", "to": "PHL"}, {"from": "BHM", "to": "ATL"}, {"from": "MSY", "to": "HOU"}, {"from": "ORD", "to": "OMA"}, {"from": "SAN", "to": "SMF"}, {"from": "SNA", "to": "DFW"}, {"from": "CLT", "to": "IAD"}, {"from": "IAH", "to": "PHX"}, {"from": "JFK", "to": "MIA"}, {"from": "SJC", "to": "SAN"}, {"from": "DFW", "to": "DTW"}, {"from": "ORD", "to": "MCO"}, {"from": "MCI", "to": "MDW"}, {"from": "DCA", "to": "JFK"}, {"from": "LGA", "to": "BNA"}, {"from": "DCA", "to": "MIA"}, {"from": "LAS", "to": "ORD"}, {"from": "ATL", "to": "TYS"}, {"from": "ATL", "to": "VPS"}, {"from": "RDU", "to": "BOS"}, {"from": "MCO", "to": "SJU"}, {"from": "ATL", "to": "SFO"}, {"from": "MIA", "to": "MCO"}, {"from": "MSP", "to": "DTW"}, {"from": "BWI", "to": "DTW"}, {"from": "SAN", "to": "DFW"}, {"from": "EWR", "to": "DTW"}, {"from": "MIA", "to": "IAH"}, {"from": "DFW", "to": "GRK"}, {"from": "ORD", "to": "XNA"}, {"from": "MDW", "to": "STL"}, {"from": "CLT", "to": "RDU"}, {"from": "SFO", "to": "PHL"}, {"from": "MDW", "to": "MSP"}, {"from": "EWR", "to": "DFW"}, {"from": "SLC", "to": "DFW"}, {"from": "ATL", "to": "CAE"}, {"from": "DAL", "to": "MCI"}, {"from": "LAX", "to": "MIA"}, {"from": "JFK", "to": "RDU"}, {"from": "BTR", "to": "ATL"}, {"from": "SJC", "to": "LAS"}, {"from": "MDW", "to": "LAS"}, {"from": "XNA", "to": "DFW"}, {"from": "IAH", "to": "TUL"}, {"from": "CLT", "to": "PIT"}, {"from": "PHX", "to": "CLT"}, {"from": "ORD", "to": "MSN"}, {"from": "STL", "to": "ORD"}, {"from": "HOU", "to": "DFW"}, {"from": "OAK", "to": "LAS"}, {"from": "CLT", "to": "TPA"}, {"from": "MDW", "to": "MCO"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
