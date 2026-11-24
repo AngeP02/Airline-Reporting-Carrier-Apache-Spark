@@ -1,81 +1,287 @@
-# Progetto Voli Big Data
+# Airline Reporting Carrier On-Time Performance - Apache Spark
 
-Dashboard interattiva per l'analisi del traffico aereo domestico negli Stati Uniti nel 2013, sviluppata con Apache Spark e Streamlit.
+An interactive Big Data analytics platform for exploring US domestic air traffic, analyzing flight delays, evaluating airline performance, and investigating airport network structures.
 
-Il progetto nasce come elaborato per il corso di **Modelli e Tecniche per Big Data**. L'obiettivo è analizzare il dataset **Airline Reporting Carrier On-Time Performance** del Bureau of Transportation Statistics, che contiene oltre **6 milioni di voli** effettuati nel 2013 da compagnie aeree statunitensi.
+Developed using Apache Spark and PySpark, the project processes more than **6.3 million flight records** from the 2013 US Airline On-Time Performance dataset, integrating distributed data processing, machine learning, graph analytics, and geospatial visualization into a single interactive application.
 
-Dato il volume dei dati, le tecnologie classiche non bastano, per questo il progetto usa Apache Spark, che elabora tutto in parallelo senza campionamenti o riduzioni del dataset.
+Developed as part of the **Modelli e tecniche per big data** course at the University of Calabria.
+
+## Project Overview
+
+Air transportation generates large volumes of operational data, providing valuable insights into airline performance, airport congestion, flight delays, and network connectivity.
+
+FlightScope processes the complete 2013 US domestic flight dataset using Apache Spark, without sampling or reducing the original dataset for the main analysis.
+
+The platform combines four analytical components:
+
+- **Big Data Analytics:** distributed data processing and large-scale aggregation using PySpark.
+- **Machine Learning:** flight cancellation classification, departure delay regression, and KMeans clustering.
+- **Graph Analytics:** airport network analysis using GraphFrames.
+- **Interactive Visualization:** geospatial maps, analytical dashboards, and predictive interfaces built with Streamlit and PyDeck.
+
+## Key Features
+
+- Processing of over **6.3 million flight records** using Apache Spark.
+- Comprehensive analysis of airlines, airports, cities, and flight routes.
+- Interactive geospatial visualization of airport traffic and flight connections.
+- Machine learning models for cancellation risk classification and delay estimation.
+- Graph-based analysis of airport connectivity and network structure.
+- Interactive airport removal simulation to investigate network resilience.
 
 ## Dataset
 
-**Fonte:** [Bureau of Transportation Statistics](https://transtats.bts.gov/DatabaseInfo.asp?QO_VQ=EFD&DB_URL=) — anno 2013
+**Source:** [US Bureau of Transportation Statistics (BTS)](https://www.transtats.bts.gov/)
 
-Il dataset si compone di 12 file CSV (uno per mese), per un totale di oltre 6,3 milioni di righe. Ogni riga rappresenta un singolo volo e include:
-- orari schedulati e reali di partenza/arrivo
-- aeroporto di origine e destinazione
-- compagnia aerea
-- ritardi e relative cause (meteo, NAS, sicurezza, compagnia, aeromobile)
-- cancellazioni e deviazioni
+**Dataset:** Airline Reporting Carrier On-Time Performance — 2013.
 
-### Stack tecnologico
+The dataset consists of 12 monthly CSV files containing more than 6.3 million domestic flight records.
 
-| Tecnologia | Uso |
+Each record describes an individual flight and includes:
+
+| Category | Data |
 |---|---|
-| **PySpark** | Elaborazione distribuita del dataset |
-| **MLlib** | Modelli predittivi (classificazione e regressione) |
-| **GraphFrames** | Analisi della rete aeroportuale come grafo |
-| **Streamlit** | Dashboard interattiva |
-| **Pandas** | Conversione risultati per la visualizzazione |
-| **PyDeck** | Mappe interattive geospaziali |
+| Flight information | Scheduled and actual departure and arrival times |
+| Airports | Origin and destination airport codes |
+| Airlines | Reporting carrier information |
+| Delays | Departure and arrival delays |
+| Delay causes | Weather, NAS, security, carrier, and late aircraft |
+| Flight status | Cancellations and diversions |
 
+The dataset is used to investigate operational patterns and relationships across airlines, airports, routes, and time periods.
 
-### Preprocessing
+## Data Preprocessing
 
-Prima di lanciare la dashboard è necessario eseguire il preprocessing. I due script si occupano di:
+Before analytical processing, the original CSV files undergo a dedicated preprocessing stage.
 
-1. **`AnalisiDatasets.py`** — legge tutti e 12 i CSV in un unico DataFrame e genera un report dettagliato su valori nulli, struttura delle colonne e anomalie (es. colonna `_c109` malformata).
-2. **`Preprocessing.py`** — sulla base del report, elimina le colonne interamente nulle, le righe vuote e la colonna anomala. Produce 12 CSV "puliti" pronti per l'analisi.
+Two scripts are responsible for data inspection and cleaning:
 
-### Avvio della dashboard
+**1. `AnalisiDatasets.py`**
 
-Al primo avvio i dati vengono convertiti in formato **Parquet** e caricati in cache con `persist(MEMORY_ONLY)` — le sessioni successive partono molto più velocemente.
+- Loads and inspects the 12 monthly CSV files.
+- Analyzes column structures and data types.
+- Generates reports on missing values and data anomalies.
+- Identifies malformed columns, including the anomalous `_c109` field.
 
-La sessione Spark è configurata per girare in locale con 18 GB di memoria driver, shuffle ottimizzato (8 partizioni) e join broadcast automatico fino a 100 MB.
+**2. `Preprocessing.py`**
 
-## Sezioni della dashboard
+- Removes entirely null columns.
+- Eliminates empty rows.
+- Removes malformed columns identified during inspection.
+- Produces 12 cleaned CSV files ready for distributed processing.
 
-### Home
-Panoramica generale: KPI principali (totale voli, ritardo medio, % cancellazioni), top 5 compagnie per voli/puntualità/cancellazioni, top 5 aeroporti più ritardatari, top 5 rotte, e una mappa interattiva degli aeroporti dove dimensione = volume voli e colore = ritardo medio.
+During the initial application setup, the cleaned data is converted into Parquet format and persisted using Spark's `MEMORY_ONLY` storage level to accelerate subsequent analytical operations.
 
-### Aeroporto
-Analisi dettagliata per singolo aeroporto: statistiche di traffico, distribuzione dei ritardi, confronto con la media nazionale.
+## Technology Stack
 
-### Compagnie aeree
-Efficienza e affidabilità per compagnia: puntualità, percentuale di cancellazioni, trend temporali.
+| Technology | Purpose |
+|---|---|
+| Python | Main programming language |
+| Apache Spark | Distributed data processing |
+| PySpark | Data transformations and analytical workflows |
+| Spark SQL | Distributed SQL queries and aggregations |
+| Spark MLlib | Machine learning models |
+| GraphFrames | Distributed graph processing and network analysis |
+| Streamlit | Interactive dashboard and application interface |
+| PyDeck | Geospatial and network visualization |
+| Pandas | Conversion and preparation of analytical results |
 
-### Città
-Riepilogo delle statistiche aggregate per città di origine/destinazione.
+## Application Architecture
 
-### Ritardi e cancellazioni
-Analisi delle cause di ritardo (meteo, NAS, sicurezza, compagnia, aeromobile) con trend mensili e settimanali, distribuzione per fascia oraria.
+The application follows a modular architecture that separates data preparation, analytical processing, and user interaction.
 
-### Tratte aeree
-Le rotte più trafficate e quelle con più problemi. Include una mappa interattiva dove lo spessore degli archi è proporzionale al numero di voli sulla tratta. Selezionando una tratta si ottengono le statistiche dettagliate (compagnie, mesi di punta, bidirezionalità).
+```text
+             2013 Flight Dataset
+              12 Monthly CSVs
+                     |
+                     v
+              Data Inspection
+              AnalisiDatasets.py
+                     |
+                     v
+              Data Cleaning
+              Preprocessing.py
+                     |
+                     v
+              Cleaned CSV Files
+                     |
+                     v
+              Apache Spark
+              PySpark / Spark SQL
+                     |
+          +----------+----------+
+          |          |          |
+          v          v          v
+       Analytics   Machine    Graph
+       & EDA       Learning   Analytics
+          |          |          |
+          +----------+----------+
+                     |
+                     v
+             Streamlit Dashboard
+                     |
+                     v
+          Interactive Visualization
+              and Predictions
+```
 
-### Previsioni AI
-Tre modelli predittivi sviluppati con MLlib:
-- **Random Forest** per la classificazione del rischio di cancellazione (AUC: 0.961). Il dataset era fortemente sbilanciato (96k cancellati su 6,3M voli), quindi è stata applicata una pesatura inversa delle classi.
-- **Regressione lineare** per stimare i minuti di ritardo alla partenza, con normalizzazione via StandardScaler.
-- **KMeans clustering** (4 cluster) per raggruppare voli simili: voli brevi e puntuali, voli medi con ritardi moderati, voli lunghi con ritardi significativi, casi anomali ad alta variabilità.
+## Interactive Dashboard
 
-L'interfaccia permette di inserire i parametri di un volo (distanza, ora schedulata, mese, giorno) e ottenere in tempo reale la probabilità di cancellazione, il ritardo stimato e un livello di rischio combinato.
+The Streamlit application provides several analytical sections, each focusing on a different aspect of US domestic air traffic.
 
-### Grafi
-La rete aeroportuale modellata come grafo orientato (aeroporti = nodi, tratte = archi). Metriche calcolate con GraphFrames:
-- **PageRank** — identifica gli hub principali (ATL, ORD e DFW i più importanti)
-- **Componenti connesse e fortemente connesse** — verifica la connettività globale della rete
-- **Label Propagation** — individua cluster regionali di aeroporti
-- **In-Degree / Out-Degree** — aeroporti specializzati come origine o destinazione
-- **Triangle Count** — misura la ridondanza e la fault tolerance della rete
+### 1. Home — Global Overview
 
-È possibile simulare la rimozione di un aeroporto per vedere come cambia la struttura della rete, utile per valutare la resilienza del sistema in caso di chiusura temporanea.
+Provides a general overview of the dataset through key performance indicators and interactive visualizations.
+
+Main features:
+
+- Total number of flights.
+- Average flight delay.
+- Flight cancellation percentage.
+- Top airlines by traffic volume, punctuality, and cancellations.
+- Airports with the highest average delays.
+- Most frequently used flight routes.
+- Interactive airport map, with marker size representing flight volume and color representing average delay.
+
+### 2. Airport Analytics
+
+Explores the operational performance of individual airports.
+
+Includes:
+
+- Flight traffic statistics.
+- Delay distributions.
+- Comparison with national averages.
+- Airport-level operational indicators.
+
+### 3. Airline Performance
+
+Compares airline operational performance and reliability.
+
+Includes:
+
+- On-time performance.
+- Cancellation rates.
+- Flight traffic volume.
+- Temporal performance trends.
+
+### 4. City Analytics
+
+Provides aggregated flight statistics by origin and destination city, allowing comparisons between urban areas and their associated airport traffic.
+
+### 5. Delays and Cancellations
+
+Investigates flight delays and their underlying causes.
+
+Includes:
+
+- Weather-related delays.
+- National Aviation System (NAS) delays.
+- Security-related delays.
+- Carrier-related delays.
+- Late aircraft delays.
+- Monthly and weekly trends.
+- Delay distributions by departure time.
+
+### 6. Route Analytics
+
+Explores the structure and operational characteristics of flight routes.
+
+The section includes:
+
+- Most frequently traveled routes.
+- Routes with the highest delay levels.
+- Interactive route maps, with edge thickness proportional to flight volume.
+- Detailed route statistics, including operating airlines, peak months, and bidirectional traffic.
+
+Selecting an individual route provides a more detailed view of its operational characteristics.
+
+### 7. Predictive Analytics — Machine Learning
+
+Three machine learning models are implemented using Apache Spark MLlib.
+
+**Random Forest — Flight Cancellation Classification**
+
+Predicts the probability of flight cancellation based on flight characteristics.
+
+- Classification task.
+- AUC: **0.961**.
+- Class imbalance addressed through inverse class weighting.
+- The dataset contains approximately 96,000 cancelled flights out of more than 6.3 million records.
+
+**Linear Regression — Departure Delay Estimation**
+
+Estimates departure delay in minutes using a regression model.
+
+- Regression task.
+- Feature normalization using `StandardScaler`.
+- Predicts the expected departure delay based on flight characteristics.
+
+**KMeans — Flight Clustering**
+
+Groups flights into four clusters based on their operational characteristics.
+
+The resulting clusters represent different flight patterns:
+
+- Short-distance, predominantly punctual flights.
+- Medium-distance flights with moderate delays.
+- Long-distance flights with more significant delays.
+- High-variability and anomalous flight patterns.
+
+**Interactive Prediction Interface**
+
+The dashboard allows users to enter flight parameters, including distance, scheduled departure time, month, and day.
+
+The application returns:
+
+- Estimated cancellation probability.
+- Predicted departure delay.
+- Combined operational risk level.
+
+### 8. Airport Network — Graph Analytics
+
+The airport system is modeled as a directed graph using GraphFrames:
+
+- **Nodes:** airports.
+- **Edges:** directed flight routes.
+
+Several graph algorithms and structural metrics are implemented.
+
+| Algorithm / Metric | Purpose |
+|---|---|
+| PageRank | Identifies the most influential airports in the network |
+| Connected Components | Identifies connected groups of airports |
+| Strongly Connected Components | Analyzes mutual reachability within the directed network |
+| Label Propagation | Identifies communities and regional airport clusters |
+| In-Degree / Out-Degree | Measures incoming and outgoing flight connectivity |
+| Triangle Count | Evaluates local connectivity and network structure |
+
+The analysis identifies major airport hubs, including Atlanta (ATL), Chicago O'Hare (ORD), and Dallas/Fort Worth (DFW).
+
+**Network Resilience Simulation**
+
+An additional feature allows users to simulate the removal of an airport and observe the resulting changes in network connectivity.
+
+This makes it possible to investigate how the closure of an airport may affect the structure of the flight network and its regional connectivity.
+
+## Performance and Execution
+
+The application uses Apache Spark in local execution mode.
+
+The Spark session is configured with:
+
+- 18 GB driver memory.
+- 8 shuffle partitions.
+- Automatic broadcast joins for tables up to 100 MB.
+- Parquet conversion and in-memory persistence using `MEMORY_ONLY`.
+
+These settings are part of the project's execution configuration and can be adapted to the available hardware.
+
+## Technologies and Concepts
+
+`Python` `Apache Spark` `PySpark` `Spark SQL` `MLlib` `GraphFrames` `Streamlit` `PyDeck` `Pandas` `Big Data Analytics` `Machine Learning` `Graph Analytics` `Data Visualization`
+
+## Academic Context
+
+Developed as part of the **Modelli e tecniche per big data** course at the University of Calabria.
+
+The project explores the integration of distributed data processing, machine learning, graph algorithms, and interactive visualization within a unified analytical application.
